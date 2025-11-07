@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys,os
+sys.path.append('/afs/cern.ch/work/p/pelai/HZa/TnP/CMSSW_11_2_0/src/egm_tnp_analysis/libPython')
 from math import sqrt
 import ROOT as rt
 import CMS_lumi, tdrstyle
@@ -287,12 +288,12 @@ def diagnosticErrorPlot( effgr, ierror, nameout ):
     return h2_sfErrorAbs
 
 def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
-    print " Opening file: %s (plot lumi: %3.1f)" % ( filein, lumi )
+    print(" Opening file: %s (plot lumi: %3.1f)" % ( filein, lumi ))
     CMS_lumi.lumi_13TeV = "%+3.1f fb^{-1}" % lumi 
 
     nameOutBase = filein 
     if not os.path.exists( filein ) :
-        print 'file %s does not exist' % filein
+        print('file %s does not exist' % filein)
         sys.exit(1)
 
 
@@ -318,7 +319,7 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     # effGraph.symmetrizeSystVsEta()# ----- REMOVING SYMM ETA AS DISCUSSED WITH RICCARDO
     effGraph.combineSyst()
 
-    print " ------------------------------- "
+    print(" ------------------------------- ")
 
     customEtaBining = []
     customEtaBining.append( (0.000,0.800))
@@ -419,7 +420,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.txtFile is None:
-        print ' - Needs EGM txt file as input'
+        print(' - Needs EGM txt file as input')
         sys.exit(1)
     
 

@@ -25,6 +25,40 @@ eos_Run3_PromptReco = '/eos/cms/store/group/phys_egamma/tnpTuples/bjoshi/2023-04
 eos_Reco_Run3_PromptReco = '/eos/cms/store/group/phys_egamma/tnpTuples/bjoshi/2023-05-01/2022/data/'
 eos_Reco_Run3_124X = '/eos/cms/store/group/phys_egamma/tnpTuples/bjoshi/2023-02-09/2022/mc/'
 
+eos2022 = '/eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022'
+Run3_2022preEE = {
+        'DY_MC_NLO_2022preEE'   : tnpSample('DY_MC_NLO_2022preEE', eos2022 + '/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root', isMC=True, nEvts = 7286732),
+        'DY_MC_LO_2022preEE'    : tnpSample('DY_MC_LO_2022preEE', eos2022 + '/sim/DY_LO/merged_DYJetsToLL_M_50_Run3Summer22MiniAODv4-forPOG_130X_mcRun3_2022_realistic_v5-v2.root', isMC=True, nEvts = 3595138),
+        'Data_2022preEE'        : tnpSample('Data_2022preEE', eos2022 + '/data/merged_Run2022_BCD_ReReco_updated.root', lumi = 7.98),
+        }
+Run3_2022postEE = {
+        'DY_MC_NLO_2022postEE'  : tnpSample('DY_MC_NLO_2022postEE', eos2022 + '/sim/DY_NLO/merged_Run3Summer22EEMiniAODv4-130X_mcRun3_2022_realistic_postEE_v6-v2.root', isMC=True, nEvts = 27397320),
+        'DY_MC_LO_2022postEE'   : tnpSample('DY_MC_LO_2022postEE', eos2022 + '/sim/DY_LO/merged_DYJetsToLL_M_50_Run3Summer22EEMiniAODv4-forPOG_130X_mcRun3_2022_realistic_postEE_v6-v2.root', isMC=True, nEvts = 12144692),
+        'Data_2022postEE'       : tnpSample('Data_2022postEE', eos2022 + '/data/merged_Run2022_EReReco_FG_PromptReco_updated.root', lumi = 26.67),
+        }
+
+eos2023 = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023'
+Run3_2023preBPix = {
+        'DY_MC_NLO_2023preBPix' : tnpSample('DY_MC_NLO_2023preBPix', eos2023 + '/DY_NLO_2023preBPIX.root', isMC=True, nEvts = 21841873),
+        'DY_MC_LO_2023preBPix'  : tnpSample('DY_MC_LO_2023preBPix', eos2023 + '/DY_LO_2023preBPIX.root', isMC=True, nEvts = 18539920),
+        'Data_2023preBPix'      : tnpSample('Data_2023preBPix', eos2023 + '/data_2023C.root', lumi = 17.79),
+        }
+Run3_2023postBPix = {
+        'DY_MC_NLO_2023postBPix': tnpSample('DY_MC_NLO_2023postBPix', eos2023 + '/DY_NLO_2023postBPIX.root', isMC=True, nEvts = 27397320),
+        'DY_MC_LO_2023postBPix' : tnpSample('DY_MC_LO_2023postBPix', eos2023 + '/DY_LO_2023postBPIX.root', isMC=True, nEvts = 12144692),
+        'Data_2023postBPix'     : tnpSample('Data_2023postBPix', eos2023 + '/data_2023D.root', lumi = 9.45),
+        }
+
+# 2024 lumi needs to be updated
+eos2024 = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2024/2024-05-27/2024'
+Run3_2024 = {
+        'DY_MC_LO'       : tnpSample('DY_MC_LO', eos2024 + '/mc/DYto2L_M-50_TuneCP5_13p6TeV_pythia8/crab_2024_DY_LO/240527_143348/0000/*.root', isMC=True, nEvts = 12144692),
+        'Data_2024B'     : tnpSample('Data_2024B', eos2024 + '/data/Run2024B.root', lumi = 26.67),
+        'Data_2024C'     : tnpSample('Data_2024C', eos2024 + '/data/Run2024C.root', lumi = 26.67),
+        'Data_2024D'     : tnpSample('Data_2024D', eos2024 + '/data/Run2024D.root', lumi = 26.67),
+        }
+
+
 
 ReReco2017 = {
 

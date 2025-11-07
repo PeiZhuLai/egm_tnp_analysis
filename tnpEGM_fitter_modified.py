@@ -154,15 +154,10 @@ if args.createHists:
             tnpHist = _il_util.module_from_spec(_spec)
             _spec.loader.exec_module(tnpHist)
         except Exception as e_second:
-            # 第三段回退：以頂層模組名載入，並註冊別名到封包路徑
+            # 第三段回退：以頂層模組名載入，並註冊別名到封包路徑，繞過 PyROOT import hook 的干擾
             try:
-                import glob, importlib.util as _il_util
+                import importlib.util as _il_util
                 from importlib import machinery as _il_mach
-                _lib_dir = os.path.join(_pkg_dir, 'libPython')
-                _cands = sorted(glob.glob(os.path.join(_lib_dir, 'histUtils*.so')))
-                if not _cands:
-                    raise ImportError('no histUtils*.so found under %s' % _lib_dir)
-                _so_path = _cands[-1]
                 _loader = _il_mach.ExtensionFileLoader('histUtils', _so_path)
                 _spec = _il_util.spec_from_file_location('histUtils', _so_path, loader=_loader)
                 tnpHist = _il_util.module_from_spec(_spec)
@@ -174,35 +169,22 @@ if args.createHists:
                 print('  -> Hint: 確認已在正確的 CMSSW/ROOT 環境下，亦可手動執行: tools/build_histutils.sh')
                 sys.exit(1)
 
-    # 修正：確保對 histUtils 傳遞正確型別
-    def _ensure_str(v):
-        if isinstance(v, bytes):
-            return v.decode('utf-8', errors='ignore')
-        return v
-    def _ensure_bytes(v):
-        if isinstance(v, str):
-            return v.encode('utf-8', errors='ignore')
-        return v
+    # 只在必要屬性上做 bytes 轉換（其餘維持 str）
+    def _to_bytes_if_str(v):
+        return v.encode('utf-8') if isinstance(v, str) else v
 
-    class _SampleProxy:
-        def __init__(self, obj, str_attrs=('tnpTree', 'name', 'path', 'histFile', 'puTree', 'weight', 'cut'),
-                           bytes_attrs=('tree',)):
+    class _BytesProxy:
+        """僅對指定屬性在取用時轉為 bytes，其他維持原樣。"""
+        def __init__(self, obj, attrs=('tnpTree','tree')):
             self.__obj = obj
-            self.__str_attrs = set(str_attrs)
-            self.__bytes_attrs = set(bytes_attrs)
+            self.__attrs = set(attrs)
         def __getattr__(self, name):
             v = getattr(self.__obj, name)
-            if name in self.__bytes_attrs:
-                if isinstance(v, (list, tuple)):
-                    return [ _ensure_bytes(x) for x in v ]
-                return _ensure_bytes(v)
-            if name in self.__str_attrs:
-                if isinstance(v, (list, tuple)):
-                    return [ _ensure_str(x) for x in v ]
-                return _ensure_str(v)
+            if name in self.__attrs:
+                return _to_bytes_if_str(v)
             return v
         def __repr__(self):
-            return "<SampleProxy of %r>" % (self.__obj,)
+            return "<BytesProxy of %r>" % (self.__obj,)
 
     def parallel_hists(sampleType):
         sample =  tnpConf.samplesDef[sampleType]
@@ -213,18 +195,9 @@ if args.createHists:
             var = { 'name' : 'pair_mass', 'nbins' : 80, 'min' : 50, 'max': 130 }
             if sample.mcTruth:
                 var = { 'name' : 'pair_mass', 'nbins' : 80, 'min' : 50, 'max': 130 }
-
-            # 僅將 sample.tree 轉 bytes，其他維持/確保為 str；var['name'] 維持 str
-            sample_p = _SampleProxy(sample)
-            var_t = dict(var)
-            var_t['name'] = _ensure_str(var_t.get('name'))
-
-            try:
-                tnpHist.makePassFailHistograms(sample_p, tnpConf.flags[args.flag], tnpBins, var_t)
-            except TypeError as te:
-                print('[tnpEGM_fitter] makePassFailHistograms TypeError: %s' % te)
-                print('  -> 檢查 sample.tree 是否為 bytes（本修正已轉換），以及 histUtils*.so 是否需要清理重建。')
-                raise
+            # 僅代理 sample 的 tnpTree、tree -> bytes；其餘參數保持為 str
+            sample_b = _BytesProxy(sample, attrs=('tnpTree','tree'))
+            tnpHist.makePassFailHistograms(sample_b, tnpConf.flags[args.flag], tnpBins, var)
     
     for k in tnpConf.samplesDef.keys(): parallel_hists(k)
 
@@ -309,8 +282,6 @@ if  args.doPlot:
             tnpRoot.histPlotter( fileName, tnpBins['bins'][ib], plottingDir )
 
     print(' ===> Plots saved in <=======')
-    pool.close()
-    pool.join()
 #    print 'localhost/%s/' % plottingDir
 
 

@@ -121,7 +121,7 @@ def makePassFailHistograms( sample, flag, bindef, var ):
     ######################################
 
     # Find out with variables are used to activate the corresponding branches
-    replace_patterns = ['&', '|', '+', '-', 'cos(', 'sqrt(', 'fabs(', 'abs(', '(', ')', '>', '<', '=', '!', '*', '/', '[', ']']
+    replace_patterns = ['&', '|', '-', 'cos(', 'sqrt(', 'fabs(', 'abs(', '(', ')', '>', '<', '=', '!', '*', '/', '[', ']']
     branches = " ".join(cutBinList) + " pair_mass " + flag
     for p in replace_patterns:
         branches = branches.replace(p, ' ')

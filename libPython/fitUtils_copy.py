@@ -8,9 +8,7 @@ from ROOT import tnpFitter
 
 import re
 import math
-import os
-import logging
-logging.basicConfig(level=logging.WARNING, format='[fitUtils] %(message)s')
+
 
 minPtForSwitch = 70
 
@@ -23,80 +21,62 @@ def ptMin( tnpBin ):
     return ptmin
 
 def createWorkspaceForAltSig( sample, tnpBin, tnpWorkspaceParam ):
-    """
-    根據 MC 參考檔案的 RooFitResult 覆寫部分參數；若缺失則保持原樣。
-    為避免多程序修改同一列表，使用複本後再回傳。
-    """
-    # 使用複本避免 multiprocessing 共享列表被就地修改
-    localParams = list(tnpWorkspaceParam)
 
-    def _removeAndAppend(paramName, value):
-        x = re.compile('%s.*?' % paramName)
-        # 將 filter 結果轉成 list 再處理
-        listToRM = list(filter(x.match, localParams))
-        for old in listToRM:
-            localParams.remove(old)
-        localParams.append('%s[%2.3f]' % (paramName, value))
-
-    # high pT 處理 tailLeft
+    ### tricky: use n < 0 for high pT bin (so need to remove param and add it back)
     cbNList = ['tailLeft']
-    ptmin = ptMin(tnpBin)
-    if ptmin >= 35:
+    ptmin = ptMin(tnpBin)        
+    if ptmin >= 35 :
         for par in cbNList:
-            x = re.compile('%s.*?' % par)
-            listToRM = list(filter(x.match, localParams))
-            for old in listToRM:
-                logging.warning(f'remove {old}')
-                localParams.remove(old)
-            localParams.append('tailLeft[-1]')
+            for ip in range(len(tnpWorkspaceParam)):
+                x=re.compile('%s.*?' % par)
+                listToRM = filter(x.match, tnpWorkspaceParam)
+                for ir in listToRM :
+                    print('**** remove', ir)
+                    tnpWorkspaceParam.remove(ir)                    
+            tnpWorkspaceParam.append( 'tailLeft[-1]' )
 
     if sample.isMC:
-        return localParams
+        return tnpWorkspaceParam
 
-    fileref = getattr(sample.mcRef, 'altSigFit', None)
-    if not fileref or not os.path.exists(fileref):
-        logging.warning(f'參考檔不存在或未設定: {fileref}')
-        return localParams
+    
+    fileref = sample.mcRef.altSigFit
+    filemc  = rt.TFile(fileref,'read')
 
-    filemc = rt.TFile(fileref, 'read')
-    if not filemc or filemc.IsZombie():
-        logging.warning(f'無法開啟參考檔: {fileref}')
-        return localParams
+    from ROOT import RooFit,RooFitResult
+    fitresP = filemc.Get( '%s_resP' % tnpBin['name']  )
+    fitresF = filemc.Get( '%s_resF' % tnpBin['name'] )
 
-    # 安全取得 RooFitResult
-    def _getFitResult(objName):
-        obj = filemc.Get(objName)
-        if not obj or not hasattr(obj, 'floatParsFinal'):
-            logging.warning(f'缺少 RooFitResult 或型別不符: {objName}')
-            return None
-        return obj
-
-    fitresP = _getFitResult(f"{tnpBin['name']}_resP")
-    fitresF = _getFitResult(f"{tnpBin['name']}_resF")
-    if not fitresP or not fitresF:
-        filemc.Close()
-        return localParams
-
-    listOfParam = ['nF','alphaF','nP','alphaP','sigmaP','sigmaF','sigmaP_2','sigmaF_2','meanGF','sigmaGF','sigFracF']
-
-    # 失敗樣本參數
-    fitParF = fitresF.floatParsFinal()
-    for ipar in range(len(fitParF)):
-        pName = fitParF[ipar].GetName()
-        if pName in listOfParam:
-            logging.warning(f'覆寫 {pName} -> {fitParF[ipar].getVal():2.3f}')
-            _removeAndAppend(pName, fitParF[ipar].getVal())
-
-    # 通過樣本參數
-    fitParP = fitresP.floatParsFinal()
-    for ipar in range(len(fitParP)):
-        pName = fitParP[ipar].GetName()
-        if pName in listOfParam:
-            logging.warning(f'覆寫 {pName} -> {fitParP[ipar].getVal():2.3f}')
-            _removeAndAppend(pName, fitParP[ipar].getVal())
+    listOfParam = ['nF','alphaF','nP','alphaP','sigmaP','sigmaF','sigmaP_2','sigmaF_2','meanGF','sigmaGF', 'sigFracF']
+    
+    fitPar = fitresF.floatParsFinal()
+    for ipar in range(len(fitPar)):
+        pName = fitPar[ipar].GetName()
+        print('%s[%2.3f]' % (pName,fitPar[ipar].getVal()))
+        for par in listOfParam:
+            if pName == par:
+                x=re.compile('%s.*?' % pName)
+                listToRM = filter(x.match, tnpWorkspaceParam)
+                for ir in listToRM :
+                    tnpWorkspaceParam.remove(ir)                    
+                tnpWorkspaceParam.append( '%s[%2.3f]' % (pName,fitPar[ipar].getVal()) )
+                              
+  
+    fitPar = fitresP.floatParsFinal()
+    for ipar in range(len(fitPar)):
+        pName = fitPar[ipar].GetName()
+        print('%s[%2.3f]' % (pName,fitPar[ipar].getVal()))
+        for par in listOfParam:
+            if pName == par:
+                x=re.compile('%s.*?' % pName)
+                listToRM = filter(x.match, tnpWorkspaceParam)
+                for ir in listToRM :
+                    tnpWorkspaceParam.remove(ir)
+                tnpWorkspaceParam.append( '%s[%2.3f]' % (pName,fitPar[ipar].getVal()) )
 
     filemc.Close()
-    return localParams
+
+    return tnpWorkspaceParam
+
 
 #############################################################
 ########## nominal fitter
@@ -276,8 +256,8 @@ def histFitterAltSigBkg( sample, tnpBin, tnpWorkspaceParam):
         "tailLeft[1]",
         "RooCBExGaussShapeTNP::sigResPass(x,meanP,expr('sqrt(sigmaP*sigmaP+sosP*sosP)',{sigmaP,sosP}),alphaP,nP, expr('sqrt(sigmaP_2*sigmaP_2+sosP*sosP)',{sigmaP_2,sosP}),tailLeft)",
         "RooCBExGaussShapeTNP::sigResFail(x,meanF,expr('sqrt(sigmaF*sigmaF+sosF*sosF)',{sigmaF,sosF}),alphaF,nF, expr('sqrt(sigmaF_2*sigmaF_2+sosF*sosF)',{sigmaF_2,sosF}),tailLeft)",
-        "Exponential::bkgPass(x, alphaP)",
-        "Exponential::bkgFail(x, alphaF)",
+        "Exponential::bkgPass(x, alphaP_2)",
+        "Exponential::bkgFail(x, alphaF_2)",
         ]
 
     tnpWorkspace = []

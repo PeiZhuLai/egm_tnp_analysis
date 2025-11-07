@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 ### python specific import
 import argparse
 import os
@@ -23,49 +23,19 @@ parser.add_argument('--doPlot'     , action='store_true'  , help = 'plotting')
 parser.add_argument('--sumUp'      , action='store_true'  , help = 'sum up efficiencies')
 parser.add_argument('--iBin'       , dest = 'binNumber'   , type = int,  default=-1, help='bin number (to refit individual bin)')
 parser.add_argument('--flag'       , default = None       , help ='WP to test')
-parser.add_argument('settings'     , default = "egm_tnp_analysis"       , help = 'setting file [mandatory]')
+parser.add_argument('settings'     , default = None       , help = 'setting file [mandatory]')
 
 
 args = parser.parse_args()
 
 print('===> settings %s <===' % args.settings)
-tnpConf = None
-_settings_arg = args.settings
-# --- begin: robust settings loader (replace imp) ---
-import importlib
-import importlib.util
-
-settings_source = None
-try:
-    # Prefer explicit file path if it exists (also accepts ending with .py)
-    if _settings_arg.endswith('.py') and os.path.isfile(_settings_arg):
-        spec = importlib.util.spec_from_file_location('tnpConf', _settings_arg)
-        if spec is None or spec.loader is None:
-            raise ImportError('Could not create spec for settings file: %s' % _settings_arg)
-        tnpConf = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(tnpConf)
-        settings_source = getattr(tnpConf, '__file__', _settings_arg)
-    else:
-        # Treat input as module path (allow .py suffix or '/' separators)
-        mod_path = _settings_arg[:-3] if _settings_arg.endswith('.py') else _settings_arg
-        mod_path = mod_path.replace('/', '.')
-        tnpConf = importlib.import_module(mod_path)
-        settings_source = getattr(tnpConf, '__file__', 'module:' + mod_path)
-    print('[tnpEGM_fitter] loaded settings module: %s' % settings_source)
-except Exception as e:
-    print('[tnpEGM_fitter] Failed to import settings: %s' % str(e))
-    sys.exit(1)
-# --- end: robust settings loader (replace imp) ---
+importSetting = 'import %s as tnpConf' % args.settings.replace('/','.').split('.py')[0]
+print(importSetting)
+exec(importSetting)
 
 ### tnp library
-CMSSW_BASE = os.getenv('CMSSW_BASE')
-if CMSSW_BASE:
-    _src = os.path.join(CMSSW_BASE, 'src')
-    if _src not in sys.path:
-        sys.path.insert(0, _src)
-
-from egm_tnp_analysis.libPython import binUtils  as tnpBiner
-from egm_tnp_analysis.libPython import rootUtils as tnpRoot
+import libPython.binUtils  as tnpBiner
+import libPython.rootUtils as tnpRoot
 
 
 if args.flag is None:
@@ -124,85 +94,7 @@ for s in tnpConf.samplesDef.keys():
 if args.createHists:
 
     print(" ======== Creating Histograms ========")
-    # 先嘗試正常匯入；若失敗就動態建置 C++ 擴充並重試
-    try:
-        from egm_tnp_analysis.libPython import histUtils as tnpHist
-    except Exception as e_first:
-        print('[tnpEGM_fitter] histUtils import failed: %s' % str(e_first))
-        _pkg_dir = os.path.dirname(__file__)
-        _builder = os.path.join(_pkg_dir, 'tools', 'build_histutils.sh')
-        if os.path.exists(_builder):
-            import subprocess as _sp
-            print('[tnpEGM_fitter] trying on-demand build via: %s' % _builder)
-            try:
-                _sp.check_call(['bash', _builder], cwd=_pkg_dir)
-            except _sp.CalledProcessError as _be:
-                print('[tnpEGM_fitter] build script failed (rc=%s), will retry import anyway' % _be.returncode)
-        else:
-            print('[tnpEGM_fitter] build script not found at %s' % _builder)
-        # 第二段回退：直接以絕對路徑載入 .so（包路徑）
-        try:
-            import glob, importlib.util as _il_util
-            from importlib import machinery as _il_mach
-            _lib_dir = os.path.join(_pkg_dir, 'libPython')
-            _cands = sorted(glob.glob(os.path.join(_lib_dir, 'histUtils*.so')))
-            if not _cands:
-                raise ImportError('no histUtils*.so found under %s' % _lib_dir)
-            _so_path = _cands[-1]
-            _loader = _il_mach.ExtensionFileLoader('egm_tnp_analysis.libPython.histUtils', _so_path)
-            _spec = _il_util.spec_from_file_location('egm_tnp_analysis.libPython.histUtils', _so_path, loader=_loader)
-            tnpHist = _il_util.module_from_spec(_spec)
-            _spec.loader.exec_module(tnpHist)
-        except Exception as e_second:
-            # 第三段回退：以頂層模組名載入，並註冊別名到封包路徑
-            try:
-                import glob, importlib.util as _il_util
-                from importlib import machinery as _il_mach
-                _lib_dir = os.path.join(_pkg_dir, 'libPython')
-                _cands = sorted(glob.glob(os.path.join(_lib_dir, 'histUtils*.so')))
-                if not _cands:
-                    raise ImportError('no histUtils*.so found under %s' % _lib_dir)
-                _so_path = _cands[-1]
-                _loader = _il_mach.ExtensionFileLoader('histUtils', _so_path)
-                _spec = _il_util.spec_from_file_location('histUtils', _so_path, loader=_loader)
-                tnpHist = _il_util.module_from_spec(_spec)
-                _spec.loader.exec_module(tnpHist)
-                sys.modules['egm_tnp_analysis.libPython.histUtils'] = tnpHist
-                print('[tnpEGM_fitter] loaded histUtils as top-level module and aliased into egm_tnp_analysis.libPython.histUtils')
-            except Exception as e_third:
-                print('[tnpEGM_fitter] histUtils still not importable after build: %s' % str(e_third))
-                print('  -> Hint: 確認已在正確的 CMSSW/ROOT 環境下，亦可手動執行: tools/build_histutils.sh')
-                sys.exit(1)
-
-    # 修正：確保對 histUtils 傳遞正確型別
-    def _ensure_str(v):
-        if isinstance(v, bytes):
-            return v.decode('utf-8', errors='ignore')
-        return v
-    def _ensure_bytes(v):
-        if isinstance(v, str):
-            return v.encode('utf-8', errors='ignore')
-        return v
-
-    class _SampleProxy:
-        def __init__(self, obj, str_attrs=('tnpTree', 'name', 'path', 'histFile', 'puTree', 'weight', 'cut'),
-                           bytes_attrs=('tree',)):
-            self.__obj = obj
-            self.__str_attrs = set(str_attrs)
-            self.__bytes_attrs = set(bytes_attrs)
-        def __getattr__(self, name):
-            v = getattr(self.__obj, name)
-            if name in self.__bytes_attrs:
-                if isinstance(v, (list, tuple)):
-                    return [ _ensure_bytes(x) for x in v ]
-                return _ensure_bytes(v)
-            if name in self.__str_attrs:
-                if isinstance(v, (list, tuple)):
-                    return [ _ensure_str(x) for x in v ]
-                return _ensure_str(v)
-            return v
-        def __repr__(self):
-            return "<SampleProxy of %r>" % (self.__obj,)
+    import libPython.histUtils as tnpHist
 
     def parallel_hists(sampleType):
         sample =  tnpConf.samplesDef[sampleType]
@@ -213,19 +105,10 @@ if args.createHists:
             var = { 'name' : 'pair_mass', 'nbins' : 80, 'min' : 50, 'max': 130 }
             if sample.mcTruth:
                 var = { 'name' : 'pair_mass', 'nbins' : 80, 'min' : 50, 'max': 130 }
-
-            # 僅將 sample.tree 轉 bytes，其他維持/確保為 str；var['name'] 維持 str
-            sample_p = _SampleProxy(sample)
-            var_t = dict(var)
-            var_t['name'] = _ensure_str(var_t.get('name'))
-
-            try:
-                tnpHist.makePassFailHistograms(sample_p, tnpConf.flags[args.flag], tnpBins, var_t)
-            except TypeError as te:
-                print('[tnpEGM_fitter] makePassFailHistograms TypeError: %s' % te)
-                print('  -> 檢查 sample.tree 是否為 bytes（本修正已轉換），以及 histUtils*.so 是否需要清理重建。')
-                raise
+            tnpHist.makePassFailHistograms( sample, tnpConf.flags[args.flag], tnpBins, var )
     
+    #pool = Pool()
+    #pool.map(parallel_hists, tnpConf.samplesDef.keys())
     for k in tnpConf.samplesDef.keys(): parallel_hists(k)
 
     sys.exit(0)
@@ -300,17 +183,13 @@ if  args.doPlot:
     plottingDir = '%s/plots/%s/%s' % (outputDirectory,sampleToFit.name,fitType)
     if not os.path.exists( plottingDir ):
         os.makedirs( plottingDir )
-    _pkg_dir = os.path.dirname(__file__)
-    shutil.copy(os.path.join(_pkg_dir, 'etc', 'inputs', 'index.php.listPlots'),
-                os.path.join(plottingDir, 'index.php'))
+    shutil.copy('etc/inputs/index.php.listPlots','%s/index.php' % plottingDir)
 
     for ib in range(len(tnpBins['bins'])):
         if (args.binNumber >= 0 and ib == args.binNumber) or args.binNumber < 0:
             tnpRoot.histPlotter( fileName, tnpBins['bins'][ib], plottingDir )
 
     print(' ===> Plots saved in <=======')
-    pool.close()
-    pool.join()
 #    print 'localhost/%s/' % plottingDir
 
 
@@ -369,14 +248,5 @@ if args.sumUp:
     fOut.close()
 
     print('Effis saved in file : ',  effFileName)
-    # 同樣加入回退匯入，避免 PyROOT 攔截
-    try:
-        from egm_tnp_analysis.libPython import EGammaID_scaleFactors as egm_sf
-    except Exception:
-        import importlib.util as _il_util
-        _pkg_dir = os.path.dirname(__file__)
-        _sf_path = os.path.join(_pkg_dir, 'libPython', 'EGammaID_scaleFactors.py')
-        _spec = _il_util.spec_from_file_location('egm_tnp_analysis.libPython.EGammaID_scaleFactors', _sf_path)
-        egm_sf = _il_util.module_from_spec(_spec)
-        _spec.loader.exec_module(egm_sf)
+    import libPython.EGammaID_scaleFactors as egm_sf
     egm_sf.doEGM_SFs(effFileName,sampleToFit.lumi)
