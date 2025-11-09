@@ -152,14 +152,16 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     effminmax =  findMinMax( effDataList )
     effiMin = effminmax[0]
     effiMax = effminmax[1]
-    effiMin = 0.30 
-    effiMax = 1.45
+    # effiMin = 0.18
+    # effiMax = 1.35
+    effiMin = 0.01
+    effiMax = 0.45
 
     sfminmax =  findMinMax( sfList )
     sfMin = sfminmax[0]
     sfMax = sfminmax[1]
-    sfMin = 0.55
-    sfMax = 1.25
+    sfMin = 0.68
+    sfMax = 1.52
 
     for key in sorted(effDataList.keys()):
         grBinsEffData = effUtil.makeTGraphFromList(effDataList[key], 'min', 'max')
@@ -379,9 +381,9 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     cDummy.Print( pdfout + "[" )
 
     #---------------------------------------------------------------
-    EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 0 ) ,  # Data
-                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, -1 ) , # MC
-                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 1 ) ,  # SF
+    EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, False ) , # eff Data
+                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, -1 ) ,  # eff MC
+                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, True ) , # SF
                  pdfout,
                  xAxis = axis[0], yAxis = axis[1] )
     #---------------------------------------------------------------
@@ -390,10 +392,10 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     #              effGraph.pt_1DGraph_list(typeGR=+1),  # SF
     #              pdfout,
     #              xAxis = axis[0], yAxis = axis[1] )
-    # 原始註解區可保留或更新 (以下僅示意，不重複整段)
-    # EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 0 ) , # eff Data
-    #              None,
-    #              effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 1 ) , # SF
+    # Original Code --------------------------------------------------------------
+    # EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, False ) , #eff Data
+    #              None, 
+    #              effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, True ) , #SF
     #              pdfout,
     #              xAxis = axis[0], yAxis = axis[1] )
     #---------------------------------------------------------------

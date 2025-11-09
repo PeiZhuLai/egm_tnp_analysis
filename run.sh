@@ -63,22 +63,22 @@ SETTINGS_MOD=$1
 
 WP=$2   # 你的 working point 名称，例如 'Tight_PhotonID'
 
-# 5) 运行 —— 模块方式最稳，不受当前工作目录影响
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --checkBins
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createBins
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createHists
+## 5) 运行 —— 模块方式最稳，不受当前工作目录影响
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --checkBins
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createBins
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createHists
 # ----------- Fitting Procedure --------------
 # ----------- 1 MC Fit -----------------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --mcSig
-# ----------- 2 Data Fit --------------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit 
-# ----------- 3 MC Fit altsig---------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSig
-# ----------- 4 MC Fit altbkg---------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altBkg
-# ----------- 5 MC Fit altSigBkg--------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSigBkg
-# ----------- Get Results --------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --mcSig
+## ----------- 2 Data Fit --------------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit 
+## ----------- 3 MC Fit altsig---------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSig
+## ----------- 4 MC Fit altbkg---------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altBkg
+## ----------- 5 MC Fit altSigBkg--------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSigBkg
+## ----------- Get Results --------------
 python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --sumUp
 # ----------- Tuning a bin --------------
 # rm -fr /eos/home-p/pelai/HZa/root_TnP/passingCustomCutBased_2022preEE/Data_2022preEE_passingCustomCutBased_2022preEE.nominalFit-bin04_ph_sc_eta_0p00To0p80_ph_et_10p00To15p00.root

@@ -386,8 +386,11 @@ class efficiencyList:
                                                   
         return listOfGraphs
 
-    def pt_1DGraph_list_customEtaBining(self, etaBining, doScaleFactor):
-#        self.symmetrizeSystVsEta()
+    def pt_1DGraph_list_customEtaBining(self, etaBining, typeGR = 0 ):
+        """
+        typeGR: 0=Data (mean), +1=ScaleFactor (mean/MC), -1=MC
+        """
+        # self.combineSyst() 已在外面呼叫過；此處保留一致性
         self.combineSyst()
         listOfGraphs = {}
 
@@ -401,28 +404,34 @@ class efficiencyList:
 
                         if abin[0] < etaBin[0] or abin[1] > etaBin[1]:
                             continue
-                        #                        if abin[0] >= etaBin[0] and abin[1] <= etaBin[1]:
-                        #                            continue
+
                         effPlus  = self.effList[ptBin][etaBinPlus]
                         effMinus = None
                         if etaBinMinus in self.effList[ptBin]:
-                            effMinus =  self.effList[ptBin][etaBinMinus] 
+                            effMinus = self.effList[ptBin][etaBinMinus]
 
                         effAverage = effPlus
                         if not effMinus is None:
                             effAverage = effPlus + effMinus
 
-                        effAverage.combineSyst(effAverage.effData,effAverage.effMC)
+                        effAverage.combineSyst(effAverage.effData, effAverage.effMC)
+
                         aValue  = effAverage.mean
                         anError = effAverage.systCombined
-                        if doScaleFactor :
-                            aValue  = _safe_ratio(aValue, effAverage.effMC, default=1.0)
-                            anError = _safe_ratio(anError, effAverage.effMC, default=0.0)
-                        listOfGraphs[abin].append( {'min': ptBin[0], 'max': ptBin[1],
-                                                    'val': aValue  , 'err': anError } ) 
-                                                  
-        return listOfGraphs
+                        if typeGR == 1:      # SF
+                            aValue  = _safe_ratio(effAverage.mean, effAverage.effMC, default=1.0)
+                            anError = _safe_ratio(effAverage.systCombined, effAverage.effMC, default=0.0)
+                        elif typeGR == -1:   # MC
+                            aValue  = effAverage.effMC
+                            anError = 0
 
+                        listOfGraphs[abin].append({
+                            'min': ptBin[0],
+                            'max': ptBin[1],
+                            'val': aValue,
+                            'err': anError
+                        })
+        return listOfGraphs
 
     
     def eta_1DGraph_list(self, typeGR = 0 ):
