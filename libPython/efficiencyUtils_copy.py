@@ -1,5 +1,15 @@
 import math
 
+# 新增：安全除法工具，避免 ZeroDivisionError
+EPS = 1e-12
+def _safe_ratio(num, den, default):
+    try:
+        if den is None or abs(den) <= EPS:
+            return default
+        return num / den
+    except Exception:
+        return default
+
 class efficiency:
     #    altEff = [-1]*7
     iAltBkgModel = 0
@@ -165,7 +175,7 @@ class efficiencyList:
 
     
     def addEfficiency( self, eff ):
-        if not self.effList.has_key(eff.ptBin):
+        if eff.ptBin not in self.effList:
             self.effList[eff.ptBin] = {}
         self.effList[eff.ptBin][eff.etaBin] = eff
 
@@ -178,7 +188,7 @@ class efficiencyList:
                     
                     effPlus  = self.effList[ptBin][etaBinPlus]
                     effMinus = None
-                    if self.effList[ptBin].has_key(etaBinMinus):
+                    if etaBinMinus in self.effList[ptBin]:
                         effMinus =  self.effList[ptBin][etaBinMinus] 
 
                     if effMinus is None:
@@ -198,7 +208,7 @@ class efficiencyList:
                         
     def symmetrizeSystVsEta(self):
         for ptBin in self.effList.keys():
-            for etaBin in self.effList[ptBin].keys():
+            for etaBin in list(self.effList[ptBin].keys()):
                 print("etaBin:  ",etaBin)
                 if etaBin[0] >= 0 and etaBin[1] > 0:
                     etaBinPlus  = etaBin
@@ -206,7 +216,7 @@ class efficiencyList:
                     
                     effPlus  = self.effList[ptBin][etaBinPlus]
                     effMinus = None
-                    if self.effList[ptBin].has_key(etaBinMinus):
+                    if etaBinMinus in self.effList[ptBin]:
                         effMinus =  self.effList[ptBin][etaBinMinus] 
 
                     if effMinus is None:
@@ -302,7 +312,7 @@ class efficiencyList:
                     
                         effPlus  = self.effList[ptBin][etaBinPlus]
                         effMinus = None
-                        if self.effList[ptBin].has_key(etaBinMinus):
+                        if etaBinMinus in self.effList[ptBin]:
                             effMinus =  self.effList[ptBin][etaBinMinus] 
 
                         averageMC = None
@@ -312,27 +322,27 @@ class efficiencyList:
                         else:                        
                             averageMC   = (effPlus.effMC   + effMinus.effMC  )/2.
                         ### so this is h2D bin is inside the bining used by e/gamma POG
-                        h2.SetBinContent(ix,iy, self.effList[ptBin][etaBin].mean      / self.effList[ptBin][etaBin].effMC)
-                        h2.SetBinError  (ix,iy, self.effList[ptBin][etaBin].systCombined / self.effList[ptBin][etaBin].effMC )
+                        h2.SetBinContent(ix,iy, _safe_ratio(self.effList[ptBin][etaBin].mean, self.effList[ptBin][etaBin].effMC, default=1.0))
+                        h2.SetBinError  (ix,iy, _safe_ratio(self.effList[ptBin][etaBin].systCombined, self.effList[ptBin][etaBin].effMC, default=0.0))
                         if onlyError   == 0 :
-                            h2.SetBinContent(ix,iy, self.effList[ptBin][etaBin].systCombined      / self.effList[ptBin][etaBin].effMC  )
+                            h2.SetBinContent(ix,iy, _safe_ratio(self.effList[ptBin][etaBin].systCombined, self.effList[ptBin][etaBin].effMC, default=0.0))
                         if   onlyError == -3 :
-                            h2.SetBinContent(ix,iy, self.effList[ptBin][etaBin].mean      )
-                            h2.SetBinError  (ix,iy, self.effList[ptBin][etaBin].systCombined * self.effList[ptBin][etaBin].effMC / self.effList[ptBin][etaBin].effMC )
+                            h2.SetBinContent(ix,iy, self.effList[ptBin][etaBin].mean)
+                            h2.SetBinError  (ix,iy, _safe_ratio(self.effList[ptBin][etaBin].systCombined * self.effList[ptBin][etaBin].effMC, self.effList[ptBin][etaBin].effMC, default=0.0))
                         elif onlyError == -2 :
                             h2.SetBinContent(ix,iy, self.effList[ptBin][etaBin].effMC)
                             h2.SetBinError  (ix,iy, 0 )
                         elif onlyError == -1 :
-                            h2.SetBinContent(ix,iy, self.effList[ptBin][etaBin].mean      / self.effList[ptBin][etaBin].effMC)
-                            h2.SetBinError  (ix,iy, self.effList[ptBin][etaBin].systCombined / self.effList[ptBin][etaBin].effMC )
+                            h2.SetBinContent(ix,iy, _safe_ratio(self.effList[ptBin][etaBin].mean, self.effList[ptBin][etaBin].effMC, default=1.0))
+                            h2.SetBinError  (ix,iy, _safe_ratio(self.effList[ptBin][etaBin].systCombined, self.effList[ptBin][etaBin].effMC, default=0.0))
 
                         if onlyError   == 0 :
-                                h2.SetBinContent(ix,iy, self.effList[ptBin][etaBin].systCombined      / self.effList[ptBin][etaBin].effMC  )
+                            h2.SetBinContent(ix,iy, _safe_ratio(self.effList[ptBin][etaBin].systCombined, self.effList[ptBin][etaBin].effMC, default=0.0))
                         elif onlyError >= 1 and onlyError <= 6:
                             denominator = averageMC
                             if relError:
                                 denominator = self.effList[ptBin][etaBin].systCombined
-                            h2.SetBinContent(ix,iy, abs(self.effList[ptBin][etaBin].syst[onlyError-1]) / denominator )
+                            h2.SetBinContent(ix,iy, _safe_ratio(abs(self.effList[ptBin][etaBin].syst[onlyError-1]), denominator, default=0.0))
 
         h2.GetXaxis().SetTitle("SuperCluster #eta")
         h2.GetYaxis().SetTitle("p_{T} [GeV]")
@@ -353,7 +363,7 @@ class efficiencyList:
                     
                     effPlus  = self.effList[ptBin][etaBinPlus]
                     effMinus = None
-                    if self.effList[ptBin].has_key(etaBinMinus):
+                    if etaBinMinus in self.effList[ptBin]:
                         effMinus =  self.effList[ptBin][etaBinMinus] 
 
                     effAverage = effPlus
@@ -361,7 +371,7 @@ class efficiencyList:
                         effAverage = effPlus + effMinus
 
                         
-                    if not listOfGraphs.has_key(etaBin):                        
+                    if etaBin not in listOfGraphs:                        
                         ### init average efficiency 
                         listOfGraphs[etaBin] = []
 
@@ -369,15 +379,18 @@ class efficiencyList:
                     aValue  = effAverage.mean
                     anError = effAverage.systCombined 
                     if doScaleFactor :
-                        aValue  = effAverage.mean      / effAverage.effMC
-                        anError = effAverage.systCombined / effAverage.effMC  
+                        aValue  = _safe_ratio(effAverage.mean, effAverage.effMC, default=1.0)
+                        anError = _safe_ratio(effAverage.systCombined, effAverage.effMC, default=0.0)
                     listOfGraphs[etaBin].append( {'min': ptBin[0], 'max': ptBin[1],
                                                   'val': aValue  , 'err': anError } ) 
                                                   
         return listOfGraphs
 
-    def pt_1DGraph_list_customEtaBining(self, etaBining, doScaleFactor):
-#        self.symmetrizeSystVsEta()
+    def pt_1DGraph_list_customEtaBining(self, etaBining, typeGR = 0 ):
+        """
+        typeGR: 0=Data (mean), +1=ScaleFactor (mean/MC), -1=MC
+        """
+        # self.combineSyst() 已在外面呼叫過；此處保留一致性
         self.combineSyst()
         listOfGraphs = {}
 
@@ -391,30 +404,34 @@ class efficiencyList:
 
                         if abin[0] < etaBin[0] or abin[1] > etaBin[1]:
                             continue
-                        #                        if abin[0] >= etaBin[0] and abin[1] <= etaBin[1]:
-                        #                            continue
+
                         effPlus  = self.effList[ptBin][etaBinPlus]
                         effMinus = None
-                        if self.effList[ptBin].has_key(etaBinMinus):
-                            effMinus =  self.effList[ptBin][etaBinMinus] 
+                        if etaBinMinus in self.effList[ptBin]:
+                            effMinus = self.effList[ptBin][etaBinMinus]
 
                         effAverage = effPlus
                         if not effMinus is None:
                             effAverage = effPlus + effMinus
 
-                        effAverage.combineSyst(effAverage.effData,effAverage.effMC)
+                        effAverage.combineSyst(effAverage.effData, effAverage.effMC)
+
                         aValue  = effAverage.mean
                         anError = effAverage.systCombined
-                        #aValue  = (effPlus.mean + effMinus.mean)/2   #we use abs eta (average between etaplus and etaminus) for pt plot
-                        #anError = (effPlus.systCombined + effMinus.systCombined)/2
-                        if doScaleFactor :
-                            aValue  = aValue   / effAverage.effMC
-                            anError = anError / effAverage.effMC  
-                        listOfGraphs[abin].append( {'min': ptBin[0], 'max': ptBin[1],
-                                                    'val': aValue  , 'err': anError } ) 
-                                                  
-        return listOfGraphs
+                        if typeGR == 1:      # SF
+                            aValue  = _safe_ratio(effAverage.mean, effAverage.effMC, default=1.0)
+                            anError = _safe_ratio(effAverage.systCombined, effAverage.effMC, default=0.0)
+                        elif typeGR == -1:   # MC
+                            aValue  = effAverage.effMC
+                            anError = 0
 
+                        listOfGraphs[abin].append({
+                            'min': ptBin[0],
+                            'max': ptBin[1],
+                            'val': aValue,
+                            'err': anError
+                        })
+        return listOfGraphs
 
     
     def eta_1DGraph_list(self, typeGR = 0 ):
@@ -424,15 +441,15 @@ class efficiencyList:
         
         for ptBin in self.effList.keys():
             for etaBin in self.effList[ptBin].keys():
-                if not listOfGraphs.has_key(ptBin):                        
+                if ptBin not in listOfGraphs:                        
                     ### init average efficiency 
                     listOfGraphs[ptBin] = []
                 effAverage = self.effList[ptBin][etaBin]
                 aValue  = effAverage.mean
                 anError = effAverage.systCombined 
                 if typeGR == 1:
-                    aValue  = effAverage.mean      / effAverage.effMC
-                    anError = effAverage.systCombined / effAverage.effMC  
+                    aValue  = _safe_ratio(effAverage.mean, effAverage.effMC, default=1.0)
+                    anError = _safe_ratio(effAverage.systCombined, effAverage.effMC, default=0.0)
                 if typeGR == -1:
                     aValue  = effAverage.effMC
                     anError = 0#effAverage.errEffMC
@@ -441,9 +458,3 @@ class efficiencyList:
                                              'val': aValue  , 'err': anError } )
 
         return listOfGraphs
-
-
-
-
-
-    

@@ -103,8 +103,17 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     p2.SetBottomMargin( c.GetBottomMargin()*1/yUp)
     p1.SetLeftMargin( c.GetLeftMargin() )
     p2.SetLeftMargin( c.GetLeftMargin() )
+    p1.SetTicks(1, 1)
+    p2.SetTicks(1, 1)
     firstGraph = True
-    leg = rt.TLegend(0.53,0.74,0.94,0.92)
+
+    legx1=0.51; legy1=0.74; legx2=0.94; legy2=0.92; 
+    if 'pT' in xAxis or 'pt' in xAxis:
+        leg = rt.TLegend(legx1,legy1,legx2,legy2)
+    elif 'eta' in xAxis or 'Eta' in xAxis:
+        legx1=0.53; legy1=0.74; legx2=0.94; legy2=0.92; 
+        leg = rt.TLegend(legx1,legy1,legx2,legy2)
+    
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
     leg.SetTextSize(0.035)
@@ -152,13 +161,13 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     effminmax =  findMinMax( effDataList )
     effiMin = effminmax[0]
     effiMax = effminmax[1]
-    effiMin = 0.30 
-    effiMax = 1.45
+    effiMin = 0.10 
+    effiMax = 1.55
 
     sfminmax =  findMinMax( sfList )
     sfMin = sfminmax[0]
     sfMax = sfminmax[1]
-    sfMin = 0.55
+    sfMin = 0.45
     sfMax = 1.25
 
     for key in sorted(effDataList.keys()):
@@ -283,7 +292,8 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
 
     c.Print(nameout)
     listName = nameout.split('/')
-    for iext in ["pdf","C","png"]:
+    # for iext in ["pdf","C","png"]:
+    for iext in ["pdf","png"]:
         c.SaveAs(nameout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3]).replace('pdf',iext))
 
     return listOfTGraph2
@@ -295,14 +305,16 @@ def diagnosticErrorPlot( effgr, ierror, nameout ):
     errorNames = efficiency.getSystematicNames()
     c2D_Err = rt.TCanvas('canScaleFactor_%s' % errorNames[ierror] ,'canScaleFactor: %s' % errorNames[ierror],1000,600)    
     c2D_Err.Divide(2,1)
-    c2D_Err.GetPad(1).SetLogy()
-    c2D_Err.GetPad(2).SetLogy()
-    c2D_Err.GetPad(1).SetRightMargin(0.15)
-    c2D_Err.GetPad(1).SetLeftMargin( 0.15)
-    c2D_Err.GetPad(1).SetTopMargin(  0.10)
-    c2D_Err.GetPad(2).SetRightMargin(0.15)
-    c2D_Err.GetPad(2).SetLeftMargin( 0.15)
-    c2D_Err.GetPad(2).SetTopMargin(  0.10)
+    # c2D_Err.GetPad(1).SetLogy()
+    # c2D_Err.GetPad(2).SetLogy()
+    c2D_Err.GetPad(1).SetRightMargin(   0.18)
+    c2D_Err.GetPad(1).SetLeftMargin(    0.16)
+    c2D_Err.GetPad(1).SetTopMargin(     0.10)
+    c2D_Err.GetPad(1).SetBottomMargin(  0.13)
+    c2D_Err.GetPad(2).SetRightMargin(   0.16)
+    c2D_Err.GetPad(2).SetLeftMargin(    0.16)
+    c2D_Err.GetPad(2).SetTopMargin(     0.10)
+    c2D_Err.GetPad(2).SetBottomMargin(  0.13)
 
     h2_sfErrorAbs = effgr.ptEtaScaleFactor_2DHisto(ierror+1, False )
     h2_sfErrorRel = effgr.ptEtaScaleFactor_2DHisto(ierror+1, True  )
@@ -320,7 +332,8 @@ def diagnosticErrorPlot( effgr, ierror, nameout ):
     c2D_Err.Print(nameout)
 
     listName = nameout.split('/')
-    for iext in ["pdf","C","png"]:
+    # for iext in ["pdf","C","png"]:
+    for iext in ["pdf","png"]:
         c2D_Err.SaveAs(nameout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3]).replace('pdf',iext))
     
     return h2_sfErrorAbs
@@ -417,14 +430,16 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
 
     c2D = rt.TCanvas('canScaleFactor','canScaleFactor',900,600)
     c2D.Divide(2,1)
-    c2D.GetPad(1).SetRightMargin(0.15)
-    c2D.GetPad(1).SetLeftMargin( 0.15)
-    c2D.GetPad(1).SetTopMargin(  0.10)
-    c2D.GetPad(2).SetRightMargin(0.15)
-    c2D.GetPad(2).SetLeftMargin( 0.15)
-    c2D.GetPad(2).SetTopMargin(  0.10)
-    c2D.GetPad(1).SetLogy()
-    c2D.GetPad(2).SetLogy()
+    c2D.GetPad(1).SetRightMargin(   0.16)
+    c2D.GetPad(1).SetLeftMargin(    0.16)
+    c2D.GetPad(1).SetTopMargin(     0.10)
+    c2D.GetPad(1).SetBottomMargin(  0.13)
+    c2D.GetPad(2).SetRightMargin(   0.16)
+    c2D.GetPad(2).SetLeftMargin(    0.16)
+    c2D.GetPad(2).SetTopMargin(     0.10)
+    c2D.GetPad(2).SetBottomMargin(  0.13)
+    # c2D.GetPad(1).SetLogy()
+    # c2D.GetPad(2).SetLogy()
     
 
     c2D.cd(1)
@@ -442,7 +457,8 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
 
     c2D.Print( pdfout )
     listName = pdfout.split('/')
-    for iext in ["pdf","C","png"]:
+    # for iext in ["pdf","C","png"]:
+    for iext in ["pdf","png"]:
         c2D.SaveAs(pdfout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3]).replace('pdf',iext))
 
     rootout = rt.TFile(nameOutBase + '_EGM2D.root','recreate')

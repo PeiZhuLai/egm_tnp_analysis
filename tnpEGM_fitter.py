@@ -6,7 +6,7 @@ import sys
 import pickle
 import shutil
 from multiprocessing import Pool
-
+import math, json
 
 parser = argparse.ArgumentParser(description='tnp EGM fitter')
 parser.add_argument('--checkBins'  , action='store_true'  , help = 'check  bining definition')
@@ -24,6 +24,7 @@ parser.add_argument('--sumUp'      , action='store_true'  , help = 'sum up effic
 parser.add_argument('--iBin'       , dest = 'binNumber'   , type = int,  default=-1, help='bin number (to refit individual bin)')
 parser.add_argument('--flag'       , default = None       , help ='WP to test')
 parser.add_argument('settings'     , default = "egm_tnp_analysis"       , help = 'setting file [mandatory]')
+parser.add_argument('--exportJson' , action='store_true', help='export scale factors JSON (schema_version=2)')
 
 
 args = parser.parse_args()
@@ -339,6 +340,15 @@ if args.sumUp:
     effFileName ='%s/egammaEffi.txt' % outputDirectory 
     fOut = open( effFileName,'w')
     
+    # 用來組合 JSON 的暫存
+    _binTuples = []          # (v1_low,v1_high,v2_low,v2_high)
+    _sf_pass   = []
+    _unc_pass  = []
+    _sf_fail   = []
+    _unc_fail  = []
+    _var1_name = None
+    _var2_name = None
+
     for ib in range(len(tnpBins['bins'])):
         effis = tnpRoot.getAllEffi( info, tnpBins['bins'][ib] )
 
@@ -366,6 +376,49 @@ if args.sumUp:
             )
         print(astr)
         fOut.write( astr + '\n' )
+
+        # 取得變數名稱 (首次)
+        if _var1_name is None: _var1_name = v1Range[1] if len(v1Range) > 1 else 'var1'
+        if _var2_name is None: _var2_name = v2Range[1] if len(v2Range) > 1 else 'var2'
+        # 正規化變數命名（映射 ph_et -> pt；ph_sc_eta -> eta）
+        if _var1_name is not None:
+            _var1_name = _var1_name.strip()
+            if _var1_name == 'ph_sc_eta':
+                _var1_name = 'eta'
+        if _var2_name is not None:
+            _var2_name = _var2_name.strip()
+            if _var2_name == 'ph_et':
+                _var2_name = 'pt'
+        # 效率與不確定度
+        eff_data, unc_data = effis['dataNominal'][0], effis['dataNominal'][1]
+        eff_mc  , unc_mc   = effis['mcNominal'  ][0], effis['mcNominal'  ][1]
+        # 保護除以零
+        if eff_mc <= 0: 
+            sf_pass = 1.0
+            unc_pass = 0.0
+        else:
+            sf_pass = eff_data / eff_mc
+            # 誤差傳播: f = A/B
+            unc_pass = math.sqrt( (unc_data/eff_mc)**2 + (eff_data*unc_mc/(eff_mc**2))**2 )
+        # Fail 區 (互補)
+        eff_data_fail = 1.0 - eff_data
+        eff_mc_fail   = 1.0 - eff_mc
+        if eff_mc_fail <= 0:
+            sf_fail = 1.0
+            unc_fail = 0.0
+        else:
+            sf_fail = eff_data_fail / eff_mc_fail
+            # f = (1-A)/(1-B) -> 對 A, B 的偏微分做近似 (線性誤差傳播)
+            # df/dA = -1/(1-B), df/dB = (1-A)/(1-B)^2
+            dfdA = -1.0 / max(1e-12, (1 - eff_mc))
+            dfdB = (1 - eff_data) / max(1e-12, (1 - eff_mc)**2)
+            unc_fail = math.sqrt( (dfdA * unc_data)**2 + (dfdB * unc_mc)**2 )
+        _sf_pass.append(sf_pass)
+        _unc_pass.append(unc_pass)
+        _sf_fail.append(sf_fail)
+        _unc_fail.append(unc_fail)
+        _binTuples.append( (float(v1Range[0]), float(v1Range[2]), float(v2Range[0]), float(v2Range[2])) )
+
     fOut.close()
 
     print('Effis saved in file : ',  effFileName)
@@ -380,3 +433,86 @@ if args.sumUp:
         egm_sf = _il_util.module_from_spec(_spec)
         _spec.loader.exec_module(egm_sf)
     egm_sf.doEGM_SFs(effFileName,sampleToFit.lumi)
+
+    if args.exportJson:
+        # 邊界重建
+        edges1_lows = sorted({b[0] for b in _binTuples})
+        edges2_lows = sorted({b[2] for b in _binTuples})
+        last_high1 = max(b[1] for b in _binTuples)
+        last_high2 = max(b[3] for b in _binTuples)
+        edges1 = edges1_lows + ([last_high1] if edges1_lows[-1] != last_high1 else [])
+        edges2 = edges2_lows + ([last_high2] if edges2_lows[-1] != last_high2 else [])
+        out_json = {
+            "schema_version": 2,
+            "description": "auto-generated scale factors",
+            "corrections": [
+                {
+                    "name": "sf_pass",
+                    "version": 1,
+                    "inputs": [
+                        {"name": _var1_name, "type": "real", "description": _var1_name},
+                        {"name": _var2_name, "type": "real", "description": _var2_name}
+                    ],
+                    "output": {"name": "sf", "type": "real", "description": "data/MC scale factor (pass)"},
+                    "data": {
+                        "nodetype": "multibinning",
+                        "inputs": [_var1_name, _var2_name],
+                        "edges": [edges1, edges2],
+                        "content": _sf_pass,
+                        "flow": "clamp"
+                    }
+                },
+                {
+                    "name": "unc_pass",
+                    "version": 1,
+                    "inputs": [
+                        {"name": _var1_name, "type": "real", "description": _var1_name},
+                        {"name": _var2_name, "type": "real", "description": _var2_name}
+                    ],
+                    "output": {"name": "sf", "type": "real", "description": "uncertainty (pass)"},
+                    "data": {
+                        "nodetype": "multibinning",
+                        "inputs": [_var1_name, _var2_name],
+                        "edges": [edges1, edges2],
+                        "content": _unc_pass,
+                        "flow": "clamp"
+                    }
+                },
+                {
+                    "name": "sf_fail",
+                    "version": 1,
+                    "inputs": [
+                        {"name": _var1_name, "type": "real", "description": _var1_name},
+                        {"name": _var2_name, "type": "real", "description": _var2_name}
+                    ],
+                    "output": {"name": "sf", "type": "real", "description": "data/MC scale factor (fail)"},
+                    "data": {
+                        "nodetype": "multibinning",
+                        "inputs": [_var1_name, _var2_name],
+                        "edges": [edges1, edges2],
+                        "content": _sf_fail,
+                        "flow": "clamp"
+                    }
+                },
+                {
+                    "name": "unc_fail",
+                    "version": 1,
+                    "inputs": [
+                        {"name": _var1_name, "type": "real", "description": _var1_name},
+                        {"name": _var2_name, "type": "real", "description": _var2_name}
+                    ],
+                    "output": {"name": "sf", "type": "real", "description": "uncertainty (fail)"},
+                    "data": {
+                        "nodetype": "multibinning",
+                        "inputs": [_var1_name, _var2_name],
+                        "edges": [edges1, edges2],
+                        "content": _unc_fail,
+                        "flow": "clamp"
+                    }
+                }
+            ]
+        }
+        _json_path = os.path.join(outputDirectory, f'{args.flag}.json')
+        with open(_json_path, 'w') as jf:
+            json.dump(out_json, jf, indent=2)
+        print('[exportJson] JSON written:', _json_path)

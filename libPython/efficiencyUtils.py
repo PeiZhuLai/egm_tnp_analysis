@@ -344,8 +344,28 @@ class efficiencyList:
                                 denominator = self.effList[ptBin][etaBin].systCombined
                             h2.SetBinContent(ix,iy, _safe_ratio(abs(self.effList[ptBin][etaBin].syst[onlyError-1]), denominator, default=0.0))
 
-        h2.GetXaxis().SetTitle("SuperCluster #eta")
-        h2.GetYaxis().SetTitle("p_{T} [GeV]")
+        h2.SetTitle("%s;%s;%s" % (htitle, "SuperCluster #eta", "p_{T} [GeV]"))
+        h2.SetMarkerSize(1.8)
+
+        h2.GetYaxis().SetTitleFont(42)
+        h2.GetYaxis().SetLabelFont(42)
+        h2.GetYaxis().SetTitleSize(0.06)
+        h2.GetYaxis().SetLabelSize(0.05)
+        h2.GetYaxis().SetTitleOffset(1.2)
+
+        h2.GetXaxis().SetTitleFont(42)
+        h2.GetXaxis().SetLabelFont(42)
+        h2.GetXaxis().SetTitleSize(0.06)
+        h2.GetXaxis().SetLabelSize(0.05)
+        h2.GetXaxis().SetTitleOffset(1.1)
+        h2.GetXaxis().SetLabelOffset(0.01)
+
+        h2.GetZaxis().SetTitleFont(42)
+        h2.GetZaxis().SetLabelFont(42)
+        h2.GetZaxis().SetTitleSize(0.055)
+        h2.GetZaxis().SetLabelSize(0.05)
+        h2.GetZaxis().SetTitleOffset(0.75)
+
         return h2
         
                                 

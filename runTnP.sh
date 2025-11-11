@@ -10,6 +10,9 @@
 
 baseDir="/afs/cern.ch/work/p/pelai/HZa/TnP/CMSSW_11_2_0/src/egm_tnp_analysis"
 
-# sh $baseDir/run.sh "$baseDir/etc/config/settings_resolve_pho_2022preEE.py" passingCustomCutBased
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.settings_resolve_pho_2022preEE passingCustomCutBased_2022preEE
-# BUILD_CPP=1 sh $baseDir/run.sh egm_tnp_analysis.etc.config.settings_resolve_pho_2022preEE passingCustomCutBased_2022preEE
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.settings_resolve_pho_2022preEE hza_resolve_phid_2022preEE_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.settings_resolve_pho_2022postEE hza_resolve_phid_2022postEE_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.settings_resolve_pho_2023preBPix hza_resolve_phid_2023preBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.settings_resolve_pho_2023postBPix hza_resolve_phid_2023postBPix_sf &
+
+# BUILD_CPP=1 sh $baseDir/run.sh egm_tnp_analysis.etc.config.settings_resolve_pho_2022preEE hza_phid_2022preEE_sf
