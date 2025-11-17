@@ -337,7 +337,10 @@ if args.sumUp:
     #     info['tagSel'   ] = tnpConf.samplesDef['tagSel'].histFile
 
     effis = None
-    effFileName ='%s/egammaEffi.txt' % outputDirectory 
+    if "lowpt" in args.flag:
+        effFileName ='%s/egammaLowptEffi.txt' % outputDirectory
+    else:
+        effFileName ='%s/egammaEffi.txt' % outputDirectory 
     fOut = open( effFileName,'w')
     
     # 用來組合 JSON 的暫存

@@ -163,7 +163,7 @@ if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
     samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2022postEE')
-    samplesDef['tagSel'].set_cut('tag_Ele_pt > 37')
+    samplesDef['tagSel'].set_cut('tag_Ele_pt > 35')
 
 ## set MC weight, simple way (use tree weight) 
 # weightName = 'totWeight'
@@ -187,8 +187,7 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFil
 #############################################################
 biningDef = [
    { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.0, 2.5] },
-   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,25,35,50,80] },
-#    { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,35,50,80] },
+   { 'var' : 'ph_et' , 'type': 'float', 'bins': [20,35,50,80] },
 ]
 
 #############################################################
@@ -224,30 +223,32 @@ tnpParNomFit = [
     "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
 
-# # 15
+# # 6
 # tnpParNomFit = [
 #     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-#     "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
-#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-#     "acmsF[60.,50.,70.]","betaF[0.05,0.05,0.07]","gammaF[0.01, -2, 2]","peakF[87.0,82.0,90.0]",
+#     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 0.03]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,55.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
 #     ]
-
-# # 4
-# tnpParNomFit = [
-#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-#     "meanF[0.2,0.1,5.0]","sigmaF[1.5]",
-#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-#     "acmsF[60.,40.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.01, -2, 0.1]","peakF[87.0,82.0,90.0]",
-#     ]
-# print("DEBUG tnpParNomFit =", tnpParNomFit)
 
 tnpParAltSigFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,8.0]","alphaF[2.0,1.2,3.5]",'nF[3,-5,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
-    "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
-    "acmsF[60.,50.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.005, 1]","peakF[89.0,82.0,90.0]",
+    "meanP[-0.0,-5.0,5.0]",
+    "sigmaP[1,0.7,6.0]",
+    "alphaP[2.0,1.2,3.5]" ,
+    "nP[3,-5,5]",
+    "sigmaP_2[1.5,0.5,6.0]",
+    "sosP[1,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]",
+    "sigmaF[2,0.7,8.0]",
+    "alphaF[2.0,1.2,3.5]",
+    "nF[3,0,5]",
+    "sigmaF_2[2.0,0.5,6.0]",
+    "sosF[1,0.5,5.0]",
+    "acmsP[60.,50.,80.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
+    "acmsF[60.,50.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.01, 1]","peakF[89.0,82.0,90.0]",
     ]
-     
+
+
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
@@ -256,10 +257,16 @@ tnpParAltBkgFit = [
     ]
 
 tnpParAltSigBkgFit = [
-    'meanP[90,80,100]', 'meanF[90,80,100]',
-    'sigmaP[1.5,0.2,10]', 'sigmaF[2.0,0.2,10]',
-    'sigmaP_2[3.0,0.2,10]', 'sigmaF_2[3.0,0.2,10]',
-    'alphaP[1.2,0.2,5]', 'nP[2,0.5,10]',
-    'alphaF[1.2,0.2,5]', 'nF[2,0.5,10]',
-    'sosP[0]', 'sosF[0]',
+  'meanP[-0.0, -5.0, 5.0]',
+  'meanF[-0.0, -5.0, 5.0]',
+  'sigmaP[0.5, 0.1, 2.0]',
+  'sigmaF[0.5, 0.1, 2.0]',
+  'sigmaP_2[0.5, 0.1, 2.0]',
+  'sigmaF_2[0.5, 0.1, 3.0]',
+  'sosP[0.10, 0.0, 1.0]',
+  'sosF[0.12, 0.0, 1.0]',
+  'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
+  'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
+  'alphaP_2[-0.012, -1, 0]',
+  'alphaF_2[-0.014, -1, 0.05]',
 ]

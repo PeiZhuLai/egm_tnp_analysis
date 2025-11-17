@@ -14,7 +14,7 @@ if '_mod_path' not in globals() or not _mod_path:
 # flag to be Tested
 flags = {
     # Run3 custom ID aligned to ZaTaggerRun3.select_photons
-    'hza_resolve_phid_2023preBPix_sf': (
+    'hza_resolve_phid_lowpt_2023preBPix_sf': (
         # pT + acceptance
         '(ph_et > 10) && ((abs(ph_sc_eta) < 1.4442) || (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.5))'
         ' && ('
@@ -163,7 +163,7 @@ if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
     samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2023preBPix')
-    samplesDef['tagSel'].set_cut('tag_Ele_pt > 32')
+    samplesDef['tagSel'].set_cut('tag_Ele_pt > 50 && ph_mva122XV1 > 0.99 && ph_r9 > 0.99')
 
 ## set MC weight, simple way (use tree weight) 
 # weightName = 'totWeight'
@@ -186,8 +186,8 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFil
 ########## bining definition  [can be nD bining]
 #############################################################
 biningDef = [
-   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.0, 2.5] },
-   { 'var' : 'ph_et' , 'type': 'float', 'bins': [20,35,50,80] },
+   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, 0.0, 1.4442, 1.566, 2.0, 2.5] },
+   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20] },
 #    { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,35,50,80] },
 ]
 
@@ -218,10 +218,10 @@ additionalCuts = None
 ########## fitting params to tune fit by hand if necessary
 #############################################################
 tnpParNomFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
-    "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-    "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.4,2.87]",
+    "meanF[-0.0,-2.6,5.0]","sigmaF[1.0,0.5,2.1]",
+    "acmsP[60.,39.,80.]","betaP[0.05,0.01,0.09]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+    "acmsF[60.,35.,75.]","betaF[0.05,0.01,0.11]","gammaF[0.1, 0.02, 2]","peakF[87.0,82.0,90.0]",
     ]
 
 # # 15
@@ -242,10 +242,20 @@ tnpParNomFit = [
 # print("DEBUG tnpParNomFit =", tnpParNomFit)
 
 tnpParAltSigFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,8.0]","alphaF[2.0,1.2,3.5]",'nF[3,0,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
+    "meanP[-0.0,-5.0,5.0]",
+    "sigmaP[4.0, 3.0, 8.0]",
+    "sigmaP_2[0.5, 0.5, 6.0]",
+    "alphaP[2.0,1.2,3.5]" ,
+    "nP[3,-5,5]",
+    "sosP[1,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]",
+    "sigmaF[4.5, 3.0, 8.0]",
+    "sigmaF_2[0.5, 0.5, 6.0]",
+    "alphaF[2.0,1.2,3.5]",
+    "nF[3,0,5]",
+    "sosF[1,0.5,5.0]",
     "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
-    "acmsF[60.,50.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.01, 1]","peakF[89.0,82.0,90.0]",
+    "acmsF[60.,35.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.02, 1]","peakF[89.0,82.0,90.0]",
     ]
      
 tnpParAltBkgFit = [
@@ -254,7 +264,6 @@ tnpParAltBkgFit = [
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
-
 
 tnpParAltSigBkgFit = [
   'meanP[-0.0, -5.0, 5.0]',
@@ -267,22 +276,6 @@ tnpParAltSigBkgFit = [
   'sosF[0.12, 0.0, 1.0]',
   'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
   'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
-  'alphaP_2[-0.012, -1, 0]',
+  'alphaP_2[-0.020, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]
-
-# ## 06
-# tnpParAltSigBkgFit = [
-#   'meanP[-0.0, -5.0, 5.0]',
-#   'meanF[-0.0, -5.0, 5.0]',
-#   'sigmaP[0.5, 0.1, 2.0]',
-#   'sigmaF[0.5, 0.1, 2.0]',
-#   'sigmaP_2[0.5, 0.1, 2.0]',
-#   'sigmaF_2[0.5, 0.1, 3.0]',
-#   'sosP[0.10, 0.0, 1.0]',
-#   'sosF[0.12, 0.0, 1.0]',
-#   'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
-#   'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
-#   'alphaP_2[-0.012, -1, 0]',
-#   'alphaF_2[-0.014, -1, 0.]',
-# ]

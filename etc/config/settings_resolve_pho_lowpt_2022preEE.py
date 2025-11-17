@@ -14,7 +14,7 @@ if '_mod_path' not in globals() or not _mod_path:
 # flag to be Tested
 flags = {
     # Run3 custom ID aligned to ZaTaggerRun3.select_photons
-    'hza_resolve_phid_2023preBPix_sf': (
+    'hza_resolve_phid_lowpt_2022preEE_sf': (
         # pT + acceptance
         '(ph_et > 10) && ((abs(ph_sc_eta) < 1.4442) || (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.5))'
         ' && ('
@@ -139,10 +139,10 @@ import etc.inputs.tnpSampleDef as tnpSamples
 tnpTreeDir = 'tnpPhoIDs'
 
 samplesDef = {
-        'data'  : tnpSamples.Run3_2023preBPix['Data_2023preBPix'].clone(),
-        'mcNom' : tnpSamples.Run3_2023preBPix['DY_MC_LO_2023preBPix'].clone(),
-        'tagSel': tnpSamples.Run3_2023preBPix['DY_MC_LO_2023preBPix'].clone(),
-        'mcAlt': tnpSamples.Run3_2023preBPix['DY_MC_NLO_2023preBPix'].clone(),
+        'data'  : tnpSamples.Run3_2022preEE['Data_2022preEE'].clone(),
+        'mcNom' : tnpSamples.Run3_2022preEE['DY_MC_LO_2022preEE'].clone(),
+        'tagSel': tnpSamples.Run3_2022preEE['DY_MC_LO_2022preEE'].clone(),
+        'mcAlt': tnpSamples.Run3_2022preEE['DY_MC_NLO_2022preEE'].clone(),
     }
 
 
@@ -162,8 +162,8 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2023preBPix')
-    samplesDef['tagSel'].set_cut('tag_Ele_pt > 32')
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2022preEE')
+    samplesDef['tagSel'].set_cut('tag_Ele_pt > 50 && ph_mva122XV1 > 0.99 && ph_r9 > 0.99')
 
 ## set MC weight, simple way (use tree weight) 
 # weightName = 'totWeight'
@@ -172,9 +172,9 @@ if not samplesDef['tagSel'] is None:
 # if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 
 ## set MC weight, can use several pileup rw for different data taking 
-mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_madgraph_pho.pu.puTree.root'
-mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_amcatnloext_pho.pu.puTree.root'
-weightName = 'weights_data_Run2023C.totWeight'
+mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_LO/puTree/mcRun3_130X_2022_realistic_LO_pho.pu.puTree.root'
+mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/puTree/mcRun3_130X_2022_realistic_pho.pu.puTree.root'
+weightName = 'weights_data_Run2022BCD.totWeight'
 if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
@@ -186,9 +186,8 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFil
 ########## bining definition  [can be nD bining]
 #############################################################
 biningDef = [
-   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.0, 2.5] },
-   { 'var' : 'ph_et' , 'type': 'float', 'bins': [20,35,50,80] },
-#    { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,35,50,80] },
+   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, 0.0, 1.4442, 1.566, 2.0, 2.5] },
+   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20] }
 ]
 
 #############################################################
@@ -219,35 +218,36 @@ additionalCuts = None
 #############################################################
 tnpParNomFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
+    "meanF[-0.0,-4.0,5.0]","sigmaF[2.0,0.5,5.0]",
     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-    "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+    "acmsF[60.,35.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, 0.02, 2]","peakF[87.0,82.0,90.0]",
     ]
 
-# # 15
-# tnpParNomFit = [
-#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-#     "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
-#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-#     "acmsF[60.,50.,70.]","betaF[0.05,0.05,0.07]","gammaF[0.01, -2, 2]","peakF[87.0,82.0,90.0]",
-#     ]
-
-# # 4
+# # 0
 # tnpParNomFit = [
 #     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
 #     "meanF[0.2,0.1,5.0]","sigmaF[1.5]",
 #     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-#     "acmsF[60.,40.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.01, -2, 0.1]","peakF[87.0,82.0,90.0]",
+#     "acmsF[60.,40.,80.]","betaF[0.05,0.005,0.08]","gammaF[0.01, -2, 1]","peakF[87.0,82.0,90.0]",
 #     ]
-# print("DEBUG tnpParNomFit =", tnpParNomFit)
 
 tnpParAltSigFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,8.0]","alphaF[2.0,1.2,3.5]",'nF[3,0,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
+    "meanP[-0.0,-5.0,5.0]",
+    "sigmaP[4.0, 3.0, 8.0]",
+    "sigmaP_2[0.5, 0.5, 6.0]",
+    "alphaP[2.0,1.2,3.5]" ,
+    "nP[3,-5,5]",
+    "sosP[1,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]",
+    "sigmaF[4.5, 3.0, 8.0]",
+    "sigmaF_2[0.5, 0.5, 6.0]",
+    "alphaF[2.0,1.2,3.5]",
+    "nF[3,0,5]",
+    "sosF[1,0.5,5.0]",
     "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
-    "acmsF[60.,50.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.01, 1]","peakF[89.0,82.0,90.0]",
+    "acmsF[60.,40.,70.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.01, 1]","peakF[89.0,82.0,90.0]",
     ]
-     
+
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
@@ -258,20 +258,20 @@ tnpParAltBkgFit = [
 
 tnpParAltSigBkgFit = [
   'meanP[-0.0, -5.0, 5.0]',
-  'meanF[-0.0, -5.0, 5.0]',
   'sigmaP[0.5, 0.1, 2.0]',
-  'sigmaF[0.5, 0.1, 2.0]',
   'sigmaP_2[0.5, 0.1, 2.0]',
-  'sigmaF_2[0.5, 0.1, 3.0]',
   'sosP[0.10, 0.0, 1.0]',
-  'sosF[0.12, 0.0, 1.0]',
   'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
+  'meanF[-0.0, -5.0, 5.0]',
+  'sigmaF[0.5, 0.1, 2.0]',
+  'sigmaF_2[0.5, 0.1, 3.0]',
+  'sosF[0.12, 0.0, 1.0]',
   'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
   'alphaP_2[-0.012, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 
-# ## 06
+# ## 09
 # tnpParAltSigBkgFit = [
 #   'meanP[-0.0, -5.0, 5.0]',
 #   'meanF[-0.0, -5.0, 5.0]',
@@ -282,7 +282,7 @@ tnpParAltSigBkgFit = [
 #   'sosP[0.10, 0.0, 1.0]',
 #   'sosF[0.12, 0.0, 1.0]',
 #   'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
-#   'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
+#   'alphaF[2.0, 1.4, 3.6]', 'nF[0.4, 0.0, 1.5]',
 #   'alphaP_2[-0.012, -1, 0]',
-#   'alphaF_2[-0.014, -1, 0.]',
+#   'alphaF_2[-0.014, -1, 0.05]',
 # ]

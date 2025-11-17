@@ -73,14 +73,44 @@ WP=$2   # 你的 working point 名称，例如 'Tight_PhotonID'
 # ## ----------- 2 Data Fit --------------------
 # python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit 
 # ## ----------- 3 MC Fit altsig---------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSig
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSig
 # ## ----------- 4 MC Fit altbkg---------------
 # python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altBkg
 # ## ----------- 5 MC Fit altSigBkg--------------
 # python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSigBkg
 ## ----------- Get Results --------------
 python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --sumUp --exportJson
+
+
+
 # ----------- Tuning a bin --------------
-# rm -fr /eos/home-p/pelai/HZa/root_TnP/passingCustomCutBased_2022preEE/Data_2022preEE_passingCustomCutBased_2022preEE.nominalFit-bin04_ph_sc_eta_0p00To0p80_ph_et_10p00To15p00.root
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --iBin 4
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --mcSig --altSig --iBin 4
+# For Region
+# High pT
+# ----------- 2022preEE --------------
+# for i in 00 15 20; do
+#   python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --iBin ${i}
+# done
+# ----------- 2022postEE --------------
+# for i in 00 15 20; do
+#   python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --iBin ${i}
+# done
+# ----------- 2023postBPix --------------
+# for i in 08; do
+#   python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --iBin ${i}
+# done
+# Low pT
+# ----------- 2022preEE --------------
+# for i in 04 05; do
+#   python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altBkg --iBin ${i}
+# done
+
+
+# Single Region
+# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --mcSig --altSig --iBin 5
+
+# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --iBin 7
+# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altBkg --iBin 6
+# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSig --iBin 1
+# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSigBkg --iBin 6
+
+sh publish.sh
