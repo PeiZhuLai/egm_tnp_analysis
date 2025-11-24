@@ -14,7 +14,7 @@ if '_mod_path' not in globals() or not _mod_path:
 # flag to be Tested
 flags = {
     # Run3 custom ID aligned to ZaTaggerRun3.select_photons
-    'hza_resolve_phid_2023postBPix_sf': (
+    'hza_resolve_phid_2022preEE_sf': (
         # pT + acceptance
         '(ph_et > 10) && ((abs(ph_sc_eta) < 1.4442) || (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.5))'
         ' && ('
@@ -31,9 +31,25 @@ flags = {
         '             < 0.0417588)'
         '       ))'
         # ================= Ch ISO =================
-        '   && (ph_chIso < 0.316306)'
+        '   && (('
+        '         (abs(ph_sc_eta) > 0.0 && abs(ph_sc_eta) < 1.0)'
+        '         && (ph_chIso - event_rho*0.0342898 - (event_rho*event_rho)*(-0.000103508)'
+        '             < 0.316306)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 1.0 && abs(ph_sc_eta) < 1.4442)'
+        '         && (ph_chIso - event_rho*0.0281424 - (event_rho*event_rho)*(-0.000031494)'
+        '             < 0.316306)'
+        '       ))'
         # ================= H ISO =================
-        '   && (ph_neuIso < (0.39057 + 0.0100547*ph_et + 0.0000578332*ph_et*ph_et))'
+        '   && (('
+        '         (abs(ph_sc_eta) > 0.0 && abs(ph_sc_eta) < 1.0)'
+        '         && (ph_neuIso - event_rho*0.17005 - (event_rho*event_rho)*(-0.000835)'
+        '             < (0.39057 + 0.0100547*ph_et + 0.0000578332*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 1.0 && abs(ph_sc_eta) < 1.4442)'
+        '         && (ph_neuIso - event_rho*0.208571 - (event_rho*event_rho)*(-0.000905)'
+        '             < (0.39057 + 0.0100547*ph_et + 0.0000578332*ph_et*ph_et))'
+        '       ))'
         '  )'
         '  ||'
         # ================= EE block =================
@@ -61,9 +77,49 @@ flags = {
         '             < 0.00254267)'
         '       ))'
         # ================= Ch ISO =================
-        '   && (ph_chIso < 0.292664)'
+        '   && (('
+        '         (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.0)'
+        '         && (ph_chIso - event_rho*0.0288533 - (event_rho*event_rho)*(-0.0000666148)'
+        '             < 0.292664)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.0 && abs(ph_sc_eta) < 2.2)'
+        '         && (ph_chIso - event_rho*0.028789 - (event_rho*event_rho)*(-0.0000684993)'
+        '             < 0.292664)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.2 && abs(ph_sc_eta) < 2.3)'
+        '         && (ph_chIso - event_rho*0.0264064 - (event_rho*event_rho)*(-0.0000889189)'
+        '             < 0.292664)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.3 && abs(ph_sc_eta) < 2.4)'
+        '         && (ph_chIso - event_rho*0.025587 - (event_rho*event_rho)*(-0.0000590178)'
+        '             < 0.292664)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.4 && abs(ph_sc_eta) < 2.5)'
+        '         && (ph_chIso - event_rho*0.0224817 - (event_rho*event_rho)*(-0.0000422712)'
+        '             < 0.292664)'
+        '       ))'
         # ================= H ISO =================
-        '   && (ph_neuIso < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '   && (('
+        '         (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.0)'
+        '         && (ph_neuIso - event_rho*0.246494 - (event_rho*event_rho)*(-0.000722)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.0 && abs(ph_sc_eta) < 2.2)'
+        '         && (ph_neuIso - event_rho*0.306529 - (event_rho*event_rho)*(-0.000608)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.2 && abs(ph_sc_eta) < 2.3)'
+        '         && (ph_neuIso - event_rho*0.322673 - (event_rho*event_rho)*(-0.000750)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.3 && abs(ph_sc_eta) < 2.4)'
+        '         && (ph_neuIso - event_rho*0.315793 - (event_rho*event_rho)*(-0.000795)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.4 && abs(ph_sc_eta) < 2.5)'
+        '         && (ph_neuIso - event_rho*0.36531 - (event_rho*event_rho)*(-0.000439)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ))'
         '  )'
         ' )'
         # electron veto
@@ -83,10 +139,10 @@ import etc.inputs.tnpSampleDef as tnpSamples
 tnpTreeDir = 'tnpPhoIDs'
 
 samplesDef = {
-        'data'  : tnpSamples.Run3_2023postBPix['Data_2023postBPix'].clone(),
-        'mcNom' : tnpSamples.Run3_2023postBPix['DY_MC_LO_2023postBPix'].clone(),
-        'tagSel': tnpSamples.Run3_2023postBPix['DY_MC_LO_2023postBPix'].clone(),
-        'mcAlt': tnpSamples.Run3_2023postBPix['DY_MC_NLO_2023postBPix'].clone(),
+        'data'  : tnpSamples.Run3_2022preEE['Data_2022preEE'].clone(),
+        'mcNom' : tnpSamples.Run3_2022preEE['DY_MC_LO_2022preEE'].clone(),
+        'tagSel': tnpSamples.Run3_2022preEE['DY_MC_LO_2022preEE'].clone(),
+        'mcAlt': tnpSamples.Run3_2022preEE['DY_MC_NLO_2022preEE'].clone(),
     }
 
 
@@ -106,8 +162,8 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2023postBPix')
-    samplesDef['tagSel'].set_cut('tag_Ele_pt > 32')
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2022preEE')
+    samplesDef['tagSel'].set_cut('tag_Ele_pt > 35')
 
 ## set MC weight, simple way (use tree weight) 
 # weightName = 'totWeight'
@@ -116,9 +172,9 @@ if not samplesDef['tagSel'] is None:
 # if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 
 ## set MC weight, can use several pileup rw for different data taking 
-mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/postBPIX/DY_madgraph_pho.pu.puTree.root'
-mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/postBPIX/DY_amcatnloext_pho.pu.puTree.root'
-weightName = 'weights_data_Run2023D.totWeight'
+mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_LO/puTree/mcRun3_130X_2022_realistic_LO_pho.pu.puTree.root'
+mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/puTree/mcRun3_130X_2022_realistic_pho.pu.puTree.root'
+weightName = 'weights_data_Run2022BCD.totWeight'
 if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
@@ -164,48 +220,112 @@ additionalCuts = None
 # tnpParNomFit = [
 #     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
 #     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
-#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 0.03]","peakP[87.0,82.0,90.0]",
 #     "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
 #     ]
 
-# 5,6,7
-tnpParNomFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
-    "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-    "acmsF[65.,55.,80.]","betaF[0.05,0.05,0.07]","gammaF[0.1, 0.03, 2]","peakF[87.0,82.0,90.0]",
-    ]
+# # 0
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 0.03]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+#     ]
+
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[0.2,0.1,5.0]","sigmaF[1.5]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,40.,80.]","betaF[0.05,0.005,0.08]","gammaF[0.01, -2, 1]","peakF[87.0,82.0,90.0]",
+#     ]
 
 # # 4
 # tnpParNomFit = [
 #     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
 #     "meanF[0.2,0.1,5.0]","sigmaF[1.5]",
 #     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-#     "acmsF[60.,40.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.01, -2, 0.1]","peakF[87.0,82.0,90.0]",
+#     "acmsF[60.,40.,80.]","betaF[0.05,0.005,0.08]","gammaF[0.01, -2, 1]","peakF[87.0,82.0,90.0]",
 #     ]
-# print("DEBUG tnpParNomFit =", tnpParNomFit)
+
+# # 5
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[0.2,0.1,5.0]","sigmaF[1.5]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,40.,80.]","betaF[0.05,0.005,0.08]","gammaF[0.01, -2, 1]","peakF[87.0,82.0,90.0]",
+#     ]
+
+# 9
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[0.2,0.1,5.0]","sigmaF[1.5]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.005,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,40.,80.]","betaF[0.05,0.005,0.08]","gammaF[0.01, -2, 0.1]","peakF[87.0,82.0,90.0]",
+#     ]
+
+# # 15
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,50.,70.]","betaF[0.05,0.05,0.07]","gammaF[0.01, -2, 2]","peakF[87.0,82.0,90.0]",
+#     ]
+
+# # # 24
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
+#     "acmsP[60.,50.,80.]","betaP[0.01,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,91.0]",
+#     "acmsF[60.,50.,70.]","betaF[0.05,0.01,0.07]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+#     ]
+
+# # 25
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
+#     "acmsP[60.,50.,80.]","betaP[0.01,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,91.0]",
+#     "acmsF[60.,50.,70.]","betaF[0.05,0.01,0.07]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+#     ]
+
+# # 26
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
+#     "acmsP[60.,50.,80.]","betaP[0.01,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,91.0]",
+#     "acmsF[60.,50.,70.]","betaF[0.05,0.01,0.07]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+#     ]
+
+# # 30
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
+#     "acmsP[60.,50.,85.]","betaP[0.05,0.01,0.08]","gammaP[-0.1, -2, 2]","peakP[87.0,82.0,92.0]",
+#     "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+#     ]
 
 tnpParAltSigFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,8.0]","alphaF[2.0,1.2,3.5]",'nF[3,0,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
-    "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
+    "meanP[-0.0,-5.0,5.0]",
+    "sigmaP[1,0.7,6.0]",
+    "alphaP[2.0,1.2,3.5]" ,
+    "nP[3,-5,5]",
+    "sigmaP_2[1.5,0.5,6.0]",
+    "sosP[1,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]",
+    "sigmaF[2,0.7,8.0]",
+    "alphaF[2.0,1.2,3.5]",
+    "nF[3,0,5]",
+    "sigmaF_2[2.0,0.5,6.0]",
+    "sosF[1,0.5,5.0]",
+    "acmsP[60.,50.,80.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
     "acmsF[60.,50.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.01, 1]","peakF[89.0,82.0,90.0]",
     ]
-     
+
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
-
-# ##06
-# tnpParAltBkgFit = [
-#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-#     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
-#     "alphaP[0.,-5.,5.]",
-#     "alphaF[-1.8,-5.,-1.8]",
-#     ]
 
 tnpParAltSigBkgFit = [
   'meanP[-0.0, -5.0, 5.0]',
@@ -216,8 +336,8 @@ tnpParAltSigBkgFit = [
   'sigmaF_2[0.5, 0.1, 3.0]',
   'sosP[0.10, 0.0, 1.0]',
   'sosF[0.12, 0.0, 1.0]',
-  'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
-  'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
+  'alphaP[2.0, 1.4, 3.5]', 'nP[1.0, 0.0, 15.0]',
+  'alphaF[2.0, 1.4, 3.5]', 'nF[1.0, 0.0, 20.0]',
   'alphaP_2[-0.012, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]

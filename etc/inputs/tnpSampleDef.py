@@ -50,12 +50,17 @@ Run3_2023postBPix = {
         }
 
 # 2024 lumi needs to be updated
-eos2024 = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2024/2024-05-27/2024'
+eos2024 = '/eos/cms/store/group/phys_egamma/ScaleFactors/Data2024/PhoID/tnp_ntuples/merged_era'
 Run3_2024 = {
-        'DY_MC_LO'       : tnpSample('DY_MC_LO', eos2024 + '/mc/DYto2L_M-50_TuneCP5_13p6TeV_pythia8/crab_2024_DY_LO/240527_143348/0000/*.root', isMC=True, nEvts = 12144692),
-        'Data_2024B'     : tnpSample('Data_2024B', eos2024 + '/data/Run2024B.root', lumi = 26.67),
-        'Data_2024C'     : tnpSample('Data_2024C', eos2024 + '/data/Run2024C.root', lumi = 26.67),
-        'Data_2024D'     : tnpSample('Data_2024D', eos2024 + '/data/Run2024D.root', lumi = 26.67),
+        'DY_MC_NLO_2024' : tnpSample('DY_MC_NLO_2024', eos2024 + '/TnPTree_mc_amcatnlo.root', isMC=True, nEvts = 203271136),
+        'DY_MC_LO_2024'  : tnpSample('DY_MC_LO_2024', eos2024 + '/TnPTree_mc_madgraph.root', isMC=True, nEvts = 202883601),
+        'Data_2024C'     : tnpSample('Data_2024C', eos2024 + '/TnPTree_data_C.root', lumi = 7.24),
+        'Data_2024D'     : tnpSample('Data_2024D', eos2024 + '/TnPTree_data_D.root', lumi = 7.96),
+        'Data_2024E'     : tnpSample('Data_2024E', eos2024 + '/TnPTree_data_E.root', lumi = 11.32),
+        'Data_2024F'     : tnpSample('Data_2024F', eos2024 + '/TnPTree_data_F.root', lumi = 27.76),
+        'Data_2024G'     : tnpSample('Data_2024G', eos2024 + '/TnPTree_data_G.root', lumi = 37.77),
+        'Data_2024H'     : tnpSample('Data_2024H', eos2024 + '/TnPTree_data_H.root', lumi = 5.44),
+        'Data_2024I'     : tnpSample('Data_2024I', eos2024 + '/TnPTree_data_I.root', lumi = 11.47),
         }
 
 

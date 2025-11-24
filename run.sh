@@ -73,11 +73,11 @@ WP=$2   # 你的 working point 名称，例如 'Tight_PhotonID'
 # ## ----------- 2 Data Fit --------------------
 # python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit 
 # ## ----------- 3 MC Fit altsig---------------
-python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSig
+# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSig
 # ## ----------- 4 MC Fit altbkg---------------
 # python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altBkg
 # ## ----------- 5 MC Fit altSigBkg--------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSigBkg
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSigBkg
 ## ----------- Get Results --------------
 python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --sumUp --exportJson
 
