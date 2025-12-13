@@ -337,10 +337,23 @@ if args.sumUp:
     #     info['tagSel'   ] = tnpConf.samplesDef['tagSel'].histFile
 
     effis = None
-    if "lowpt" in args.flag:
-        effFileName ='%s/egammaLowptEffi.txt' % outputDirectory
+    flag = args.flag
+
+    is_lowpt = "lowpt" in flag
+    is_postBPixHole = "2023postBPixHole" in flag
+
+    if is_postBPixHole and is_lowpt:
+        effFileName = f"{outputDirectory}/egammaLowptEffi_postBPixHole.txt"
+
+    elif is_postBPixHole and not is_lowpt:
+        effFileName = f"{outputDirectory}/egammaEffi_postBPixHole.txt"
+
+    elif not is_postBPixHole and is_lowpt:
+        effFileName = f"{outputDirectory}/egammaLowptEffi.txt"
+
     else:
-        effFileName ='%s/egammaEffi.txt' % outputDirectory 
+        effFileName = f"{outputDirectory}/egammaEffi.txt"
+
     fOut = open( effFileName,'w')
     
     # 用來組合 JSON 的暫存

@@ -12,6 +12,10 @@ if '_mod_path' not in globals() or not _mod_path:
 #############################################################
 # EA reference: https://indico.cern.ch/event/1204277/contributions/5064356/attachments/2538496/4369369/CutBasedPhotonID_20221031.pdf
 # flag to be Tested
+
+# BPix區域：-1.566 < ph_sc_eta < 0 且 -1.2 < ph_sc_phi < -0.8
+_exclude_region = ' !((ph_sc_eta > -1.566 && ph_sc_eta < 0) && (ph_sc_phi > -1.2 && ph_sc_phi < -0.8)) '
+
 flags = {
     # Run3 custom ID aligned to ZaTaggerRun3.select_photons
     'hza_resolve_phid_2023postBPix_sf': (
@@ -122,8 +126,6 @@ flags = {
         '       ))'
         '  )'
         ' )'
-        # electron veto
-        # ' && (ph_passElectronVeto == 1)'
     ),
 }
 
@@ -198,21 +200,22 @@ biningDef = [
 cutBase   = 'tag_Ele_pt > 35 && abs(tag_sc_eta) < 2.17'
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
-additionalCuts = { 
-   0 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   1 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   2 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   3 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   4 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   5 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   6 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   7 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   8 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   9 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-}
+# additionalCuts = { 
+#    0 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+#    1 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+#    2 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+#    3 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+#    4 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+#    5 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+#    6 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+#    7 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+#    8 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+#    9 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+# }
 
 #### or remove any additional cut (default)
-additionalCuts = None
+_nbins = (len(biningDef[0]['bins']) - 1) * (len(biningDef[1]['bins']) - 1)
+additionalCuts = {ib: _exclude_region for ib in range(_nbins)}
 
 #############################################################
 ########## fitting params to tune fit by hand if necessary

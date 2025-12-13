@@ -3,14 +3,25 @@
 # FORCE_REGEN_SUB=1 to update the homepage but the rest of link need to be updated
 # FORCE_REGEN_FIT=1 to update the homepage but the rest of link need to be updated
 
+# The last line of the homepage
+# publish_subpage.sh  (v2: default /eos/user/p/pelai/www/HZa/sfs)
+
 # Low pT
-FORCE_REGEN_SUB=1 ./publish_subpage.sh \
+./publish_subpage.sh \
   --dest resolve_ph_lowpt_2023postBPix/hza_resolve_phid_lowpt_2024 \
   --hometitle "Resolve Custom Photon ID Low pT 2024"\
   --title "Efficiency / Scale Factor Measurements — hza_resolve_phid_lowpt_2024" \
   --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_lowpt_2024_sf/plots/Data_2024C \
   --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_lowpt_2024_sf \
   --section-url "#Resolve_Custom_Photon_ID_lowpt_2024"
+
+./publish_subpage.sh \
+  --dest resolve_ph_lowpt_2023postBPixHole/hza_resolve_phid_lowpt_2023postBPixHole \
+  --hometitle "Resolve Custom Photon ID Low pT 2023postBPixHole"\
+  --title "Efficiency / Scale Factor Measurements — hza_resolve_phid_lowpt_2023postBPixHole" \
+  --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_lowpt_2023postBPixHole_sf/plots/Data_2023postBPix \
+  --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_lowpt_2023postBPixHole_sf \
+  --section-url "#Resolve_Custom_Photon_ID_lowpt_2023postBPixHole"
 
 ./publish_subpage.sh \
   --dest resolve_ph_lowpt_2023postBPix/hza_resolve_phid_lowpt_2023postBPix \
@@ -45,13 +56,21 @@ FORCE_REGEN_SUB=1 ./publish_subpage.sh \
   --section-url "#Resolve_Custom_Photon_ID_lowpt_2022preEE"
 
 # High pT
-FORCE_REGEN_FIT=1 ./publish_subpage.sh \
+./publish_subpage.sh \
   --dest resolve_ph_2023postBPix/hza_resolve_phid_2024 \
   --hometitle "Resolve Custom Photon ID 2024"\
   --title "Efficiency / Scale Factor Measurements — hza_resolve_phid_2024" \
   --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_2024_sf/plots/Data_2024C \
   --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_2024_sf \
   --section-url "#Resolve_Custom_Photon_ID_2024"
+
+./publish_subpage.sh \
+  --dest resolve_ph_2023postBPixHole/hza_resolve_phid_2023postBPixHole \
+  --hometitle "Resolve Custom Photon ID 2023postBPixHole"\
+  --title "Efficiency / Scale Factor Measurements — hza_resolve_phid_2023postBPixHole" \
+  --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_2023postBPixHole_sf/plots/Data_2023postBPix \
+  --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_2023postBPixHole_sf \
+  --section-url "#Resolve_Custom_Photon_ID_2023postBPixHole"
 
 ./publish_subpage.sh \
   --dest resolve_ph_2023postBPix/hza_resolve_phid_2023postBPix \
@@ -85,3 +104,4 @@ FORCE_REGEN_FIT=1 ./publish_subpage.sh \
   --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_2022preEE_sf \
   --section-url "#Resolve_Custom_Photon_ID_2022preEE"
 
+# The first line of the homepage

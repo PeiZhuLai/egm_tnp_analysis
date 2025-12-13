@@ -14,14 +14,16 @@ baseDir="/afs/cern.ch/work/p/pelai/HZa/TnP/CMSSW_11_2_0/src/egm_tnp_analysis"
 # sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_2022preEE hza_resolve_phid_2022preEE_sf &
 # sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_2022postEE hza_resolve_phid_2022postEE_sf &
 # sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_2023preBPix hza_resolve_phid_2023preBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_2023postBPix hza_resolve_phid_2023postBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_2024 hza_resolve_phid_2024_sf
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_2023postBPix hza_resolve_phid_2023postBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_2023postBPixHole hza_resolve_phid_2023postBPixHole_sf &
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_2024 hza_resolve_phid_2024_sf &
 
 # -------- Low pT --------
 # sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_lowpt_2022preEE hza_resolve_phid_lowpt_2022preEE_sf &
 # sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_lowpt_2022postEE hza_resolve_phid_lowpt_2022postEE_sf &
 # sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_lowpt_2023preBPix hza_resolve_phid_lowpt_2023preBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_lowpt_2023postBPix hza_resolve_phid_lowpt_2023postBPix_sf &
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_lowpt_2024 hza_resolve_phid_lowpt_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_lowpt_2023postBPix hza_resolve_phid_lowpt_2023postBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_lowpt_2023postBPixHole hza_resolve_phid_lowpt_2023postBPixHole_sf &
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_pho_lowpt_2024 hza_resolve_phid_lowpt_2024_sf &
 
 # BUILD_CPP=1 sh $baseDir/run.sh egm_tnp_analysis.etc.config.settings_resolve_pho_2022preEE hza_phid_2022preEE_sf

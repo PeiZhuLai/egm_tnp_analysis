@@ -103,13 +103,41 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     p2.SetBottomMargin( c.GetBottomMargin()*1/yUp)
     p1.SetLeftMargin( c.GetLeftMargin() )
     p2.SetLeftMargin( c.GetLeftMargin() )
+    p1.SetTicks(1, 1)
+    p2.SetTicks(1, 1)
     firstGraph = True
-    leg = rt.TLegend(0.53,0.74,0.94,0.92)
+
+    p1.cd()
+    # 根據 xAxis 與 effDataList 動態決定 legend 位置後再建構
+    def _chooseLegendCoords(effDataList, xAxis):
+        nkeys = len(effDataList)
+        if 'pT' in xAxis or 'pt' in xAxis:
+            if nkeys == 3:
+                return (0.51, 0.80, 0.94, 0.92)
+            elif nkeys == 2:
+                return (0.51, 0.84, 0.94, 0.92)
+            elif nkeys == 1:
+                return (0.51, 0.88, 0.94, 0.92)
+            else:
+                return (0.51, 0.74, 0.94, 0.92)
+        elif 'eta' in xAxis or 'Eta' in xAxis:
+            if nkeys == 1:
+                return (0.53, 0.88, 0.94, 0.92)
+            else:
+                return (0.53, 0.80, 0.94, 0.92)
+        # fallback
+        return (0.51, 0.80, 0.94, 0.92)
+
+    legx1, legy1, legx2, legy2 = _chooseLegendCoords(effDataList, xAxis)
+    leg = rt.TLegend(legx1, legy1, legx2, legy2)
+    # 偵錯輸出
+    print("Legend coords (NDC):", legx1, legy1, legx2, legy2)
+
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
     leg.SetTextSize(0.035)
 
-    # 新增：僅顯示用的 legend（Data/MC 線型說明），不把線畫到圖上
+    # 樣式 legend 也強制使用 NDC 並於 p1 內生成
     legStyle = rt.TLegend(0.35,0.84,0.73,0.92)
     legStyle.SetBorderSize(0)
     legStyle.SetFillStyle(0)
@@ -152,21 +180,46 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     effminmax =  findMinMax( effDataList )
     effiMin = effminmax[0]
     effiMax = effminmax[1]
-    # effiMin = 0.18
-    # effiMax = 1.35
-    effiMin = 0.01
-    effiMax = 0.45
+    effiMin = 0.10 
+    effiMax = 1.55
 
     sfminmax =  findMinMax( sfList )
     sfMin = sfminmax[0]
     sfMax = sfminmax[1]
-    sfMin = 0.68
-    sfMax = 1.52
+    sfMin = 0.45
+    sfMax = 1.45
+
 
     for key in sorted(effDataList.keys()):
+            
+        nData = len(effDataList.get(key, []))
+        nSF   = len(sfList.get(key, []))
+        nMC   = len(effMCList.get(key, [])) if effMCList is not None else -1
+        print("key:", key, "nData:", nData, "nSF:", nSF, "nMC:", nMC)
+
+        # 先擋掉空 bin：不要呼叫 makeTGraphFromList([])，避免 ROOT 噴 null-histogram
+        if nData == 0 or nSF == 0:
+            print(f"[WARN] Empty bin for key={key}: nData={nData}, nSF={nSF} (skip)")
+            continue
+        
         grBinsEffData = effUtil.makeTGraphFromList(effDataList[key], 'min', 'max')
         grBinsSF      = effUtil.makeTGraphFromList(sfList[key]     , 'min', 'max')
+
+        # --- 防止 BPixHole/缺 bin 時產生 0-point TGraph，GetHistogram() 會是 null ---
+        if grBinsEffData is None or grBinsEffData.GetN() == 0:
+            print(f"[WARN] Empty Data graph for key={key} (skip)")
+            continue
+        if grBinsSF is None or grBinsSF.GetN() == 0:
+            print(f"[WARN] Empty SF graph for key={key} (skip)")
+            continue
+
         grBinsEffMC = None
+        if not effMCList is None:
+            grBinsEffMC = effUtil.makeTGraphFromList(effMCList[key], 'min', 'max')
+            if grBinsEffMC is None or grBinsEffMC.GetN() == 0:
+                print(f"[WARN] Empty MC graph for key={key} (set to None)")
+                grBinsEffMC = None
+
         if not effMCList is None:
             grBinsEffMC = effUtil.makeTGraphFromList(effMCList[key], 'min', 'max')
             grBinsEffMC.SetLineStyle( rt.kDashed )
@@ -214,8 +267,12 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
             leg.AddEntry( grBinsEffData, '%3.0f #leq p_{T} #leq  %3.0f GeV' % (float(key[0]),float(key[1])), "PL")        
         elif 'vtx' in yAxis or 'Vtx' in yAxis or 'PV' in yAxis:
             leg.AddEntry( grBinsEffData, '%3.0f #leq nVtx #leq  %3.0f'      % (float(key[0]),float(key[1])), "PL")        
+    
+    # 若全部 bin 都被 skip，避免後面存取 list[0] 炸掉
+    if len(listOfTGraph1) == 0:
+        print("[ERROR] No valid graphs to draw (all bins empty).")
+        return []
 
-        
     for igr in range(len(listOfTGraph1)+1):
 
         option = "P"
@@ -285,8 +342,20 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
 
     c.Print(nameout)
     listName = nameout.split('/')
-    for iext in ["pdf","C","png"]:
-        c.SaveAs(nameout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3]).replace('pdf',iext))
+    # for iext in ["pdf","C","png"]:
+    for iext in ["pdf","png"]:
+        tmp = nameout
+        tmp = tmp.replace('egammaLowptEffi_postBPixHole.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
+        tmp = tmp.replace('egammaEffi_postBPixHole.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
+        tmp = tmp.replace('egammaLowptEffi.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
+        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
+
+        c.SaveAs(tmp.replace('pdf', iext))
+        # c.SaveAs(nameout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3]).replace('pdf',iext))
 
     return listOfTGraph2
 
@@ -297,14 +366,16 @@ def diagnosticErrorPlot( effgr, ierror, nameout ):
     errorNames = efficiency.getSystematicNames()
     c2D_Err = rt.TCanvas('canScaleFactor_%s' % errorNames[ierror] ,'canScaleFactor: %s' % errorNames[ierror],1000,600)    
     c2D_Err.Divide(2,1)
-    c2D_Err.GetPad(1).SetLogy()
-    c2D_Err.GetPad(2).SetLogy()
-    c2D_Err.GetPad(1).SetRightMargin(0.15)
-    c2D_Err.GetPad(1).SetLeftMargin( 0.15)
-    c2D_Err.GetPad(1).SetTopMargin(  0.10)
-    c2D_Err.GetPad(2).SetRightMargin(0.15)
-    c2D_Err.GetPad(2).SetLeftMargin( 0.15)
-    c2D_Err.GetPad(2).SetTopMargin(  0.10)
+    # c2D_Err.GetPad(1).SetLogy()
+    # c2D_Err.GetPad(2).SetLogy()
+    c2D_Err.GetPad(1).SetRightMargin(   0.18)
+    c2D_Err.GetPad(1).SetLeftMargin(    0.16)
+    c2D_Err.GetPad(1).SetTopMargin(     0.10)
+    c2D_Err.GetPad(1).SetBottomMargin(  0.13)
+    c2D_Err.GetPad(2).SetRightMargin(   0.16)
+    c2D_Err.GetPad(2).SetLeftMargin(    0.16)
+    c2D_Err.GetPad(2).SetTopMargin(     0.10)
+    c2D_Err.GetPad(2).SetBottomMargin(  0.13)
 
     h2_sfErrorAbs = effgr.ptEtaScaleFactor_2DHisto(ierror+1, False )
     h2_sfErrorRel = effgr.ptEtaScaleFactor_2DHisto(ierror+1, True  )
@@ -322,8 +393,20 @@ def diagnosticErrorPlot( effgr, ierror, nameout ):
     c2D_Err.Print(nameout)
 
     listName = nameout.split('/')
-    for iext in ["pdf","C","png"]:
-        c2D_Err.SaveAs(nameout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3]).replace('pdf',iext))
+    # for iext in ["pdf","C","png"]:
+    for iext in ["pdf","png"]:
+        tmp = nameout
+        tmp = tmp.replace('egammaLowptEffi_postBPixHole.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
+        tmp = tmp.replace('egammaEffi_postBPixHole.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
+        tmp = tmp.replace('egammaLowptEffi.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
+        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
+
+        c2D_Err.SaveAs(tmp.replace('pdf', iext))
+        # c2D_Err.SaveAs(nameout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3]).replace('pdf',iext))
     
     return h2_sfErrorAbs
 
@@ -362,11 +445,28 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     print(" ------------------------------- ")
 
     customEtaBining = []
-    customEtaBining.append( (0.000,0.800))
-    customEtaBining.append( (0.800,1.444))
+
+    if ("Lowpt" in filein) and ("Hole" in filein):
+        customEtaBining.append((0.000, 1.444))
+
+    elif "Lowpt" in filein:
+        customEtaBining.append((0.000, 1.444))
+        customEtaBining.append((1.566, 2.000))
+        customEtaBining.append((2.000, 2.500))
+
+    elif "Hole" in filein:
+        customEtaBining.append((0.000, 0.800))
+        customEtaBining.append((0.800, 1.444))
+
+    else:
+        customEtaBining.append((0.000, 0.800))
+        customEtaBining.append((0.800, 1.444))
+        customEtaBining.append((1.566, 2.000))
+        customEtaBining.append((2.000, 2.500))
+
 #    customEtaBining.append( (1.444,1.566)) #gap region
-    customEtaBining.append( (1.566,2.000))
-    customEtaBining.append( (2.000,2.500))
+    # customEtaBining.append( (1.566,2.000))
+    # customEtaBining.append( (2.000,2.500))
     #HZZ bins - can be deleted
     # customEtaBining.append( (0.000,0.500))
     # customEtaBining.append( (0.500,1.0))    
@@ -381,9 +481,9 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     cDummy.Print( pdfout + "[" )
 
     #---------------------------------------------------------------
-    EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, False ) , # eff Data
-                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, -1 ) ,  # eff MC
-                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, True ) , # SF
+    EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 0 ) ,  # Data
+                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, -1 ) , # MC
+                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 1 ) ,  # SF
                  pdfout,
                  xAxis = axis[0], yAxis = axis[1] )
     #---------------------------------------------------------------
@@ -392,10 +492,10 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     #              effGraph.pt_1DGraph_list(typeGR=+1),  # SF
     #              pdfout,
     #              xAxis = axis[0], yAxis = axis[1] )
-    # Original Code --------------------------------------------------------------
-    # EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, False ) , #eff Data
-    #              None, 
-    #              effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, True ) , #SF
+    # 原始註解區可保留或更新 (以下僅示意，不重複整段)
+    # EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 0 ) , # eff Data
+    #              None,
+    #              effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 1 ) , # SF
     #              pdfout,
     #              xAxis = axis[0], yAxis = axis[1] )
     #---------------------------------------------------------------
@@ -419,14 +519,16 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
 
     c2D = rt.TCanvas('canScaleFactor','canScaleFactor',900,600)
     c2D.Divide(2,1)
-    c2D.GetPad(1).SetRightMargin(0.15)
-    c2D.GetPad(1).SetLeftMargin( 0.15)
-    c2D.GetPad(1).SetTopMargin(  0.10)
-    c2D.GetPad(2).SetRightMargin(0.15)
-    c2D.GetPad(2).SetLeftMargin( 0.15)
-    c2D.GetPad(2).SetTopMargin(  0.10)
-    c2D.GetPad(1).SetLogy()
-    c2D.GetPad(2).SetLogy()
+    c2D.GetPad(1).SetRightMargin(   0.18)
+    c2D.GetPad(1).SetLeftMargin(    0.16)
+    c2D.GetPad(1).SetTopMargin(     0.10)
+    c2D.GetPad(1).SetBottomMargin(  0.13)
+    c2D.GetPad(2).SetRightMargin(   0.18)
+    c2D.GetPad(2).SetLeftMargin(    0.16)
+    c2D.GetPad(2).SetTopMargin(     0.10)
+    c2D.GetPad(2).SetBottomMargin(  0.13)
+    # c2D.GetPad(1).SetLogy()
+    # c2D.GetPad(2).SetLogy()
     
 
     c2D.cd(1)
@@ -444,8 +546,20 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
 
     c2D.Print( pdfout )
     listName = pdfout.split('/')
-    for iext in ["pdf","C","png"]:
-        c2D.SaveAs(pdfout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3]).replace('pdf',iext))
+    # for iext in ["pdf","C","png"]:
+    for iext in ["pdf","png"]:
+        tmp = pdfout
+        tmp = tmp.replace('egammaLowptEffi_postBPixHole.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
+        tmp = tmp.replace('egammaEffi_postBPixHole.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
+        tmp = tmp.replace('egammaLowptEffi.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
+        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
+
+        c2D.SaveAs(tmp.replace('pdf', iext))
+        # c2D.SaveAs(pdfout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3]).replace('pdf',iext))
 
     rootout = rt.TFile(nameOutBase + '_EGM2D.root','recreate')
     rootout.cd()

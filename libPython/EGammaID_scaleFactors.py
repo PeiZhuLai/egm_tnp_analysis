@@ -114,6 +114,10 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
         if 'pT' in xAxis or 'pt' in xAxis:
             if nkeys == 3:
                 return (0.51, 0.80, 0.94, 0.92)
+            elif nkeys == 2:
+                return (0.51, 0.84, 0.94, 0.92)
+            elif nkeys == 1:
+                return (0.51, 0.88, 0.94, 0.92)
             else:
                 return (0.51, 0.74, 0.94, 0.92)
         elif 'eta' in xAxis or 'Eta' in xAxis:
@@ -185,10 +189,37 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     sfMin = 0.45
     sfMax = 1.45
 
+
     for key in sorted(effDataList.keys()):
+            
+        nData = len(effDataList.get(key, []))
+        nSF   = len(sfList.get(key, []))
+        nMC   = len(effMCList.get(key, [])) if effMCList is not None else -1
+        print("key:", key, "nData:", nData, "nSF:", nSF, "nMC:", nMC)
+
+        # 先擋掉空 bin：不要呼叫 makeTGraphFromList([])，避免 ROOT 噴 null-histogram
+        if nData == 0 or nSF == 0:
+            print(f"[WARN] Empty bin for key={key}: nData={nData}, nSF={nSF} (skip)")
+            continue
+        
         grBinsEffData = effUtil.makeTGraphFromList(effDataList[key], 'min', 'max')
         grBinsSF      = effUtil.makeTGraphFromList(sfList[key]     , 'min', 'max')
+
+        # --- 防止 BPixHole/缺 bin 時產生 0-point TGraph，GetHistogram() 會是 null ---
+        if grBinsEffData is None or grBinsEffData.GetN() == 0:
+            print(f"[WARN] Empty Data graph for key={key} (skip)")
+            continue
+        if grBinsSF is None or grBinsSF.GetN() == 0:
+            print(f"[WARN] Empty SF graph for key={key} (skip)")
+            continue
+
         grBinsEffMC = None
+        if not effMCList is None:
+            grBinsEffMC = effUtil.makeTGraphFromList(effMCList[key], 'min', 'max')
+            if grBinsEffMC is None or grBinsEffMC.GetN() == 0:
+                print(f"[WARN] Empty MC graph for key={key} (set to None)")
+                grBinsEffMC = None
+
         if not effMCList is None:
             grBinsEffMC = effUtil.makeTGraphFromList(effMCList[key], 'min', 'max')
             grBinsEffMC.SetLineStyle( rt.kDashed )
@@ -236,15 +267,17 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
             leg.AddEntry( grBinsEffData, '%3.0f #leq p_{T} #leq  %3.0f GeV' % (float(key[0]),float(key[1])), "PL")        
         elif 'vtx' in yAxis or 'Vtx' in yAxis or 'PV' in yAxis:
             leg.AddEntry( grBinsEffData, '%3.0f #leq nVtx #leq  %3.0f'      % (float(key[0]),float(key[1])), "PL")        
+    
+    # 若全部 bin 都被 skip，避免後面存取 list[0] 炸掉
+    if len(listOfTGraph1) == 0:
+        print("[ERROR] No valid graphs to draw (all bins empty).")
+        return []
 
-        
-    for igr in range(len(listOfTGraph1)+1):
-
-        option = "P"
-        if igr == 1:
-            option = "AP"
-
+    # 修正：不要 +1，且 AP 應該給第一張
+    for igr in range(len(listOfTGraph1)):
+        option = "AP" if igr == 0 else "P"
         use_igr = igr
+        
         if use_igr == len(listOfTGraph1):
             use_igr = 0
             
@@ -310,9 +343,13 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     # for iext in ["pdf","C","png"]:
     for iext in ["pdf","png"]:
         tmp = nameout
-        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
+        tmp = tmp.replace('egammaLowptEffi_postBPixHole.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
+        tmp = tmp.replace('egammaEffi_postBPixHole.txt_egammaPlots', 
                         listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
         tmp = tmp.replace('egammaLowptEffi.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
+        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
                         listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
 
         c.SaveAs(tmp.replace('pdf', iext))
@@ -357,9 +394,13 @@ def diagnosticErrorPlot( effgr, ierror, nameout ):
     # for iext in ["pdf","C","png"]:
     for iext in ["pdf","png"]:
         tmp = nameout
-        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
+        tmp = tmp.replace('egammaLowptEffi_postBPixHole.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
+        tmp = tmp.replace('egammaEffi_postBPixHole.txt_egammaPlots', 
                         listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
         tmp = tmp.replace('egammaLowptEffi.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
+        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
                         listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
 
         c2D_Err.SaveAs(tmp.replace('pdf', iext))
@@ -399,21 +440,62 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     # effGraph.symmetrizeSystVsEta()# ----- REMOVING SYMM ETA AS DISCUSSED WITH RICCARDO
     effGraph.combineSyst()
 
+    # --- NEW: 防止某些 efficiency 物件缺少 systCombined 導致 eta_1DGraph_list 崩潰 ---
+    # 盡量不假設 efficiencyUtils 的內部結構；若找不到就用 0 兜底
+    _patched = 0
+    try:
+        _all_eff = getattr(effGraph, "efficiencies", None)
+        if _all_eff is None:
+            _all_eff = getattr(effGraph, "effList", None)
+        if _all_eff is None:
+            _all_eff = getattr(effGraph, "listOfEfficiencies", None)
+
+        if _all_eff:
+            for _eff in _all_eff:
+                if not hasattr(_eff, "systCombined"):
+                    # 常見候選來源：syst（若存在且為數值）、或直接 0
+                    _fallback = 0.0
+                    if hasattr(_eff, "syst") and isinstance(getattr(_eff, "syst"), (int, float)):
+                        _fallback = float(getattr(_eff, "syst"))
+                    setattr(_eff, "systCombined", _fallback)
+                    _patched += 1
+
+                # 有些 util 可能也會用到這些名稱，順手補齊（不覆蓋已存在）
+                if not hasattr(_eff, "systTot"):
+                    setattr(_eff, "systTot", getattr(_eff, "systCombined"))
+                if not hasattr(_eff, "systTotal"):
+                    setattr(_eff, "systTotal", getattr(_eff, "systCombined"))
+    except Exception as _e:
+        print("[WARN] Failed to patch missing systCombined fields:", _e)
+
+    if _patched > 0:
+        print(f"[WARN] Patched {_patched} efficiency object(s) missing systCombined (set to fallback).")
+
     print(" ------------------------------- ")
 
     customEtaBining = []
-    # High pT Eta bin
-    # customEtaBining.append( (0.000,0.800))
-    # customEtaBining.append( (0.800,1.444))
-    # Low pT Eta bin
-    if "Lowpt" in filein:
-        customEtaBining.append( (0.000,1.444))
+
+    if ("Lowpt" in filein) and ("Hole" in filein):
+        customEtaBining.append((0.000, 1.444))
+
+    elif "Lowpt" in filein:
+        customEtaBining.append((0.000, 1.444))
+        customEtaBining.append((1.566, 2.000))
+        customEtaBining.append((2.000, 2.500))
+
+    elif "Hole" in filein:
+        customEtaBining.append((0.000, 0.800))
+        customEtaBining.append((0.800, 1.444))
+
     else:
-        customEtaBining.append( (0.000,0.800))
-        customEtaBining.append( (0.800,1.444))
+        customEtaBining.append((0.000, 0.800))
+        customEtaBining.append((0.800, 1.444))
+        customEtaBining.append((1.566, 2.000))
+        customEtaBining.append((2.000, 2.500))
+
 #    customEtaBining.append( (1.444,1.566)) #gap region
-    customEtaBining.append( (1.566,2.000))
-    customEtaBining.append( (2.000,2.500))
+    # customEtaBining.append( (1.566,2.000))
+    # customEtaBining.append( (2.000,2.500))
     #HZZ bins - can be deleted
     # customEtaBining.append( (0.000,0.500))
     # customEtaBining.append( (0.500,1.0))    
@@ -453,7 +535,7 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
                               effGraph.eta_1DGraph_list( typeGR = -1 ) , # eff MC
                               effGraph.eta_1DGraph_list( typeGR = +1 ) , # SF
                               pdfout, 
-                              xAxis = axis[1], yAxis = axis[0] )
+                              xAxis = axis[1], yAxis = axis[0] ) or []
 
     h2EffData = effGraph.ptEtaScaleFactor_2DHisto(-3)
     h2EffMC   = effGraph.ptEtaScaleFactor_2DHisto(-2)
@@ -496,9 +578,13 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     # for iext in ["pdf","C","png"]:
     for iext in ["pdf","png"]:
         tmp = pdfout
-        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
+        tmp = tmp.replace('egammaLowptEffi_postBPixHole.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
+        tmp = tmp.replace('egammaEffi_postBPixHole.txt_egammaPlots', 
                         listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
         tmp = tmp.replace('egammaLowptEffi.txt_egammaPlots', 
+                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
+        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
                         listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
 
         c2D.SaveAs(tmp.replace('pdf', iext))

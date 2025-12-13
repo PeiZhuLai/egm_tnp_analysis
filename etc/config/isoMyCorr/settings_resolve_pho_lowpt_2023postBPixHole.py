@@ -14,11 +14,11 @@ if '_mod_path' not in globals() or not _mod_path:
 # flag to be Tested
 
 # BPix區域：-1.566 < ph_sc_eta < 0 且 -1.2 < ph_sc_phi < -0.8
-_exclude_region = ' !((ph_sc_eta > -1.566 && ph_sc_eta < 0) && (ph_sc_phi > -1.2 && ph_sc_phi < -0.8)) '
+_include_region = ' ((ph_sc_eta > -1.566 && ph_sc_eta < 0) && (ph_sc_phi > -1.2 && ph_sc_phi < -0.8)) '
 
 flags = {
     # Run3 custom ID aligned to ZaTaggerRun3.select_photons
-    'hza_resolve_phid_lowpt_2023postBPix_sf': (
+    'hza_resolve_phid_lowpt_2023postBPixHole_sf': (
         # pT + acceptance
         '(ph_et > 10) && ((abs(ph_sc_eta) < 1.4442) || (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.5))'
         ' && ('
@@ -188,7 +188,7 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFil
 ########## bining definition  [can be nD bining]
 #############################################################
 biningDef = [
-   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, 0.0, 1.4442, 1.566, 2.0, 2.5] },
+   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-1.566,-1.4442, 0.0] },
    { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20] }
 ]
 
@@ -214,7 +214,7 @@ cutBase   = 'tag_Ele_pt > 35 && abs(tag_sc_eta) < 2.17'
 
 #### or remove any additional cut (default)
 _nbins = (len(biningDef[0]['bins']) - 1) * (len(biningDef[1]['bins']) - 1)
-additionalCuts = {ib: _exclude_region for ib in range(_nbins)}
+additionalCuts = {ib: _include_region for ib in range(_nbins)}
 
 #############################################################
 ########## fitting params to tune fit by hand if necessary

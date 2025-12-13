@@ -44,9 +44,9 @@ Run3_2023preBPix = {
         'Data_2023preBPix'      : tnpSample('Data_2023preBPix', eos2023 + '/data_2023C.root', lumi = 17.79),
         }
 Run3_2023postBPix = {
-        'DY_MC_NLO_2023postBPix': tnpSample('DY_MC_NLO_2023postBPix', eos2023 + '/DY_NLO_2023postBPIX.root', isMC=True, nEvts = 27397320),
-        'DY_MC_LO_2023postBPix' : tnpSample('DY_MC_LO_2023postBPix', eos2023 + '/DY_LO_2023postBPIX.root', isMC=True, nEvts = 12144692),
-        'Data_2023postBPix'     : tnpSample('Data_2023postBPix', eos2023 + '/data_2023D.root', lumi = 9.45),
+        'DY_MC_NLO_2023postBPix': tnpSample('DY_MC_NLO_2023postBPix', eos2023 + '/photonIDpostBPIXntuples/DY_NLO_2023postBPIX.root', isMC=True, nEvts = 13142450),
+        'DY_MC_LO_2023postBPix' : tnpSample('DY_MC_LO_2023postBPix', eos2023 + '/photonIDpostBPIXntuples/DY_LO_2023postBPIX.root', isMC=True, nEvts = 9750346),
+        'Data_2023postBPix'     : tnpSample('Data_2023postBPix', eos2023 + '/photonIDpostBPIXntuples/data_2023D.root', lumi = 9.45),
         }
 
 # 2024 lumi needs to be updated

@@ -122,8 +122,6 @@ flags = {
         '       ))'
         '  )'
         ' )'
-        # electron veto
-        # ' && (ph_passElectronVeto == 1)'
     ),
 }
 
