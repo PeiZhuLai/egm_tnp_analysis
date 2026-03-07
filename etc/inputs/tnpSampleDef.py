@@ -49,7 +49,7 @@ Run3_2023postBPix = {
         'Data_2023postBPix'     : tnpSample('Data_2023postBPix', eos2023 + '/photonIDpostBPIXntuples/data_2023D.root', lumi = 9.45),
         }
 
-# 2024 lumi needs to be updated
+
 eos2024 = '/eos/cms/store/group/phys_egamma/ScaleFactors/Data2024/PhoID/tnp_ntuples/merged_era'
 Run3_2024 = {
         'DY_MC_NLO_2024' : tnpSample('DY_MC_NLO_2024', eos2024 + '/TnPTree_mc_amcatnlo.root', isMC=True, nEvts = 203271136),
@@ -63,6 +63,32 @@ Run3_2024 = {
         'Data_2024I'     : tnpSample('Data_2024I', eos2024 + '/TnPTree_data_I.root', lumi = 11.47),
         }
 
+# eos2024ele = '/eos/cms/store/group/phys_egamma/ScaleFactors/Data2024/PhoID/tnp_ntuples/merged_era'
+# Run3_2024_ele = {
+#         'DY_MC_NLO_2024' : tnpSample('DY_MC_NLO_2024', eos2024ele + '/TnPTree_mc_amcatnlo.root', isMC=True, nEvts = 203271136),
+#         'DY_MC_LO_2024'  : tnpSample('DY_MC_LO_2024', eos2024ele + '/TnPTree_mc_madgraph.root', isMC=True, nEvts = 202883601),
+#         'Data_2024C'     : tnpSample('Data_2024C', eos2024ele + '/TnPTree_data_C.root', lumi = 7.24),
+#         'Data_2024D'     : tnpSample('Data_2024D', eos2024ele + '/TnPTree_data_D.root', lumi = 7.96),
+#         'Data_2024E'     : tnpSample('Data_2024E', eos2024ele + '/TnPTree_data_E.root', lumi = 11.32),
+#         'Data_2024F'     : tnpSample('Data_2024F', eos2024ele + '/TnPTree_data_F.root', lumi = 27.76),
+#         'Data_2024G'     : tnpSample('Data_2024G', eos2024ele + '/TnPTree_data_G.root', lumi = 37.77),
+#         'Data_2024H'     : tnpSample('Data_2024H', eos2024ele + '/TnPTree_data_H.root', lumi = 5.44),
+#         'Data_2024I'     : tnpSample('Data_2024I', eos2024ele + '/TnPTree_data_I.root', lumi = 11.47),
+#         }
+
+# Test
+eos2024ele = '/eos/cms/store/group/phys_egamma/ScaleFactors/Data2024/PhoID/tnp_ntuples/merged_era'
+Run3_2024_ele = {
+        'DY_MC_NLO_2024' : tnpSample('DY_MC_NLO_2024', '/eos/home-p/pelai/HZa/root_make_TnP_ntuple/260307/2024/mc/DY_LO_2024/output_0.root', isMC=True, nEvts = 203271136),
+        'DY_MC_LO_2024'  : tnpSample('DY_MC_LO_2024', '/eos/home-p/pelai/HZa/root_make_TnP_ntuple/260307/2024/mc/DY_NLO_2024/output_0.root', isMC=True, nEvts = 202883601),
+        'Data_2024C'     : tnpSample('Data_2024C', '/eos/home-p/pelai/HZa/root_make_TnP_ntuple/260307/2024/data/EGamma0_Run2024C/output_0.root', lumi = 7.24),
+        'Data_2024D'     : tnpSample('Data_2024D', eos2024ele + '/TnPTree_data_D.root', lumi = 7.96),
+        'Data_2024E'     : tnpSample('Data_2024E', eos2024ele + '/TnPTree_data_E.root', lumi = 11.32),
+        'Data_2024F'     : tnpSample('Data_2024F', eos2024ele + '/TnPTree_data_F.root', lumi = 27.76),
+        'Data_2024G'     : tnpSample('Data_2024G', eos2024ele + '/TnPTree_data_G.root', lumi = 37.77),
+        'Data_2024H'     : tnpSample('Data_2024H', eos2024ele + '/TnPTree_data_H.root', lumi = 5.44),
+        'Data_2024I'     : tnpSample('Data_2024I', eos2024ele + '/TnPTree_data_I.root', lumi = 11.47),
+        }
 
 
 ReReco2017 = {

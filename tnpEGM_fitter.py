@@ -13,6 +13,7 @@ parser.add_argument('--checkBins'  , action='store_true'  , help = 'check  binin
 parser.add_argument('--createBins' , action='store_true'  , help = 'create bining definition')
 parser.add_argument('--createHists', action='store_true'  , help = 'create histograms')
 parser.add_argument('--sample'     , default='all'        , help = 'create histograms (per sample, expert only)')
+parser.add_argument('--fitSample'  , default=None         , help = 'choose which sample to run fits on', choices=['data', 'mcNom', 'mcAlt', 'tagSel'])
 parser.add_argument('--altSig'     , action='store_true'  , help = 'alternate signal model fit')
 parser.add_argument('--addGaus'    , action='store_true'  , help = 'add gaussian to alternate signal model failing probe')
 parser.add_argument('--altBkg'     , action='store_true'  , help = 'alternate background model fit')
@@ -236,11 +237,12 @@ if args.createHists:
 ##### Actual Fitter
 ####################################################################
 sampleToFit = tnpConf.samplesDef['data']
-if sampleToFit is None:
-    print('[tnpEGM_fitter, prelim checks]: sample (data or MC) not available... check your settings')
-    sys.exit(1)
+sampleMC = tnpConf.samplesDef.get('mcNom', None)
 
-sampleMC = tnpConf.samplesDef['mcNom']
+if args.fitSample is not None:
+    sampleMC = tnpConf.samplesDef[args.fitSample]
+elif args.mcSig:
+    sampleMC = tnpConf.samplesDef['mcNom']
 
 if sampleMC is None:
     print('[tnpEGM_fitter, prelim checks]: MC sample not available... check your settings')
