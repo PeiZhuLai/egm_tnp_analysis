@@ -64,26 +64,24 @@ SETTINGS_MOD=$1
 WP=$2   # 你的 working point 名称，例如 'Tight_PhotonID'
 
 # ## 5) 运行 —— 模块方式最稳，不受当前工作目录影响
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --checkBins
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createBins
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createHists --sample mcNom
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createHists --sample mcAlt
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createHists --sample data
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --checkBins
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createBins
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createHists --sample mcNom
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createHists --sample mcAlt
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createHists --sample data
 # ----------- Fitting Procedure --------------
-# # ----------- 1 MC Nominal Fit -----------------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --fitSample mcNom
-# # ----------- 2 MC Fit altMC -----------------------
-python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --fitSample mcAlt
-# # ----------- 3 Data Fit -----------------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --fitSample data
-# # ----------- 4 MC Fit altsig -----------------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSig
-# # # ----------- 5 MC Fit altbkg -----------------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altBkg
-# # # ----------- 6 MC Fit altSigBkg -----------------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSigBkg
-# # # ----------- Get Results -----------------------
-# python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --sumUp --exportJson
+# ----------- 1 MC Nominal Fit -----------------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --fitSample mcNom
+# ----------- 2 Data Fit -----------------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --fitSample data
+# ----------- 3 MC Fit altsig -----------------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSig
+# # ----------- 4 MC Fit altbkg -----------------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altBkg
+# # ----------- 5 MC Fit altSigBkg -----------------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSigBkg
+# # ----------- Get Results -----------------------
+python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --sumUp --exportJson
 
 
 

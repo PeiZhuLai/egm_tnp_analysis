@@ -79,8 +79,8 @@ Run3_2024 = {
 # Test
 eos2024ele = '/eos/cms/store/group/phys_egamma/ScaleFactors/Data2024/PhoID/tnp_ntuples/merged_era'
 Run3_2024_ele = {
-        'DY_MC_NLO_2024' : tnpSample('DY_MC_NLO_2024', '/eos/home-p/pelai/HZa/root_make_TnP_ntuple/260307/2024/mc/DY_LO_2024/output_0.root', isMC=True, nEvts = 203271136),
-        'DY_MC_LO_2024'  : tnpSample('DY_MC_LO_2024', '/eos/home-p/pelai/HZa/root_make_TnP_ntuple/260307/2024/mc/DY_NLO_2024/output_0.root', isMC=True, nEvts = 202883601),
+        'DY_MC_NLO_2024' : tnpSample('DY_MC_NLO_2024', '/eos/home-p/pelai/HZa/root_make_TnP_ntuple/260307/2024/mc/DY_NLO_2024/output_0.root', isMC=True, nEvts = 203271136),
+        'DY_MC_LO_2024'  : tnpSample('DY_MC_LO_2024', '/eos/home-p/pelai/HZa/root_make_TnP_ntuple/260307/2024/mc/DY_LO_2024/output_0.root', isMC=True, nEvts = 202883601),
         'Data_2024C'     : tnpSample('Data_2024C', '/eos/home-p/pelai/HZa/root_make_TnP_ntuple/260307/2024/data/EGamma0_Run2024C/output_0.root', lumi = 7.24),
         'Data_2024D'     : tnpSample('Data_2024D', eos2024ele + '/TnPTree_data_D.root', lumi = 7.96),
         'Data_2024E'     : tnpSample('Data_2024E', eos2024ele + '/TnPTree_data_E.root', lumi = 11.32),

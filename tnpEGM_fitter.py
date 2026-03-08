@@ -240,9 +240,16 @@ sampleToFit = tnpConf.samplesDef['data']
 sampleMC = tnpConf.samplesDef.get('mcNom', None)
 
 if args.fitSample is not None:
-    sampleMC = tnpConf.samplesDef[args.fitSample]
+    # --fitSample should choose the actual sample being fitted
+    sampleToFit = tnpConf.samplesDef[args.fitSample]
+    # data fits still need an MC reference for line-shape templates
+    if args.fitSample == 'data':
+        sampleMC = tnpConf.samplesDef.get('mcNom', None)
+    else:
+        sampleMC = sampleToFit
 elif args.mcSig:
-    sampleMC = tnpConf.samplesDef['mcNom']
+    sampleToFit = tnpConf.samplesDef['mcNom']
+    sampleMC = sampleToFit
 
 if sampleMC is None:
     print('[tnpEGM_fitter, prelim checks]: MC sample not available... check your settings')
@@ -255,12 +262,6 @@ for s in tnpConf.samplesDef.keys():
     setattr( sample, 'altSigFit' , '%s/%s_%s.altSigFit.root'  % ( outputDirectory , sample.name, args.flag ) )
     setattr( sample, 'altBkgFit' , '%s/%s_%s.altBkgFit.root'  % ( outputDirectory , sample.name, args.flag ) )
     setattr( sample, 'altSigBkgFit' , '%s/%s_%s.altSigBkgFit.root'  % ( outputDirectory , sample.name, args.flag ) )
-
-
-
-### change the sample to fit is mc fit
-if args.mcSig :
-    sampleToFit = tnpConf.samplesDef['mcNom']
 
 if  args.doFit:
     print(" ======== Fitting ========")
