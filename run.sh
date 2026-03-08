@@ -4,30 +4,25 @@ set -euo pipefail
 echo "PWD: $PWD"
 echo "Setting environment..."
 
-# 0) 记住当前工作目录
 workdir="$(pwd)"
 
-# 1) 确保在 SLC7 容器内（你已用 cmssw-el7 进入，这里略）并加载 CMSSW 环境
 if [[ -z "${CMSSW_BASE:-}" ]]; then
   echo "ERROR: CMSSW_BASE is empty. Did you run 'cmsenv' (inside cmssw-el7)?"
   exit 1
 fi
 
-# 2) 进入 CMSSW src 顶层并加载 runtime
 cmssw_src="$CMSSW_BASE/src"
 if [[ ! -d "$cmssw_src" ]]; then
   echo "ERROR: $cmssw_src does not exist."
   exit 1
 fi
 
-# 加载 runtime（等价于 cmsenv）
 pushd "$cmssw_src" >/dev/null
-eval "$(scram runtime -sh)"   # 或者：cmsenv
+eval "$(scram runtime -sh)"
 popd >/dev/null
 
-# 3) Python 路徑：把 CMSSW_BASE/src 追加進來
+
 export PYTHONPATH="$cmssw_src:${PYTHONPATH:-}"
-# 統一 UTF-8 環境，避免 bytes/str 行為不一致
 export PYTHONIOENCODING="${PYTHONIOENCODING:-UTF-8}"
 export LANG="${LANG:-C.UTF-8}"
 export LC_ALL="${LC_ALL:-C.UTF-8}"
@@ -52,18 +47,13 @@ else
   echo "[build] 略過 C++ 擴充建置（可設環境變數 BUILD_CPP=1 啟用）。"
 fi
 
-# 4) 包根目录 & 设置文件/模块
+
 baseDir="$cmssw_src/egm_tnp_analysis"
 
-# 选一种方式：
-#   A) 用模块路径（推荐）
 SETTINGS_MOD=$1
-#   B) 或者用 .py 绝对路径（取消下一行注释以改用文件路径）
-# SETTINGS_PY="$baseDir/etc/config/settings_resolve_pho_2022preEE.py"
+WP=$2   
 
-WP=$2   # 你的 working point 名称，例如 'Tight_PhotonID'
 
-# ## 5) 运行 —— 模块方式最稳，不受当前工作目录影响
 python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --checkBins
 python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createBins
 python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --createHists --sample mcNom
