@@ -59,7 +59,7 @@ import etc.inputs.tnpSampleDef as tnpSamples
 tnpTreeDir = 'tnpEleIDs'
 
 samplesDef = {
-        'data'  : tnpSamples.Run3_2024_ele['Data_2024C'].clone(),
+        'data'  : tnpSamples.Run3_2024_ele['Data_2024'].clone(),
         'mcNom' : tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
         'tagSel': tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
         'mcAlt': tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),

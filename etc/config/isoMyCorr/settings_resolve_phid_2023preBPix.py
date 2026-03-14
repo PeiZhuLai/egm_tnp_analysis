@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+# 初始化 _mod_path 並更新 sys.path，供 tnpEGM_fitter 與 etc.* 匯入使用
 import os, sys
+# 以 globals() 安全檢查，避免在 Py2 觸發 NameError
 if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
@@ -9,37 +11,118 @@ if '_mod_path' not in globals() or not _mod_path:
 ########## General settings
 #############################################################
 # EA reference: https://indico.cern.ch/event/1204277/contributions/5064356/attachments/2538496/4369369/CutBasedPhotonID_20221031.pdf
-
-# baseline selection shared by all branches (keep trailing && for concatenation)
-baseline_cut = (
-    '(el_pt > 7) &&'
-    '(abs(el_sc_eta) < 2.5) &&'
-    '(abs(el_dz) < 1.0) &&'
-    '(abs(el_dxy) < 0.5) &&'
-)
-
-# probe preselection (moved from old flags)
-probe_preselection_cut = (
-    '(('
-    + baseline_cut +
-    '(el_sc_et > 10) && ('
-    '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527)'
-    ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
-    ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
-    ' )'
-    ') || ('
-    + baseline_cut +
-    '(el_sc_et < 10) && ('
-    '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267)'
-    ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
-    ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
-    ' )'
-    '))'
-)
-
 # flag to be Tested
 flags = {
-    'htoza_dielleg12trigger_gap_2024_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1)',
+    # Run3 custom ID aligned to ZaTaggerRun3.select_photons
+    'hza_resolve_phid_2023preBPix_sf': (
+        # pT + acceptance
+        '(ph_et > 10) && ((abs(ph_sc_eta) < 1.4442) || (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.5))'
+        ' && ('
+        # ================= EB block =================
+        # ================= H/E =================
+        '  (abs(ph_sc_eta) < 1.4442'
+        '   && (('
+        '         (abs(ph_sc_eta) > 0.0 && abs(ph_sc_eta) < 1.0)'
+        '         && (ph_hoe - event_rho*0.00198598 - (event_rho*event_rho)*(-0.0000115014)'
+        '             < 0.0417588)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 1.0 && abs(ph_sc_eta) < 1.4442)'
+        '         && (ph_hoe - event_rho*0.208571 - (event_rho*event_rho)*(-0.0000115014)'
+        '             < 0.0417588)'
+        '       ))'
+        # ================= Ch ISO =================
+        '   && (('
+        '         (abs(ph_sc_eta) > 0.0 && abs(ph_sc_eta) < 1.0)'
+        '         && (ph_chIso - event_rho*0.0342898 - (event_rho*event_rho)*(-0.000103508)'
+        '             < 0.316306)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 1.0 && abs(ph_sc_eta) < 1.4442)'
+        '         && (ph_chIso - event_rho*0.0281424 - (event_rho*event_rho)*(-0.000031494)'
+        '             < 0.316306)'
+        '       ))'
+        # ================= H ISO =================
+        '   && (('
+        '         (abs(ph_sc_eta) > 0.0 && abs(ph_sc_eta) < 1.0)'
+        '         && (ph_neuIso - event_rho*0.17005 - (event_rho*event_rho)*(-0.000835)'
+        '             < (0.39057 + 0.0100547*ph_et + 0.0000578332*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 1.0 && abs(ph_sc_eta) < 1.4442)'
+        '         && (ph_neuIso - event_rho*0.208571 - (event_rho*event_rho)*(-0.000905)'
+        '             < (0.39057 + 0.0100547*ph_et + 0.0000578332*ph_et*ph_et))'
+        '       ))'
+        '  )'
+        '  ||'
+        # ================= EE block =================
+        # ================= H/E =================
+        '  (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.5'
+        '   && (('
+        '         (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.0)'
+        '         && (ph_hoe - event_rho*0.00302416 - (event_rho*event_rho)*(-0.0000151973)'
+        '             < 0.00254267)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.0 && abs(ph_sc_eta) < 2.2)'
+        '         && (ph_hoe - event_rho*0.306529 - (event_rho*event_rho)*(-0.0000149651)'
+        '             < 0.00254267)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.2 && abs(ph_sc_eta) < 2.3)'
+        '         && (ph_hoe - event_rho*0.322673 - (event_rho*event_rho)*(-0.0000147232)'
+        '             < 0.00254267)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.3 && abs(ph_sc_eta) < 2.4)'
+        '         && (ph_hoe - event_rho*0.315793 - (event_rho*event_rho)*(-0.0000213958)'
+        '             < 0.00254267)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.4 && abs(ph_sc_eta) < 2.5)'
+        '         && (ph_hoe - event_rho*0.36531 - (event_rho*event_rho)*(-0.0000280795)'
+        '             < 0.00254267)'
+        '       ))'
+        # ================= Ch ISO =================
+        '   && (('
+        '         (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.0)'
+        '         && (ph_chIso - event_rho*0.0288533 - (event_rho*event_rho)*(-0.0000666148)'
+        '             < 0.292664)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.0 && abs(ph_sc_eta) < 2.2)'
+        '         && (ph_chIso - event_rho*0.028789 - (event_rho*event_rho)*(-0.0000684993)'
+        '             < 0.292664)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.2 && abs(ph_sc_eta) < 2.3)'
+        '         && (ph_chIso - event_rho*0.0264064 - (event_rho*event_rho)*(-0.0000889189)'
+        '             < 0.292664)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.3 && abs(ph_sc_eta) < 2.4)'
+        '         && (ph_chIso - event_rho*0.025587 - (event_rho*event_rho)*(-0.0000590178)'
+        '             < 0.292664)'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.4 && abs(ph_sc_eta) < 2.5)'
+        '         && (ph_chIso - event_rho*0.0224817 - (event_rho*event_rho)*(-0.0000422712)'
+        '             < 0.292664)'
+        '       ))'
+        # ================= H ISO =================
+        '   && (('
+        '         (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.0)'
+        '         && (ph_neuIso - event_rho*0.246494 - (event_rho*event_rho)*(-0.000722)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.0 && abs(ph_sc_eta) < 2.2)'
+        '         && (ph_neuIso - event_rho*0.306529 - (event_rho*event_rho)*(-0.000608)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.2 && abs(ph_sc_eta) < 2.3)'
+        '         && (ph_neuIso - event_rho*0.322673 - (event_rho*event_rho)*(-0.000750)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.3 && abs(ph_sc_eta) < 2.4)'
+        '         && (ph_neuIso - event_rho*0.315793 - (event_rho*event_rho)*(-0.000795)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ) || ('
+        '         (abs(ph_sc_eta) > 2.4 && abs(ph_sc_eta) < 2.5)'
+        '         && (ph_neuIso - event_rho*0.36531 - (event_rho*event_rho)*(-0.000439)'
+        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
+        '       ))'
+        '  )'
+        ' )'
+    ),
 }
 
 # /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
@@ -51,21 +134,14 @@ baseOutDir = '/eos/home-p/pelai/HZa/root_TnP/'
 ### samples are defined in etc/inputs/tnpSampleDef.py
 ### not: you can setup another sampleDef File in inputs
 import etc.inputs.tnpSampleDef as tnpSamples
-tnpTreeDir = 'tnpEleTrig'
+tnpTreeDir = 'tnpPhoIDs'
 
 samplesDef = {
-        'data'  : tnpSamples.Run3_2024_ele['Data_2024'].clone(),
-        'mcNom' : tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
-        'tagSel': tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
-        'mcAlt': tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
+        'data'  : tnpSamples.Run3_2023preBPix['Data_2023preBPix'].clone(),
+        'mcNom' : tnpSamples.Run3_2023preBPix['DY_MC_LO_2023preBPix'].clone(),
+        'tagSel': tnpSamples.Run3_2023preBPix['DY_MC_LO_2023preBPix'].clone(),
+        'mcAlt': tnpSamples.Run3_2023preBPix['DY_MC_NLO_2023preBPix'].clone(),
     }
-## can add data sample easily
-# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024D'] )
-# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024E'] )
-# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024F'] )
-# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024G'] )
-# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024H'] )
-# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024I'] )
 
 
 ## can add data sample easily
@@ -84,8 +160,8 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2024')
-    samplesDef['tagSel'].set_cut('tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0')
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2023preBPix')
+    samplesDef['tagSel'].set_cut('tag_Ele_pt > 32 && abs(tag_sc_eta) < 2.17')
 
 ## set MC weight, simple way (use tree weight) 
 # weightName = 'totWeight'
@@ -108,15 +184,16 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFil
 ########## bining definition  [can be nD bining]
 #############################################################
 biningDef = [
-   { 'var' : 'el_sc_eta' , 'type': 'float', 'bins': [-1.566,-1.4442, 0.0, 1.4442, 1.566] },
-   { 'var' : 'el_et' , 'type': 'float', 'bins': [7,12,35,500] },
+   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.0, 2.5] },
+   { 'var' : 'ph_et' , 'type': 'float', 'bins': [20,35,50,80] },
+#    { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,35,50,80] },
 ]
 
 #############################################################
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && ' + probe_preselection_cut
+cutBase   = 'tag_Ele_pt > 35 && abs(tag_sc_eta) < 2.17'
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 

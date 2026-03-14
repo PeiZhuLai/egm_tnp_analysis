@@ -21,29 +21,21 @@ baseline_cut = (
 
 # probe preselection (moved from old flags)
 probe_preselection_cut = (
-        '('
-        '('
-        + baseline_cut +
-        # ele Et > 10 region
-        '(el_sc_et > 10) && ('
-        '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527)'
-        ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
-        ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
-        ' )'
-        ')'
-        ')'
-        ' || '
-        '('
-        + baseline_cut +
-        # ele Et < 10 region
-        '(el_sc_et < 10) && ('
-        '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267)'
-        ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
-        ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
-        ' )'
-        ')'
-        ')'
-        ')'
+    '(('
+    + baseline_cut +
+    '(el_sc_et > 10) && ('
+    '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527)'
+    ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
+    ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
+    ' )'
+    ') || ('
+    + baseline_cut +
+    '(el_sc_et < 10) && ('
+    '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267)'
+    ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
+    ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
+    ' )'
+    '))'
 )
 
 # flag to be Tested
@@ -60,10 +52,10 @@ baseOutDir = '/eos/home-p/pelai/HZa/root_TnP/'
 ### samples are defined in etc/inputs/tnpSampleDef.py
 ### not: you can setup another sampleDef File in inputs
 import etc.inputs.tnpSampleDef as tnpSamples
-tnpTreeDir = 'tnpEleIDs'
+tnpTreeDir = 'tnpEleTrig'
 
 samplesDef = {
-        'data'  : tnpSamples.Run3_2024_ele['Data_2024C'].clone(),
+        'data'  : tnpSamples.Run3_2024_ele['Data_2024'].clone(),
         'mcNom' : tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
         'tagSel': tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
         'mcAlt': tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
