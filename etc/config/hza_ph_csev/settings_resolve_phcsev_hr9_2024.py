@@ -15,115 +15,8 @@ if '_mod_path' not in globals() or not _mod_path:
 flags = {
     # Run3 custom ID aligned to ZaTaggerRun3.select_photons
     'hza_resolve_phid_2024_sf': (
-        # pT + acceptance
-        '(ph_et > 10) && ((abs(ph_sc_eta) < 1.4442) || (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.5))'
-        ' && ('
-        # ================= EB block =================
-        # ================= H/E =================
-        '  (abs(ph_sc_eta) < 1.4442'
-        '   && (('
-        '         (abs(ph_sc_eta) > 0.0 && abs(ph_sc_eta) < 1.0)'
-        '         && (ph_hoe - event_rho*0.00198598 - (event_rho*event_rho)*(-0.0000115014)'
-        '             < 0.0417588)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 1.0 && abs(ph_sc_eta) < 1.4442)'
-        '         && (ph_hoe - event_rho*0.208571 - (event_rho*event_rho)*(-0.0000115014)'
-        '             < 0.0417588)'
-        '       ))'
-        # ================= Ch ISO =================
-        '   && (('
-        '         (abs(ph_sc_eta) > 0.0 && abs(ph_sc_eta) < 1.0)'
-        '         && (ph_chIso - event_rho*0.0342898 - (event_rho*event_rho)*(-0.000103508)'
-        '             < 0.316306)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 1.0 && abs(ph_sc_eta) < 1.4442)'
-        '         && (ph_chIso - event_rho*0.0281424 - (event_rho*event_rho)*(-0.000031494)'
-        '             < 0.316306)'
-        '       ))'
-        # ================= H ISO =================
-        '   && (('
-        '         (abs(ph_sc_eta) > 0.0 && abs(ph_sc_eta) < 1.0)'
-        '         && (ph_neuIso - event_rho*0.17005 - (event_rho*event_rho)*(-0.000835)'
-        '             < (0.39057 + 0.0100547*ph_et + 0.0000578332*ph_et*ph_et))'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 1.0 && abs(ph_sc_eta) < 1.4442)'
-        '         && (ph_neuIso - event_rho*0.208571 - (event_rho*event_rho)*(-0.000905)'
-        '             < (0.39057 + 0.0100547*ph_et + 0.0000578332*ph_et*ph_et))'
-        '       ))'
-        '  )'
-        '  ||'
-        # ================= EE block =================
-        # ================= H/E =================
-        '  (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.5'
-        '   && (('
-        '         (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.0)'
-        '         && (ph_hoe - event_rho*0.00302416 - (event_rho*event_rho)*(-0.0000151973)'
-        '             < 0.00254267)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.0 && abs(ph_sc_eta) < 2.2)'
-        '         && (ph_hoe - event_rho*0.306529 - (event_rho*event_rho)*(-0.0000149651)'
-        '             < 0.00254267)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.2 && abs(ph_sc_eta) < 2.3)'
-        '         && (ph_hoe - event_rho*0.322673 - (event_rho*event_rho)*(-0.0000147232)'
-        '             < 0.00254267)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.3 && abs(ph_sc_eta) < 2.4)'
-        '         && (ph_hoe - event_rho*0.315793 - (event_rho*event_rho)*(-0.0000213958)'
-        '             < 0.00254267)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.4 && abs(ph_sc_eta) < 2.5)'
-        '         && (ph_hoe - event_rho*0.36531 - (event_rho*event_rho)*(-0.0000280795)'
-        '             < 0.00254267)'
-        '       ))'
-        # ================= Ch ISO =================
-        '   && (('
-        '         (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.0)'
-        '         && (ph_chIso - event_rho*0.0288533 - (event_rho*event_rho)*(-0.0000666148)'
-        '             < 0.292664)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.0 && abs(ph_sc_eta) < 2.2)'
-        '         && (ph_chIso - event_rho*0.028789 - (event_rho*event_rho)*(-0.0000684993)'
-        '             < 0.292664)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.2 && abs(ph_sc_eta) < 2.3)'
-        '         && (ph_chIso - event_rho*0.0264064 - (event_rho*event_rho)*(-0.0000889189)'
-        '             < 0.292664)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.3 && abs(ph_sc_eta) < 2.4)'
-        '         && (ph_chIso - event_rho*0.025587 - (event_rho*event_rho)*(-0.0000590178)'
-        '             < 0.292664)'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.4 && abs(ph_sc_eta) < 2.5)'
-        '         && (ph_chIso - event_rho*0.0224817 - (event_rho*event_rho)*(-0.0000422712)'
-        '             < 0.292664)'
-        '       ))'
-        # ================= H ISO =================
-        '   && (('
-        '         (abs(ph_sc_eta) > 1.566 && abs(ph_sc_eta) < 2.0)'
-        '         && (ph_neuIso - event_rho*0.246494 - (event_rho*event_rho)*(-0.000722)'
-        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.0 && abs(ph_sc_eta) < 2.2)'
-        '         && (ph_neuIso - event_rho*0.306529 - (event_rho*event_rho)*(-0.000608)'
-        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.2 && abs(ph_sc_eta) < 2.3)'
-        '         && (ph_neuIso - event_rho*0.322673 - (event_rho*event_rho)*(-0.000750)'
-        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.3 && abs(ph_sc_eta) < 2.4)'
-        '         && (ph_neuIso - event_rho*0.315793 - (event_rho*event_rho)*(-0.000795)'
-        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
-        '       ) || ('
-        '         (abs(ph_sc_eta) > 2.4 && abs(ph_sc_eta) < 2.5)'
-        '         && (ph_neuIso - event_rho*0.36531 - (event_rho*event_rho)*(-0.000439)'
-        '             < (0.0292617 + 0.0116989*ph_et + 0.0000747603*ph_et*ph_et))'
-        '       ))'
-        '  )'
-        ' )'
         # electron veto
-        # ' && (ph_passElectronVeto == 1)'
+        ' (ph_passElectronVeto > 0.5)'
     ),
 }
 
@@ -193,16 +86,15 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFil
 ########## bining definition  [can be nD bining]
 #############################################################
 biningDef = [
-   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-1.4442, -0.8, 0.0, 0.8, 1.4442, 1.566, 2.0, 2.5] },
-   { 'var' : 'ph_et' , 'type': 'float', 'bins': [20,35,50,80] },
-#    { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,35,50,80] },
+   { 'var' : 'PV' , 'type': 'float', 'bins': [10,15,20,25,30,35,40,50,100] },
+   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,15,20,25,35,50,70,200] },
 ]
 
 #############################################################
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 35 && abs(tag_sc_eta) < 2.17'
+cutBase   = 'ph_r9 > 0.96'
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 
