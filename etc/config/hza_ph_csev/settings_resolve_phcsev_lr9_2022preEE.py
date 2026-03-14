@@ -14,7 +14,7 @@ if '_mod_path' not in globals() or not _mod_path:
 # flag to be Tested
 flags = {
     # Run3 custom ID aligned to ZaTaggerRun3.select_photons
-    'hza_resolve_phid_lowpt_2022preEE_sf': (
+    'hza_resolve_phcsev_lr9_2022preEE_sf': (
         # electron veto
         ' (ph_passElectronVeto > 0.5)'
     ),

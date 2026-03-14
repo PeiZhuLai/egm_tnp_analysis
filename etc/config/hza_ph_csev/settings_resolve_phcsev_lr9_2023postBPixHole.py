@@ -18,7 +18,7 @@ _include_region = ' ((ph_sc_eta > -1.566 && ph_sc_eta < 0) && (ph_sc_phi > -1.2 
 
 flags = {
     # Run3 custom ID aligned to ZaTaggerRun3.select_photons
-    'hza_resolve_phid_lowpt_2023postBPixHole_sf': (
+    'hza_resolve_phcsev_lr9_2023postBPixHole_sf': (
         # electron veto
         ' (ph_passElectronVeto > 0.5)'
     ),
