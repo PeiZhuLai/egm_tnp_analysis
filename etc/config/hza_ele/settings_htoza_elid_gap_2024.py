@@ -22,26 +22,21 @@ baseline_cut = (
 flags = {
     'hza_elid_gap_2024_sf': (
         '('
-        '('
         + baseline_cut +
+        '('
         # ele Et > 10 region
-        '(el_sc_et > 10) && ('
+        '((el_sc_et > 10) && ('
         '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527)'
         ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
         ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
-        ' )'
-        ')'
-        ')'
+        ' ))'
         ' || '
-        '('
-        + baseline_cut +
         # ele Et < 10 region
-        '(el_sc_et < 10) && ('
+        '((el_sc_et < 10) && ('
         '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267)'
         ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
         ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
-        ' )'
-        ')'
+        ' ))'
         ')'
         ')'
     ),
