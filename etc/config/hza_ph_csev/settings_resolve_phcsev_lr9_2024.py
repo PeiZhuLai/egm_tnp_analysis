@@ -86,7 +86,7 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFil
 ########## bining definition  [can be nD bining]
 #############################################################
 biningDef = [
-   { 'var' : 'PV' , 'type': 'float', 'bins': [10,15,20,25,30,35,40,50,100] },
+   { 'var' : 'event_nPV' , 'type': 'float', 'bins': [10,15,20,25,30,35,40,50,100] },
    { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,15,20,25,35,50,70,200] },
 ]
 
