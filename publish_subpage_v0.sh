@@ -12,6 +12,11 @@ set -euo pipefail
 #   - 將 summary/ 內圖片與 PDF 生成圖牆
 #   - 設定公開權限
 #
+# 環境變數：
+#   FORCE_REGEN_SUB=1   強制重建子頁 index.html
+#   FORCE_REGEN_HOME=1  強制重建首頁 index.html
+#   FORCE_REGEN_FIT=1   強制重建 fits/index.html
+#
 # ------------------------------------------------------------
 # 必填參數：
 #   --dest <EOS放圖的相對路徑>    例如: resolve_ph_2022preEE/hza_resolve_phid_2022preEE
@@ -80,8 +85,15 @@ mkdir -p "$FITSD" "$SUMMD"
 # 同步來源（如果提供）
 if [[ -n "${SRC_FITS}" && -d "${SRC_FITS}" ]]; then
   echo ">>> 同步 fits/ 來源（僅 PNG）：${SRC_FITS}"
-  rsync -avL --include='*/' --include='*.png' --exclude='*' "${SRC_FITS%/}/" "${FITSD}/"
+  rsync -avL \
+  --include='*/' \
+  --exclude='**1p44To1p57**' \
+  --exclude='**m1p57Tom1p44**' \
+  --include='*.png' \
+  --exclude='*' \
+  "${SRC_FITS%/}/" "${FITSD}/"
 fi
+
 if [[ -n "${SRC_SUMMARY}" && -d "${SRC_SUMMARY}" ]]; then
   echo ">>> 同步 summary/ 來源（僅 PNG）：${SRC_SUMMARY}"
   rsync -avL --delete \
@@ -93,6 +105,8 @@ fi
 
 INDEX="${DEST_DIR}/index.html"
 FORCE_REGEN_SUB="${FORCE_REGEN_SUB:-0}"
+FORCE_REGEN_HOME="${FORCE_REGEN_HOME:-0}"
+FORCE_REGEN_FIT="${FORCE_REGEN_FIT:-0}"  # 新增：控制是否強制重建 fits/index.html
 if [[ ! -f "$INDEX" || "$FORCE_REGEN_SUB" == "1" ]]; then
   echo ">>> 生成 Sub-page index.html"
   cat > "$INDEX" <<HTML
@@ -100,7 +114,7 @@ if [[ ! -f "$INDEX" || "$FORCE_REGEN_SUB" == "1" ]]; then
 <html lang="en" id="top">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${TITLE}</title>
+<title>Summary Plots</title>
 <style>
   :root{--mx:22px}
   html,body{margin:0;padding:0}
@@ -130,22 +144,22 @@ if [[ ! -f "$INDEX" || "$FORCE_REGEN_SUB" == "1" ]]; then
 
   .toplink{position:fixed;right:16px;bottom:16px;background:#0b5bd3;color:#fff;padding:8px 12px;border-radius:999px;text-decoration:none}
   .caption{color:#555;font-size:.92rem;margin-top:8px}
-  nav.breadcrumb{margin:8px 0 0;font-size:.92rem}
+  nav.breadcrumb{margin:8px 0 0;font-size:1.3rem}
 </style>
 
 <header>
   <h1>${TITLE}</h1>
   <nav class="breadcrumb">
-    <a href="${HOME_URL}">← Back to home</a>
+    <a href="${HOME_URL}">← Back to Home</a>
   </nav>
 </header>
 
 <main>
   <p class="muted">This page was auto-generated. Last updated: <span id="ts"></span></p>
 
-  <h2>All fit plots can be found <a href="fits/" target="_blank">here</a>.</h2>
+  <h2>All fit plots can be found <a href="fits/">here</a>.</h2>
 
-  <h2>Summary plots</h2>
+  <h2>Summary Plots</h2>
 
   <div class="grid">
     <!-- AUTO SUMMARY -->
@@ -153,7 +167,7 @@ if [[ ! -f "$INDEX" || "$FORCE_REGEN_SUB" == "1" ]]; then
 
 </main>
 
-<a class="toplink" href="#top">Back to top</a>
+<a class="toplink" href="#top">Back to Top</a>
 
 <script>
   document.getElementById('ts').textContent = new Date().toLocaleString();
@@ -177,9 +191,9 @@ find "summary" -type f \( -iname '*.png' -o -iname '*.pdf' \) \
     n=$0; ext=tolower(n);
     gsub(/^\.\//,"",n);
     if (ext ~ /\.pdf$/) {
-      printf("<a class=\"card\" href=\"%s\" target=\"_blank\"><div class=\"pdf\">📄 %s</div><div class=\"name\">%s</div></a>\n", n, n, n);
+      printf("<a class=\"card\" href=\"%s\"><div class=\"pdf\">📄 %s</div><div class=\"name\">%s</div></a>\n", n, n, n);
     } else {
-      printf("<a class=\"card\" href=\"%s\" target=\"_blank\"><img loading=\"lazy\" src=\"%s\" alt=\"%s\"><div class=\"name\">%s</div></a>\n", n, n, n, n);
+      printf("<a class=\"card\" href=\"%s\"><img loading=\"lazy\" src=\"%s\" alt=\"%s\"><div class=\"name\">%s</div></a>\n", n, n, n, n);
     }
   }' > "$TMP_CARDS"
 
@@ -199,30 +213,38 @@ PY
 HOME_INDEX="${WEB_ROOT%/}/index.html"
 NEW_ITEM="<li><a href=\"./${DEST_REL%/}/\">${ITEM_TITLE}</a></li>"
 
-FORCE_REGEN_HOME="${FORCE_REGEN_HOME:-0}"
 if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
   echo ">>> 建立首頁 ${HOME_INDEX}"
   cat > "$HOME_INDEX" <<HTML
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<title>/HZa/sf</title>
+<title>HZa SF</title>
 <style>
+  ul.auto-list li a {
+    font-size: 1.5rem;     /* 可以改成 18px 或更大 */
+    font-weight: 500;      /* 稍微加粗，可選 */
+  }
   .center { text-align: center; }
   .center ul { display: inline-block; text-align: left; }
+  li {
+    margin-bottom: 16px;  /* 控制項目間距，單位可改為 px/em/rem */
+  }
 </style>
 <div class="center">
-  <h2>Welcome to H -> Za -> ll gamma gamma Efficiency / Scale Factors Measurement</h2>
-  <p>
+  <h2>Welcome to H -> Za -> ll gamma gamma efficiency and scale factors measurement.</h2>
+  <h2>
     This page contains links to the scale factor measurement fits and results for the Run 3 2022+2023+2024 Higgs to Za analysis.<br>
+  </h2>
+  <h2>
     Presentations will be given to the MUO POG
     <a href="https://indico.cern.ch/event/XXXXXXX" target="_blank">here</a>
     and to the EGM POG
     <a href="https://indico.cern.ch/event/YYYYYYY" target="_blank">here</a>.
     (Left the space for the future)<br>
-    See below links for plots.
-  </p>
-  <ul>
+  </h2>
+  <h2>See below links for plots.</h2>
+  <ul class="auto-list">
     <!-- AUTO LIST -->
   </ul>
 </div>
@@ -238,6 +260,11 @@ if not home.exists():
     print(f">>> 首頁檔案不存在：{home}")
     sys.exit(1)
 html = home.read_text()
+
+# 新增：若舊版首頁缺少 auto-list class，自動補上
+if 'class="auto-list"' not in html:
+    html = re.sub(r"<ul(\s*)>", r"<ul class=\"auto-list\">", html, count=1)
+
 if re.search(re.escape(item), html):
     print(">>> 首頁已包含此條目，略過新增")
     sys.exit(0)
@@ -249,7 +276,7 @@ else:
         pos = m.start()
         html = html[:pos] + f"  {item}\n" + html[pos:]
     else:
-        html += f"\n<ul>\n  {item}\n</ul>\n"
+        html += f"\n<ul class=\"auto-list\">\n  {item}\n</ul>\n"
 home.write_text(html)
 print(">>> 首頁已更新")
 PY
@@ -260,6 +287,11 @@ rm -f "$TMP_CARDS"
 build_fits_index() {
   local dir="$1"
   local out="${dir}/index.html"
+  # 新增：若檔案存在且未強制重建則略過
+  if [[ -f "$out" && "$FORCE_REGEN_FIT" != "1" ]]; then
+    echo ">>> fits/index.html 已存在（跳過，設 FORCE_REGEN_FIT=1 可強制重建）"
+    return 0
+  fi
   if [[ ! -d "$dir" ]]; then
     echo "⚠️ fits 目錄不存在：$dir"
     return 1
@@ -292,7 +324,7 @@ for raw in pngs:
     if not raw.strip(): continue
     name = raw.strip().lstrip('./')
     esc = html.escape(name)
-    lines.append(f'<a class="card" href="./{esc}" target="_blank">'
+    lines.append(f'<a class="card" href="./{esc}">'
                  f'<img loading="lazy" src="./{esc}" alt="{esc}">'
                  f'<div class="name">{esc}</div></a>')
 cards_path.write_text("\n".join(lines))
@@ -304,7 +336,7 @@ PY
 <!doctype html>
 <html lang="en" id="top">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fit plots (PNG only)</title>
+<title>Fit plots</title>
 <style>
   :root{--mx:22px} html,body{margin:0;padding:0}
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#222;background:#fff}
@@ -312,29 +344,32 @@ PY
   header h1{margin:0;font-size:1.1rem}
   main{max-width:1400px;margin:0 auto;padding:18px var(--mx) 34px}
   a{color:#0b5bd3;text-decoration:none} a:hover{text-decoration:underline}
-  nav.breadcrumb{font-size:.85rem;margin:0 0 12px}
+  nav.breadcrumb{font-size:1.1rem;margin:0 0 12px}
   
   /* 卡片網格：每個卡片最小寬度從 260px → 340px */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(500px,1fr));gap:20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(1000px,1fr));gap:10px}
 
   /* 卡片外觀：圓角更大、邊距更寬 */
-  .card{border:1px solid #e0e0e0;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.06);min-height:400px;}
+  .card{border:1px solid #e0e0e0;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.06);min-height:800px;line-height:0;margin:0;}
 
   /* 圖片區塊高度加大 */
-  .card img{width:100%;height:380px;object-fit:contain;background:#fafafa}
+  .card img{width:103%;height:780px;object-fit:contain;object-position:center;background:#fafafa;margin:0;padding:0;}
 
   /* 檔名文字加大 */
-  .name{font-size:1.05rem;padding:12px 14px;border-top:1px solid #eee;word-break:break-all}
+  .name{font-size:1.05rem;padding:5px 6px;border-top:1px solid #eee;word-break:break-all;}
 
   /* PDF 卡片的中央文字也放大並配合圖片高度 */
   .pdf{display:flex;align-items:center;justify-content:center;height:320px;background:#fafafa;font-size:1.1rem}
 
-  .name{font-size:.85rem;padding:10px 12px;border-top:1px solid #eee;word-break:break-all}
+  .toplink{position:fixed;right:16px;bottom:16px;background:#0b5bd3;color:#fff;padding:8px 12px;border-radius:999px;text-decoration:none}
+  .caption{color:#555;font-size:.92rem;margin-top:8px}
+  nav.breadcrumb{margin:8px 0 0;font-size:1.3rem}
+
 </style>
 <header>
-  <h1>Fit plots</h1>
+  <h1>Fit Plots</h1>
   <nav class="breadcrumb">
-    <a href="../">← Back to previous page</a>
+    <a href="../">← Back to Previous Page</a>
   </nav>
 </header>
 <main>
@@ -342,7 +377,7 @@ PY
 $(cat "$tmp_cards")
   </div>
 </main>
-<a class="toplink" href="#top">Back to top</a>
+<a class="toplink" href="#top">Back to Top</a>
 </html>
 HTML
 

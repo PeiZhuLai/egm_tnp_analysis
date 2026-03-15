@@ -24,10 +24,16 @@ set -euo pipefail
 #
 # 可選參數：
 #   --src-fits <所有fit plots來源目錄>     例如: /eos/home-p/pelai/HZa/root_TnP/muon_2023/hzg_muid_2023/fits
+#   --src-fits-prefixed <prefix:path>     例如: Nominal:/eos/.../Nominal/NUM_xxx （可重複）
 #   --src-summary <Summary plots來源目錄> 例如: /eos/home-p/pelai/HZa/root_TnP/muon_2023/hzg_muid_2023/summary
 #   --web-root <根路徑>         預設: /eos/user/p/pelai/www/HZa/sfs
 #   --home-url <首頁URL>        預設: /HZa/sfs/
 #   --section-url <錨點>        例如: "#Resolved_Custom_Photon_ID_2022preEE"
+#   --summary-include <glob>    指定 summary 要同步的檔名樣式（可重複）
+#   --summary-exclude <glob>    指定 summary 要排除的檔名樣式（可重複）
+#   --summary-order <glob>      指定 summary 頁顯示順序（可重複；先比對先顯示）
+#   --copy-pdf                  同步來源中的 PDF 到網頁目錄
+#   --hide-pdf-in-html          HTML 只顯示 PNG（即使目錄中有 PDF）
 #
 # 範例：
 # ./publish_subpage.sh \
@@ -45,7 +51,14 @@ DEST_REL=""
 ITEM_TITLE=""
 TITLE=""
 SRC_FITS=""
+SRC_FITS_PREFIXED=()
 SRC_SUMMARY=""
+SUMMARY_INCLUDE_PATTERNS=()
+SUMMARY_EXCLUDE_PATTERNS=()
+SUMMARY_ORDER_PATTERNS=()
+DID_FITS_SYNC=0
+COPY_PDF=0
+HIDE_PDF_IN_HTML=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -56,7 +69,13 @@ while [[ $# -gt 0 ]]; do
     --hometitle)    ITEM_TITLE="$2"; shift 2;;
     --title)        TITLE="$2"; shift 2;;
     --src-fits)     SRC_FITS="$2"; shift 2;;
+    --src-fits-prefixed) SRC_FITS_PREFIXED+=("$2"); shift 2;;
     --src-summary)  SRC_SUMMARY="$2"; shift 2;;
+    --summary-include) SUMMARY_INCLUDE_PATTERNS+=("$2"); shift 2;;
+    --summary-exclude) SUMMARY_EXCLUDE_PATTERNS+=("$2"); shift 2;;
+    --summary-order) SUMMARY_ORDER_PATTERNS+=("$2"); shift 2;;
+    --copy-pdf)      COPY_PDF=1; shift;;
+    --hide-pdf-in-html) HIDE_PDF_IN_HTML=1; shift;;
     -h|--help)
       sed -n '1,80p' "$0"; exit 0;;
     *)
@@ -83,24 +102,90 @@ echo ">>> 目的地：${DEST_DIR}"
 mkdir -p "$FITSD" "$SUMMD"
 
 # 同步來源（如果提供）
-if [[ -n "${SRC_FITS}" && -d "${SRC_FITS}" ]]; then
+if [[ "${#SRC_FITS_PREFIXED[@]}" -gt 0 ]]; then
+  DID_FITS_SYNC=1
+  echo ">>> 同步 fits/ 來源（檔名前綴模式）"
+  # 前綴模式下先清理舊的 PNG，避免與舊版（未加前綴）檔名混用
+  find "${FITSD}" -type f -iname '*.png' -delete
+  for spec in "${SRC_FITS_PREFIXED[@]:-}"; do
+    prefix="${spec%%:*}"
+    src="${spec#*:}"
+    if [[ -z "${prefix}" || -z "${src}" || "${src}" == "${spec}" ]]; then
+      echo "⚠️ 跳過無效 --src-fits-prefixed 參數：${spec}"
+      continue
+    fi
+    if [[ ! -d "${src}" ]]; then
+      echo "⚠️ fits 來源不存在（跳過 ${prefix}）：${src}"
+      continue
+    fi
+    echo ">>> 同步 fits 來源 [${prefix}]：${src}"
+    while IFS= read -r -d '' f; do
+      rel="${f#${src%/}/}"
+      case "${rel}" in
+        *1p44To1p57*|*m1p57Tom1p44*) continue ;;
+      esac
+      rel_dir="$(dirname "${rel}")"
+      base="$(basename "${rel}")"
+      out_dir="${FITSD}/${rel_dir}"
+      mkdir -p "${out_dir}"
+      cp -f "${f}" "${out_dir}/${prefix}_${base}"
+    done < <(
+      if [[ "$COPY_PDF" == "1" ]]; then
+        find "${src}" -type f \( -iname '*.png' -o -iname '*.pdf' \) -print0
+      else
+        find "${src}" -type f -iname '*.png' -print0
+      fi
+    )
+  done
+elif [[ -n "${SRC_FITS}" && -d "${SRC_FITS}" ]]; then
+  DID_FITS_SYNC=1
   echo ">>> 同步 fits/ 來源（僅 PNG）：${SRC_FITS}"
-  rsync -avL \
-  --include='*/' \
-  --exclude='**1p44To1p57**' \
-  --exclude='**m1p57Tom1p44**' \
-  --include='*.png' \
-  --exclude='*' \
-  "${SRC_FITS%/}/" "${FITSD}/"
+  fits_rsync_args=(
+    -avL
+    "--include=*/"
+    "--exclude=**1p44To1p57**"
+    "--exclude=**m1p57Tom1p44**"
+    "--include=*.png"
+  )
+  if [[ "$COPY_PDF" == "1" ]]; then
+    fits_rsync_args+=("--include=*.pdf")
+  fi
+  fits_rsync_args+=("--exclude=*")
+  rsync "${fits_rsync_args[@]}" "${SRC_FITS%/}/" "${FITSD}/"
 fi
 
 if [[ -n "${SRC_SUMMARY}" && -d "${SRC_SUMMARY}" ]]; then
   echo ">>> 同步 summary/ 來源（僅 PNG）：${SRC_SUMMARY}"
-  rsync -avL --delete \
-    --include='*/' \
-    --include=**/HZa_{SF2D_hza,SFvseta,SFvspT}_*.png \
-    --exclude='*' \
-    "${SRC_SUMMARY%/}/" "${SUMMD}/"
+  summary_rsync_args=(
+    -avL
+    --delete
+    "--include=*/"
+  )
+  if [[ "${#SUMMARY_INCLUDE_PATTERNS[@]}" -gt 0 ]]; then
+    for pat in "${SUMMARY_INCLUDE_PATTERNS[@]:-}"; do
+      summary_rsync_args+=("--include=${pat}")
+    done
+  else
+    # 預設維持原有 electron/photon 行為
+    summary_rsync_args+=(
+      "--include=**/HZa_SF2D_hza_*.png"
+      "--include=**/HZa_SFvseta_*.png"
+      "--include=**/HZa_SFvspT_*.png"
+    )
+  fi
+  for pat in "${SUMMARY_EXCLUDE_PATTERNS[@]:-}"; do
+    summary_rsync_args+=("--exclude=${pat}")
+  done
+  summary_rsync_args+=("--exclude=*")
+  rsync "${summary_rsync_args[@]}" "${SRC_SUMMARY%/}/" "${SUMMD}/"
+  if [[ "$COPY_PDF" == "1" ]]; then
+    echo ">>> 額外同步 summary PDF：${SRC_SUMMARY}"
+    rsync -avL --delete \
+      --include='*/' \
+      --include='*.pdf' \
+      --exclude='*' \
+      "${SRC_SUMMARY%/}/" "${SUMMD}/"
+  fi
 fi
 
 INDEX="${DEST_DIR}/index.html"
@@ -184,18 +269,59 @@ TMP_CARDS="$(mktemp)"
 # 先切到目的目錄，下面的相對路徑才會對
 cd "$DEST_DIR"
 
-find "summary" -type f \( -iname '*.png' -o -iname '*.pdf' \) \
-| LC_ALL=C sort \
-| awk '
-  {
-    n=$0; ext=tolower(n);
-    gsub(/^\.\//,"",n);
-    if (ext ~ /\.pdf$/) {
-      printf("<a class=\"card\" href=\"%s\"><div class=\"pdf\">📄 %s</div><div class=\"name\">%s</div></a>\n", n, n, n);
-    } else {
-      printf("<a class=\"card\" href=\"%s\"><img loading=\"lazy\" src=\"%s\" alt=\"%s\"><div class=\"name\">%s</div></a>\n", n, n, n, n);
-    }
-  }' > "$TMP_CARDS"
+python3 - "$TMP_CARDS" "$HIDE_PDF_IN_HTML" "${SUMMARY_ORDER_PATTERNS[@]:-}" <<'PY'
+import fnmatch
+import html
+import pathlib
+import sys
+
+cards_path = pathlib.Path(sys.argv[1])
+hide_pdf_in_html = sys.argv[2] == "1"
+order_patterns = [p for p in sys.argv[3:] if p]
+summary_dir = pathlib.Path("summary")
+if not summary_dir.exists():
+    cards_path.write_text("")
+    raise SystemExit(0)
+
+suffixes = {".png"} if hide_pdf_in_html else {".png", ".pdf"}
+files = sorted(
+    str(p).replace("\\", "/")
+    for p in summary_dir.rglob("*")
+    if p.is_file() and p.suffix.lower() in suffixes
+)
+
+ordered = []
+remaining = files.copy()
+
+for pattern in order_patterns:
+    candidate_patterns = [pattern]
+    if "/" not in pattern:
+        candidate_patterns.append(f"summary/{pattern}")
+    matched = []
+    for fpath in remaining:
+        if any(fnmatch.fnmatch(fpath, pat) for pat in candidate_patterns):
+            matched.append(fpath)
+    for m in matched:
+        ordered.append(m)
+        remaining.remove(m)
+
+files = ordered + remaining
+lines = []
+for name in files:
+    esc = html.escape(name)
+    if name.lower().endswith(".pdf"):
+        lines.append(
+            f'<a class="card" href="{esc}"><div class="pdf">📄 {esc}</div>'
+            f'<div class="name">{esc}</div></a>'
+        )
+    else:
+        lines.append(
+            f'<a class="card" href="{esc}"><img loading="lazy" src="{esc}" alt="{esc}">'
+            f'<div class="name">{esc}</div></a>'
+        )
+
+cards_path.write_text("\n".join(lines))
+PY
 
 # 插入卡片至佔位符
 python3 - "$INDEX" "$TMP_CARDS" <<'PY'
@@ -288,7 +414,7 @@ build_fits_index() {
   local dir="$1"
   local out="${dir}/index.html"
   # 新增：若檔案存在且未強制重建則略過
-  if [[ -f "$out" && "$FORCE_REGEN_FIT" != "1" ]]; then
+  if [[ -f "$out" && "$FORCE_REGEN_FIT" != "1" && "$DID_FITS_SYNC" != "1" ]]; then
     echo ">>> fits/index.html 已存在（跳過，設 FORCE_REGEN_FIT=1 可強制重建）"
     return 0
   fi
@@ -302,8 +428,8 @@ build_fits_index() {
   (
     cd "$dir"
     # 只抓 PNG；若無檔案，後續補一個空白提示
-    mapfile -t pngs < <(find . -type f -iname '*.png' | LC_ALL=C sort)
-    if [[ "${#pngs[@]}" -eq 0 ]]; then
+    # 用 -print -quit 避免在 pipefail 下因 grep -q 提前結束而被誤判為失敗。
+    if ! find . -type f -iname '*.png' -print -quit | LC_ALL=C grep -q .; then
       cat > "$tmp_cards" <<'EMPTY'
 <div class="card">
   <div class="pdf" style="height:240px;font-size:1rem">No PNG files found.</div>
@@ -314,15 +440,16 @@ EMPTY
       python3 - "$tmp_cards" <<'PY'
 import sys, html, pathlib
 cards_path = pathlib.Path(sys.argv[1])
+root = pathlib.Path(".")
+pngs = sorted(
+    str(p.relative_to(root)).replace("\\", "/")
+    for p in root.rglob("*")
+    if p.is_file() and p.suffix.lower() == ".png"
+)
 lines=[]
-for p in sys.stdin:
-    pass  # (使用 mapfile 方式，此段不讀)
-# 重新列舉，保持排序
-import subprocess
-pngs = subprocess.check_output(["bash","-lc","find . -type f -iname '*.png' | LC_ALL=C sort"]).decode().strip().splitlines()
 for raw in pngs:
     if not raw.strip(): continue
-    name = raw.strip().lstrip('./')
+    name = raw.strip()
     esc = html.escape(name)
     lines.append(f'<a class="card" href="./{esc}">'
                  f'<img loading="lazy" src="./{esc}" alt="{esc}">'
@@ -395,5 +522,8 @@ rm -f "$TMP_CARDS"
 # 重新建立 fits/index.html
 build_fits_index "$FITSD"
 
-echo "🌐 網址：https://pelai.web.cern.ch/HZa/sfs/${DEST_REL}/"
-echo "🏠 首頁：https://pelai.web.cern.ch/HZa/sfs/"
+HOME_PATH="/${HOME_URL#/}"
+HOME_PATH="${HOME_PATH%/}/"
+DEST_PATH="${DEST_REL%/}/"
+echo "🌐 網址：https://pelai.web.cern.ch${HOME_PATH}${DEST_PATH}"
+echo "🏠 首頁：https://pelai.web.cern.ch${HOME_PATH}"
