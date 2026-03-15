@@ -247,7 +247,8 @@ if [[ ! -f "$INDEX" || "$FORCE_REGEN_SUB" == "1" ]]; then
   <h2>Summary Plots</h2>
 
   <div class="grid">
-    <!-- AUTO SUMMARY -->
+    <!-- AUTO SUMMARY START -->
+    <!-- AUTO SUMMARY END -->
   </div>
 
 </main>
@@ -330,7 +331,29 @@ index_path = pathlib.Path(sys.argv[1])
 cards_path = pathlib.Path(sys.argv[2])
 html = index_path.read_text()
 cards = cards_path.read_text()
-html = re.sub(r"<!-- AUTO SUMMARY -->", cards, html, count=1)
+replacement = "<!-- AUTO SUMMARY START -->\n" + cards
+if cards:
+    replacement += "\n"
+replacement += "    <!-- AUTO SUMMARY END -->"
+
+if "<!-- AUTO SUMMARY START -->" in html and "<!-- AUTO SUMMARY END -->" in html:
+    html = re.sub(
+        r"<!-- AUTO SUMMARY START -->.*?<!-- AUTO SUMMARY END -->",
+        replacement,
+        html,
+        count=1,
+        flags=re.S,
+    )
+elif "<!-- AUTO SUMMARY -->" in html:
+    html = re.sub(r"<!-- AUTO SUMMARY -->", replacement, html, count=1)
+else:
+    html = re.sub(
+        r"(<div class=\"grid\">\s*).*?(\s*</div>\s*</main>)",
+        r"\1" + replacement + r"\2",
+        html,
+        count=1,
+        flags=re.S,
+    )
 index_path.write_text(html)
 print("index.html updated.")
 PY
@@ -338,6 +361,38 @@ PY
 # ---- 更新首頁 (WEB_ROOT/index.html) ----
 HOME_INDEX="${WEB_ROOT%/}/index.html"
 NEW_ITEM="<li><a href=\"./${DEST_REL%/}/\">${ITEM_TITLE}</a></li>"
+HOME_ITEMS_TMP="$(mktemp)"
+
+if [[ -f "$HOME_INDEX" && "$FORCE_REGEN_HOME" == "1" ]]; then
+  python3 - "$HOME_INDEX" "$HOME_ITEMS_TMP" <<'PY'
+import pathlib
+import re
+import sys
+
+home = pathlib.Path(sys.argv[1])
+out = pathlib.Path(sys.argv[2])
+html = home.read_text()
+
+match = re.search(
+    r'<ul[^>]*class="[^"]*\bauto-list\b[^"]*"[^>]*>(.*?)</ul>',
+    html,
+    flags=re.S | re.I,
+)
+if not match:
+    match = re.search(r"<ul[^>]*>(.*?)</ul>", html, flags=re.S | re.I)
+
+items = []
+seen = set()
+if match:
+    for item in re.findall(r"<li\b.*?</li>", match.group(1), flags=re.S | re.I):
+        cleaned = item.strip()
+        if cleaned and cleaned not in seen:
+            seen.add(cleaned)
+            items.append(cleaned)
+
+out.write_text("\n".join(items))
+PY
+fi
 
 if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
   echo ">>> 建立首頁 ${HOME_INDEX}"
@@ -371,7 +426,9 @@ if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
   </h2>
   <h2>See below links for plots.</h2>
   <ul class="auto-list">
-    <!-- AUTO LIST -->
+    <!-- AUTO LIST START -->
+$(sed 's/^/    /' "$HOME_ITEMS_TMP")
+    <!-- AUTO LIST END -->
   </ul>
 </div>
 </html>
@@ -394,19 +451,32 @@ if 'class="auto-list"' not in html:
 if re.search(re.escape(item), html):
     print(">>> 首頁已包含此條目，略過新增")
     sys.exit(0)
-if "<!-- AUTO LIST -->" in html:
+
+if "<!-- AUTO LIST START -->" in html and "<!-- AUTO LIST END -->" in html:
+    html = re.sub(
+        r"(<!-- AUTO LIST START -->)(.*?)(<!-- AUTO LIST END -->)",
+        lambda m: f"{m.group(1)}{m.group(2)}\n    {item}\n    {m.group(3)}",
+        html,
+        count=1,
+        flags=re.S,
+    )
+elif "<!-- AUTO LIST -->" in html:
     html = html.replace("<!-- AUTO LIST -->", f"<!-- AUTO LIST -->\n  {item}", 1)
 else:
-    m = re.search(r"</ul>", html, flags=re.IGNORECASE)
+    m = re.search(
+        r'(<ul[^>]*class="[^"]*\bauto-list\b[^"]*"[^>]*>)(.*?)(</ul>)',
+        html,
+        flags=re.IGNORECASE | re.S,
+    )
     if m:
-        pos = m.start()
-        html = html[:pos] + f"  {item}\n" + html[pos:]
+        html = html[: m.start(3)] + f"    {item}\n" + html[m.start(3) :]
     else:
         html += f"\n<ul class=\"auto-list\">\n  {item}\n</ul>\n"
 home.write_text(html)
 print(">>> 首頁已更新")
 PY
 
+rm -f "$HOME_ITEMS_TMP"
 rm -f "$TMP_CARDS"
 
 # 建立 fits 目錄 index.html 的函式（僅 PNG）
