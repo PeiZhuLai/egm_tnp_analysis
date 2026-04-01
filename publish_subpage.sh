@@ -152,6 +152,8 @@ elif [[ -n "${SRC_FITS}" && -d "${SRC_FITS}" ]]; then
   fi
   fits_rsync_args+=("--exclude=*")
   rsync "${fits_rsync_args[@]}" "${SRC_FITS%/}/" "${FITSD}/"
+elif [[ -n "${SRC_FITS}" ]]; then
+  echo "⚠️ fits 來源不存在：${SRC_FITS}"
 fi
 
 if [[ -n "${SRC_SUMMARY}" && -d "${SRC_SUMMARY}" ]]; then
@@ -185,6 +187,26 @@ if [[ -n "${SRC_SUMMARY}" && -d "${SRC_SUMMARY}" ]]; then
       --include='*.pdf' \
       --exclude='*' \
       "${SRC_SUMMARY%/}/" "${SUMMD}/"
+  fi
+elif [[ -n "${SRC_SUMMARY}" ]]; then
+  echo "⚠️ summary 來源不存在：${SRC_SUMMARY}"
+fi
+
+if [[ -n "${SRC_FITS}" ]]; then
+  fit_file_count="$(
+    find "${FITSD}" -type f \( -iname '*.png' -o -iname '*.pdf' \) | wc -l | tr -d ' '
+  )"
+  if [[ "${fit_file_count}" == "0" ]]; then
+    echo "⚠️ fits/ 目前沒有任何已同步檔案：${FITSD}"
+  fi
+fi
+
+if [[ -n "${SRC_SUMMARY}" ]]; then
+  summary_file_count="$(
+    find "${SUMMD}" -type f \( -iname '*.png' -o -iname '*.pdf' \) | wc -l | tr -d ' '
+  )"
+  if [[ "${summary_file_count}" == "0" ]]; then
+    echo "⚠️ summary/ 目前沒有任何符合條件的檔案：${SUMMD}"
   fi
 fi
 
