@@ -21,7 +21,7 @@ flags = {
 }
 
 # /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
-baseOutDir = '/eos/home-p/pelai/HZa/root_TnP/'
+baseOutDir = '/eos/home-p/pelai/HZa/root_TnP'
 
 #############################################################
 ########## samples definition  - preparing the samples

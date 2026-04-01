@@ -13,30 +13,30 @@ baseDir="/afs/cern.ch/work/p/pelai/HZa/TnP/CMSSW_11_2_0/src/egm_tnp_analysis"
 # Photon CSEV SFs
 ### -------- High R9 --------
 sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2022preEE hza_resolve_phcsev_hr9_2022preEE_sf
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2022postEE hza_resolve_phcsev_hr9_2022postEE_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2023preBPix hza_resolve_phcsev_hr9_2023preBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2023postBPix hza_resolve_phcsev_hr9_2023postBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2023postBPixHole hza_resolve_phcsev_hr9_2023postBPixHole_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2024 hza_resolve_phcsev_hr9_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2022postEE hza_resolve_phcsev_hr9_2022postEE_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2023preBPix hza_resolve_phcsev_hr9_2023preBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2023postBPix hza_resolve_phcsev_hr9_2023postBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2023postBPixHole hza_resolve_phcsev_hr9_2023postBPixHole_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2024 hza_resolve_phcsev_hr9_2024_sf &
 
-### -------- Low R9 --------
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2022preEE hza_resolve_phcsev_lr9_2022preEE_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2022postEE hza_resolve_phcsev_lr9_2022postEE_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2023preBPix hza_resolve_phcsev_lr9_2023preBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2023postBPix hza_resolve_phcsev_lr9_2023postBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2023postBPixHole hza_resolve_phcsev_lr9_2023postBPixHole_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2024 hza_resolve_phcsev_lr9_2024_sf &
-#------------------------------------------------------------------------------------------------------------
+## -------- Low R9 --------
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2022preEE hza_resolve_phcsev_lr9_2022preEE_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2022postEE hza_resolve_phcsev_lr9_2022postEE_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2023preBPix hza_resolve_phcsev_lr9_2023preBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2023postBPix hza_resolve_phcsev_lr9_2023postBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2023postBPixHole hza_resolve_phcsev_lr9_2023postBPixHole_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2024 hza_resolve_phcsev_lr9_2024_sf &
+###------------------------------------------------------------------------------------------------------------
 
 # Electron ID and Trigger SFs
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_2024 hza_elid_nongap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2024 hza_elid_gap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_2024 hza_elid_nongap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2024 hza_elid_gap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf &
 #------------------------------------------------------------------------------------------------------------
 
 # Custom Photon ID
