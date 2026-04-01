@@ -28,53 +28,53 @@ publish_electron() {
   # Electron Trigger SFs
   # Double Trigger Lower Leg 12
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_dielleg12trigger_gap_2024/htoza_dielleg12trigger_gap_2024_sf \
+    --dest resolve_dielleg12trigger_gap_2024/hza_dielleg12trigger_gap_2024_sf \
     --hometitle "Custom Electron Double Lower Leg Trigger12 Gap 2024" \
-    --title "Efficiency / Scale Factor Measurements — htoza_dielleg12trigger_gap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/htoza_dielleg12trigger_gap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/htoza_dielleg12trigger_gap_2024_sf \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg12trigger_gap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_gap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_gap_2024_sf \
     --section-url "#Resolve_Electron_Double_Lower_Trigger12_gap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_dielleg12trigger_nongap_2024/htoza_dielleg12trigger_nongap_2024_sf \
+    --dest resolve_dielleg12trigger_nongap_2024/hza_dielleg12trigger_nongap_2024_sf \
     --hometitle "Custom Electron Double Lower Leg Trigger12 Nongap 2024" \
-    --title "Efficiency / Scale Factor Measurements — htoza_dielleg12trigger_nongap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/htoza_dielleg12trigger_nongap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/htoza_dielleg12trigger_nongap_2024_sf \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg12trigger_nongap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_nongap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_nongap_2024_sf \
     --section-url "#Resolve_Electron_Double_Lower_Trigger12_nongap_2024"
 
   # Double Trigger Upper Leg 23
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_dielleg23trigger_gap_2024/htoza_dielleg23trigger_gap_2024_sf \
+    --dest resolve_dielleg23trigger_gap_2024/hza_dielleg23trigger_gap_2024_sf \
     --hometitle "Custom Electron Double Upper Leg Trigger23 Gap 2024" \
-    --title "Efficiency / Scale Factor Measurements — htoza_dielleg23trigger_gap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/htoza_dielleg23trigger_gap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/htoza_dielleg23trigger_gap_2024_sf \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg23trigger_gap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_gap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_gap_2024_sf \
     --section-url "#Resolve_Electron_Double_Upper_Trigger23_gap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_dielleg23trigger_nongap_2024/htoza_dielleg23trigger_nongap_2024_sf \
+    --dest resolve_dielleg23trigger_nongap_2024/hza_dielleg23trigger_nongap_2024_sf \
     --hometitle "Custom Electron Double Upper Leg Trigger23 Nongap 2024" \
-    --title "Efficiency / Scale Factor Measurements — htoza_dielleg23trigger_nongap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/htoza_dielleg23trigger_nongap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/htoza_dielleg23trigger_nongap_2024_sf \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg23trigger_nongap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_nongap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_nongap_2024_sf \
     --section-url "#Resolve_Electron_Double_Upper_Trigger23_nongap_2024"
 
   # Single Trigger 30
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_sielleg30trigger_gap_2024/htoza_sielleg30trigger_gap_2024_sf \
+    --dest resolve_sielleg30trigger_gap_2024/hza_sielleg30trigger_gap_2024_sf \
     --hometitle "Custom Electron Single Trigger30 Gap 2024" \
-    --title "Efficiency / Scale Factor Measurements — htoza_sielleg30trigger_gap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/htoza_sielleg30trigger_gap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/htoza_sielleg30trigger_gap_2024_sf \
+    --title "Efficiency / Scale Factor Measurements — hza_sielleg30trigger_gap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_gap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_gap_2024_sf \
     --section-url "#Resolve_Electron_Single_Trigger30_gap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_sielleg30trigger_nongap_2024/htoza_sielleg30trigger_nongap_2024_sf \
+    --dest resolve_sielleg30trigger_nongap_2024/hza_sielleg30trigger_nongap_2024_sf \
     --hometitle "Custom Electron Single Trigger30 Nongap 2024" \
-    --title "Efficiency / Scale Factor Measurements — htoza_sielleg30trigger_nongap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/htoza_sielleg30trigger_nongap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/htoza_sielleg30trigger_nongap_2024_sf \
+    --title "Efficiency / Scale Factor Measurements — hza_sielleg30trigger_nongap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_nongap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_nongap_2024_sf \
     --section-url "#Resolve_Electron_Single_Trigger30_nongap_2024"
 
   # Electron ID
