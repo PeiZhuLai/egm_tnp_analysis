@@ -458,7 +458,11 @@ HTML
 fi  # 補上遺漏的 fi，避免腳本語法錯誤
 
 python3 - "$HOME_INDEX" "$NEW_ITEM" <<'PY'
-import sys, pathlib, re
+import html as html_lib
+import pathlib
+import re
+import sys
+
 home = pathlib.Path(sys.argv[1])
 item = sys.argv[2].strip()
 if not home.exists():
@@ -470,20 +474,66 @@ html = home.read_text()
 if 'class="auto-list"' not in html:
     html = re.sub(r"<ul(\s*)>", r"<ul class=\"auto-list\">", html, count=1)
 
-if re.search(re.escape(item), html):
-    print(">>> 首頁已包含此條目，略過新增")
-    sys.exit(0)
+def normalize_label(raw: str) -> str:
+    text = re.sub(r"<[^>]+>", "", raw)
+    text = html_lib.unescape(text)
+    return re.sub(r"\s+", " ", text).strip()
+
+def split_items(body: str):
+    return [frag.strip() for frag in re.findall(r"<li\b.*?</li>", body, flags=re.S | re.I)]
+
+anchor_match = re.search(r'<a\b[^>]*href="([^"]+)"[^>]*>(.*?)</a>', item, flags=re.S | re.I)
+new_href = anchor_match.group(1).strip() if anchor_match else ""
+new_label = normalize_label(anchor_match.group(2)) if anchor_match else normalize_label(item)
+
+def matches(existing_item: str) -> bool:
+    match = re.search(r'<a\b[^>]*href="([^"]+)"[^>]*>(.*?)</a>', existing_item, flags=re.S | re.I)
+    if not match:
+        return False
+    href = match.group(1).strip()
+    label = normalize_label(match.group(2))
+    if new_href and href == new_href:
+        return True
+    if new_label and label == new_label:
+        return True
+    return False
+
+def merge_items(existing_items):
+    merged = []
+    inserted = False
+    for entry in existing_items:
+        if matches(entry):
+            if not inserted:
+                merged.append(item)
+                inserted = True
+            continue
+        merged.append(entry)
+    if not inserted:
+        merged.append(item)
+    return merged
+
+def render_body(items):
+    if not items:
+        return "\n    "
+    return "\n" + "\n".join(f"    {entry}" for entry in items) + "\n    "
 
 if "<!-- AUTO LIST START -->" in html and "<!-- AUTO LIST END -->" in html:
-    html = re.sub(
+    match = re.search(
         r"(<!-- AUTO LIST START -->)(.*?)(<!-- AUTO LIST END -->)",
-        lambda m: f"{m.group(1)}{m.group(2)}\n    {item}\n    {m.group(3)}",
         html,
-        count=1,
         flags=re.S,
     )
+    if not match:
+        print(">>> 找不到 AUTO LIST 區塊，略過首頁更新")
+        sys.exit(1)
+    items = merge_items(split_items(match.group(2)))
+    html = html[: match.start(2)] + render_body(items) + html[match.end(2) :]
 elif "<!-- AUTO LIST -->" in html:
-    html = html.replace("<!-- AUTO LIST -->", f"<!-- AUTO LIST -->\n  {item}", 1)
+    html = html.replace(
+        "<!-- AUTO LIST -->",
+        f"<!-- AUTO LIST START -->\n    {item}\n    <!-- AUTO LIST END -->",
+        1,
+    )
 else:
     m = re.search(
         r'(<ul[^>]*class="[^"]*\bauto-list\b[^"]*"[^>]*>)(.*?)(</ul>)',
@@ -491,7 +541,8 @@ else:
         flags=re.IGNORECASE | re.S,
     )
     if m:
-        html = html[: m.start(3)] + f"    {item}\n" + html[m.start(3) :]
+        items = merge_items(split_items(m.group(2)))
+        html = html[: m.start(2)] + render_body(items) + html[m.end(2) :]
     else:
         html += f"\n<ul class=\"auto-list\">\n  {item}\n</ul>\n"
 home.write_text(html)
