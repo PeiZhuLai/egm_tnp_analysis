@@ -109,6 +109,20 @@ def _infer_x_limits(effis, x_axis):
     return (xmin_out, xmax_out)
 
 
+def _measurement_tag(plot_path):
+    current = os.path.dirname(os.path.abspath(plot_path))
+    while current and current != os.path.dirname(current):
+        base = os.path.basename(current)
+        if base.startswith("hza_"):
+            return base
+        current = os.path.dirname(current)
+    return os.path.basename(os.path.dirname(os.path.abspath(plot_path)))
+
+
+def _make_plot_output_path(plot_path, stem):
+    return os.path.join(os.path.dirname(plot_path), f"HZa_{stem}_{_measurement_tag(plot_path)}")
+
+
 
 graphColors = [rt.kBlack, rt.kGray+1, rt.kRed +1, rt.kRed-2, rt.kAzure+2, rt.kAzure-1, 
                rt.kSpring-1, rt.kYellow -2 , rt.kYellow+1,
@@ -399,21 +413,9 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     CMS_lumi.CMS_lumi(c, 5, 10)
 
     c.Print(nameout)
-    listName = nameout.split('/')
     # for iext in ["pdf","C","png"]:
     for iext in ["pdf","png"]:
-        tmp = nameout
-        tmp = tmp.replace('egammaLowptEffi_postBPixHole.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
-        tmp = tmp.replace('egammaEffi_postBPixHole.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
-        tmp = tmp.replace('egammaLowptEffi.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
-        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3])
-
-        c.SaveAs(tmp.replace('pdf', iext))
-        # c.SaveAs(nameout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SFvs'+xAxis+'_'+listName[-3]).replace('pdf',iext))
+        c.SaveAs(_make_plot_output_path(nameout, 'SFvs'+xAxis) + '.' + iext)
 
     return listOfTGraph2
 
@@ -452,21 +454,9 @@ def diagnosticErrorPlot( effgr, ierror, nameout ):
     
     c2D_Err.Print(nameout)
 
-    listName = nameout.split('/')
     # for iext in ["pdf","C","png"]:
     for iext in ["pdf","png"]:
-        tmp = nameout
-        tmp = tmp.replace('egammaLowptEffi_postBPixHole.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
-        tmp = tmp.replace('egammaEffi_postBPixHole.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
-        tmp = tmp.replace('egammaLowptEffi.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
-        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3])
-
-        c2D_Err.SaveAs(tmp.replace('pdf', iext))
-        # c2D_Err.SaveAs(nameout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SF2D'+'_'+errorNames[ierror]+listName[-3]).replace('pdf',iext))
+        c2D_Err.SaveAs(_make_plot_output_path(nameout, 'SF2D_'+errorNames[ierror]) + '.' + iext)
     
     return h2_sfErrorAbs
 
@@ -675,21 +665,9 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     h2Error.DrawCopy("colz TEXT45")
 
     c2D.Print( pdfout )
-    listName = pdfout.split('/')
     # for iext in ["pdf","C","png"]:
     for iext in ["pdf","png"]:
-        tmp = pdfout
-        tmp = tmp.replace('egammaLowptEffi_postBPixHole.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
-        tmp = tmp.replace('egammaEffi_postBPixHole.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
-        tmp = tmp.replace('egammaLowptEffi.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
-        tmp = tmp.replace('egammaEffi.txt_egammaPlots', 
-                        listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3])
-
-        c2D.SaveAs(tmp.replace('pdf', iext))
-        # c2D.SaveAs(pdfout.replace('egammaEffi.txt_egammaPlots',listName[-6].replace('tnp','')+'_SF2D'+'_'+listName[-3]).replace('pdf',iext))
+        c2D.SaveAs(_make_plot_output_path(pdfout, 'SF2D') + '.' + iext)
 
     rootout = rt.TFile(nameOutBase + '_EGM2D.root','recreate')
     rootout.cd()

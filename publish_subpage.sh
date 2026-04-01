@@ -170,8 +170,15 @@ if [[ -n "${SRC_SUMMARY}" && -d "${SRC_SUMMARY}" ]]; then
   else
     # 預設維持原有 electron/photon 行為
     summary_rsync_args+=(
+      "--include=HZa_SF2D_hza_*.png"
       "--include=**/HZa_SF2D_hza_*.png"
+      "--include=HZa_SFvseta_*.png"
       "--include=**/HZa_SFvseta_*.png"
+      "--include=HZa_SFvsnVtx_hza_resolve_phcsev_*.png"
+      "--include=**/HZa_SFvsnVtx_hza_resolve_phcsev_*.png"
+      "--include=pelai_SFvsnVtx_hza_resolve_phcsev_*.png"
+      "--include=**/pelai_SFvsnVtx_hza_resolve_phcsev_*.png"
+      "--include=HZa_SFvspT_*.png"
       "--include=**/HZa_SFvspT_*.png"
     )
   fi
@@ -312,6 +319,30 @@ files = sorted(
     for p in summary_dir.rglob("*")
     if p.is_file() and p.suffix.lower() in suffixes
 )
+
+# Photon CSEV pages: prefer the nVtx summary card over the legacy SFvsEta card.
+has_hza_nvtx = any(
+    fnmatch.fnmatch(fpath, "summary/HZa_SFvsnVtx_hza_resolve_phcsev_*")
+    for fpath in files
+)
+has_legacy_pelai_nvtx = any(
+    fnmatch.fnmatch(fpath, "summary/pelai_SFvsnVtx_hza_resolve_phcsev_*")
+    for fpath in files
+)
+if has_hza_nvtx or has_legacy_pelai_nvtx:
+    files = [
+        fpath
+        for fpath in files
+        if not fnmatch.fnmatch(fpath, "summary/HZa_SFvseta_hza_resolve_phcsev_*")
+        and not (has_hza_nvtx and fnmatch.fnmatch(fpath, "summary/pelai_SFvsnVtx_hza_resolve_phcsev_*"))
+    ]
+    if not order_patterns:
+        nvtx_pattern = "summary/HZa_SFvsnVtx_hza_resolve_phcsev_*" if has_hza_nvtx else "summary/pelai_SFvsnVtx_hza_resolve_phcsev_*"
+        order_patterns = [
+            "summary/HZa_SF2D_hza_resolve_phcsev_*",
+            nvtx_pattern,
+            "summary/HZa_SFvspT_hza_resolve_phcsev_*",
+        ]
 
 ordered = []
 remaining = files.copy()
