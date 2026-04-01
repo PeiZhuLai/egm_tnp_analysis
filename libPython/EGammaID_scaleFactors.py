@@ -29,6 +29,86 @@ def isFloat( myFloat ):
         return False
 
 
+def _normalize_axis_name(axis_name):
+    if axis_name is None:
+        return None
+
+    clean_name = axis_name.strip()
+    lowered = clean_name.lower()
+
+    if "eta" in lowered:
+        if "abs" in lowered:
+            return "absEta"
+        return "eta"
+
+    if (
+        lowered in ("pt", "et", "ph_et", "el_et", "ele_et", "mu_pt", "muon_pt")
+        or lowered.endswith("_pt")
+        or lowered.endswith("_et")
+    ):
+        return "pT"
+
+    if (
+        lowered in ("npv", "event_npv", "nvtx", "event_nvtx", "pv", "event_pv")
+        or "npv" in lowered
+        or "nvtx" in lowered
+        or "vertex" in lowered
+    ):
+        return "nVtx"
+
+    return clean_name
+
+
+def _axis_title(axis_name):
+    normalized = _normalize_axis_name(axis_name)
+
+    if normalized == "eta":
+        return "SuperCluster #eta"
+    if normalized == "absEta":
+        return "|SuperCluster #eta|"
+    if normalized == "pT":
+        return "p_{T} [GeV]"
+    if normalized == "nVtx":
+        return "N_{vtx}"
+
+    return axis_name.strip() if axis_name is not None else ""
+
+
+def _is_eta_like(axis_name):
+    return _normalize_axis_name(axis_name) in ("eta", "absEta")
+
+
+def _infer_x_limits(effis, x_axis):
+    xmin = None
+    xmax = None
+
+    for points in effis.values():
+        for point in points:
+            point_min = point.get("min")
+            point_max = point.get("max")
+            if point_min is None or point_max is None:
+                continue
+            xmin = point_min if xmin is None else min(xmin, point_min)
+            xmax = point_max if xmax is None else max(xmax, point_max)
+
+    if xmin is None or xmax is None:
+        return (10, 200)
+
+    if xmax <= xmin:
+        xmax = xmin + 1.0
+
+    span = xmax - xmin
+    padding = 0.03 * span
+    xmin_out = xmin - padding
+    xmax_out = xmax + padding
+
+    lowered = (x_axis or "").lower()
+    if "pt" in lowered or "vtx" in lowered or "pv" in lowered or "abs" in lowered:
+        xmin_out = max(0.0, xmin_out)
+
+    return (xmin_out, xmax_out)
+
+
 
 graphColors = [rt.kBlack, rt.kGray+1, rt.kRed +1, rt.kRed-2, rt.kAzure+2, rt.kAzure-1, 
                rt.kSpring-1, rt.kYellow -2 , rt.kYellow+1,
@@ -160,22 +240,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     listOfTGraph2 = []
     listOfMC      = []
 
-    xMin = 10
-    xMax = 200
-    if 'pT' in xAxis or 'pt' in xAxis:
-        # p1.SetLogx()
-        # p2.SetLogx()    
-        xMin = 10
-        xMax = 80
-    elif 'vtx' in xAxis or 'Vtx' in xAxis or 'PV' in xAxis:
-        xMin =  3
-        xMax = 42
-    elif 'eta' in xAxis or 'Eta' in xAxis:
-        xMin = -2.60
-        xMax = +2.60
-    
-    if 'abs' in xAxis or 'Abs' in xAxis:
-        xMin = 0.0
+    xMin, xMax = _infer_x_limits(effDataList, xAxis)
 
     effminmax =  findMinMax( effDataList )
     effiMin = effminmax[0]
@@ -243,12 +308,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
         grBinsSF.GetHistogram().SetMaximum(sfMax)
         
         grBinsSF.GetHistogram().GetXaxis().SetTitleOffset(1)
-        if 'eta' in xAxis or 'Eta' in xAxis:
-            grBinsSF.GetHistogram().GetXaxis().SetTitle("SuperCluster #eta")
-        elif 'pt' in xAxis or 'pT' in xAxis:
-            grBinsSF.GetHistogram().GetXaxis().SetTitle("p_{T}  [GeV]")  
-        elif 'vtx' in xAxis or 'Vtx' in xAxis or 'PV' in xAxis:
-            grBinsSF.GetHistogram().GetXaxis().SetTitle("N_{vtx}")  
+        grBinsSF.GetHistogram().GetXaxis().SetTitle(_axis_title(xAxis))
             
         grBinsSF.GetHistogram().GetYaxis().SetTitle("Data / MC " )
 
@@ -381,8 +441,10 @@ def diagnosticErrorPlot( effgr, ierror, nameout ):
     h2_sfErrorAbs.SetMaximum(min(h2_sfErrorAbs.GetMaximum(),0.2))
     h2_sfErrorRel.SetMinimum(0)
     h2_sfErrorRel.SetMaximum(1)
-    h2_sfErrorAbs.SetTitle('e/#gamma absolute SF syst: %s ' % errorNames[ierror])
-    h2_sfErrorRel.SetTitle('e/#gamma relative SF syst: %s ' % errorNames[ierror])
+    x_title = getattr(effgr, "xTitle", "SuperCluster #eta")
+    y_title = getattr(effgr, "yTitle", "p_{T} [GeV]")
+    h2_sfErrorAbs.SetTitle('e/#gamma absolute SF syst: %s;%s;%s' % (errorNames[ierror], x_title, y_title))
+    h2_sfErrorRel.SetTitle('e/#gamma relative SF syst: %s;%s;%s' % (errorNames[ierror], x_title, y_title))
     c2D_Err.cd(1)
     h2_sfErrorAbs.DrawCopy("colz TEXT45")
     c2D_Err.cd(2)
@@ -420,15 +482,28 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
 
     fileWithEff = open(filein, 'r')
     effGraph = efficiencyList()
+    raw_var1 = None
+    raw_var2 = None
     
     for line in fileWithEff :
         modifiedLine = line.lstrip(' ').rstrip(' ').rstrip('\n')
+        if modifiedLine.startswith('###'):
+            header_fields = modifiedLine.lstrip('#').split(':', 1)
+            if len(header_fields) == 2:
+                header_name = header_fields[0].strip().lower()
+                header_value = header_fields[1].strip()
+                if header_name == 'var1':
+                    raw_var1 = header_value
+                elif header_name == 'var2':
+                    raw_var2 = header_value
+            continue
+
         numbers = modifiedLine.split('\t')
 
         if len(numbers) > 0 and isFloat(numbers[0]):
-            etaKey = ( float(numbers[0]), float(numbers[1]) )
-            ptKey  = ( float(numbers[2]), min(500,float(numbers[3])) )
-            myeff = efficiency(ptKey,etaKey,
+            firstAxisKey  = ( float(numbers[0]), float(numbers[1]) )
+            secondAxisKey = ( float(numbers[2]), min(500,float(numbers[3])) )
+            myeff = efficiency(secondAxisKey, firstAxisKey,
                                float(numbers[4]),float(numbers[5]),float(numbers[6] ),float(numbers[7] ),
                                float(numbers[8]),float(numbers[9]),float(numbers[10]),float(numbers[11]) )
 #                           float(numbers[8]),float(numbers[9]),float(numbers[10]), -1 )
@@ -436,6 +511,23 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
             effGraph.addEfficiency(myeff)
 
     fileWithEff.close()
+
+    first_axis_name = raw_var1 if raw_var1 is not None else axis[1]
+    second_axis_name = raw_var2 if raw_var2 is not None else axis[0]
+    axis = [
+        _normalize_axis_name(second_axis_name) or second_axis_name,
+        _normalize_axis_name(first_axis_name) or first_axis_name,
+    ]
+
+    effGraph.etaLikeAxis = _is_eta_like(first_axis_name)
+    effGraph.xTitle = _axis_title(first_axis_name)
+    effGraph.yTitle = _axis_title(second_axis_name)
+
+    print(
+        " Parsed axes: var1=%s, var2=%s -> xAxis=%s, yAxis=%s"
+        % (first_axis_name, second_axis_name, axis[0], axis[1])
+    )
+
 #   ## massage the numbers a bit
     # effGraph.symmetrizeSystVsEta()# ----- REMOVING SYMM ETA AS DISCUSSED WITH RICCARDO
     effGraph.combineSyst()
@@ -446,7 +538,9 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     try:
         _all_eff = getattr(effGraph, "efficiencies", None)
         if _all_eff is None:
-            _all_eff = getattr(effGraph, "effList", None)
+            _all_eff = []
+            for second_axis_bins in getattr(effGraph, "effList", {}).values():
+                _all_eff.extend(second_axis_bins.values())
         if _all_eff is None:
             _all_eff = getattr(effGraph, "listOfEfficiencies", None)
 
@@ -473,25 +567,32 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
 
     print(" ------------------------------- ")
 
-    customEtaBining = []
+    customFirstAxisBining = []
 
-    if ("Lowpt" in filein) and ("Hole" in filein):
-        customEtaBining.append((0.000, 1.444))
+    if effGraph.etaLikeAxis:
+        if ("Lowpt" in filein) and ("Hole" in filein):
+            customFirstAxisBining.append((0.000, 1.444))
 
-    elif "Lowpt" in filein:
-        customEtaBining.append((0.000, 1.444))
-        customEtaBining.append((1.566, 2.000))
-        customEtaBining.append((2.000, 2.500))
+        elif "Lowpt" in filein:
+            customFirstAxisBining.append((0.000, 1.444))
+            customFirstAxisBining.append((1.566, 2.000))
+            customFirstAxisBining.append((2.000, 2.500))
 
-    elif "Hole" in filein:
-        customEtaBining.append((0.000, 0.800))
-        customEtaBining.append((0.800, 1.444))
+        elif "Hole" in filein:
+            customFirstAxisBining.append((0.000, 0.800))
+            customFirstAxisBining.append((0.800, 1.444))
 
+        else:
+            customFirstAxisBining.append((0.000, 0.800))
+            customFirstAxisBining.append((0.800, 1.444))
+            customFirstAxisBining.append((1.566, 2.000))
+            customFirstAxisBining.append((2.000, 2.500))
     else:
-        customEtaBining.append((0.000, 0.800))
-        customEtaBining.append((0.800, 1.444))
-        customEtaBining.append((1.566, 2.000))
-        customEtaBining.append((2.000, 2.500))
+        first_axis_bins = set()
+        for second_axis_bin in effGraph.effList.keys():
+            for first_axis_bin in effGraph.effList[second_axis_bin].keys():
+                first_axis_bins.add(first_axis_bin)
+        customFirstAxisBining = sorted(first_axis_bins)
 
 #    customEtaBining.append( (1.444,1.566)) #gap region
     # customEtaBining.append( (1.566,2.000))
@@ -510,9 +611,9 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     cDummy.Print( pdfout + "[" )
 
     #---------------------------------------------------------------
-    EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 0 ) ,  # Data
-                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, -1 ) , # MC
-                 effGraph.pt_1DGraph_list_customEtaBining(customEtaBining, 1 ) ,  # SF
+    EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customFirstAxisBining, 0 ) ,  # Data
+                 effGraph.pt_1DGraph_list_customEtaBining(customFirstAxisBining, -1 ) , # MC
+                 effGraph.pt_1DGraph_list_customEtaBining(customFirstAxisBining, 1 ) ,  # SF
                  pdfout,
                  xAxis = axis[0], yAxis = axis[1] )
     #---------------------------------------------------------------

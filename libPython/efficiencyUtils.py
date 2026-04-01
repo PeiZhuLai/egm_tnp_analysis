@@ -163,6 +163,9 @@ class efficiencyList:
 
     def __init__(self):
         self.effList = {}
+        self.etaLikeAxis = True
+        self.xTitle = "SuperCluster #eta"
+        self.yTitle = "p_{T} [GeV]"
 
     
     def __str__(self):
@@ -192,7 +195,8 @@ class efficiencyList:
                         effMinus =  self.effList[ptBin][etaBinMinus] 
 
                     if effMinus is None:
-                        print(" ---- efficiencyList: I did not find -eta bin!!!")
+                        if getattr(self, "etaLikeAxis", True):
+                            print(" ---- efficiencyList: I did not find -eta bin!!!")
                         # --- FIX: 缺 -eta bin 時，至少對 +eta bin 算一次 systCombined（用自身當 average）---
                         try:
                             effPlus.combineSyst(effPlus.effData, effPlus.effMC)
@@ -209,6 +213,8 @@ class efficiencyList:
 
                         
     def symmetrizeSystVsEta(self):
+        if not getattr(self, "etaLikeAxis", True):
+            return
         for ptBin in self.effList.keys():
             for etaBin in list(self.effList[ptBin].keys()):
                 print("etaBin:  ",etaBin)
@@ -320,7 +326,8 @@ class efficiencyList:
                         averageMC = None
                         if effMinus is None:
                             averageMC = effPlus.effMC
-                            print(" ---- efficiencyList: I did not find -eta bin!!!")
+                            if getattr(self, "etaLikeAxis", True):
+                                print(" ---- efficiencyList: I did not find -eta bin!!!")
                         else:                        
                             averageMC   = (effPlus.effMC   + effMinus.effMC  )/2.
                         ### so this is h2D bin is inside the bining used by e/gamma POG
@@ -350,7 +357,11 @@ class efficiencyList:
                                 denominator = _syst_combined
                             h2.SetBinContent(ix,iy, _safe_ratio(abs(self.effList[ptBin][etaBin].syst[onlyError-1]), denominator, default=0.0))
 
-        h2.SetTitle("%s;%s;%s" % (htitle, "SuperCluster #eta", "p_{T} [GeV]"))
+        h2.SetTitle("%s;%s;%s" % (
+            htitle,
+            getattr(self, "xTitle", "SuperCluster #eta"),
+            getattr(self, "yTitle", "p_{T} [GeV]"),
+        ))
         h2.SetMarkerSize(1.8)
 
         h2.GetYaxis().SetTitleFont(42)
@@ -506,5 +517,4 @@ class efficiencyList:
                                              'val': aValue  , 'err': anError } )
 
         return listOfGraphs
-
 
