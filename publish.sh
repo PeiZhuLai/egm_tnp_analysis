@@ -28,6 +28,53 @@ publish_electron() {
 
   # Photon CSEV SFs
   ### -------- High R9 --------
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2024/hza_resolve_phcsev_hr9_2024_sf \
+    --hometitle "Custom Photon CSEV High R9 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2024_sf/plots/Data_2024C \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2024_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2024"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2023postBPixHole/hza_resolve_phcsev_hr9_2023postBPixHole_sf \
+    --hometitle "Custom Photon CSEV High R9 2023postBPixHole" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2023postBPixHole_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPixHole_sf/plots/Data_2023postBPixHole \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPixHole_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2023postBPixHole"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2023postBPix/hza_resolve_phcsev_hr9_2023postBPix_sf \
+    --hometitle "Custom Photon CSEV High R9 2023postBPix" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2023postBPix_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPix_sf/plots/Data_2023postBPix \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPix_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2023postBPix"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2023preBPix/hza_resolve_phcsev_hr9_2023preBPix_sf \
+    --hometitle "Custom Photon CSEV High R9 2023preBPix" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2023preBPix_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023preBPix_sf/plots/Data_2023preBPix \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023preBPix_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2023preBPix"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2022postEE/hza_resolve_phcsev_hr9_2022postEE_sf \
+    --hometitle "Custom Photon CSEV High R9 2022postEE" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2022postEE_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022postEE_sf/plots/Data_2022postEE \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022postEE_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2022postEE"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2022preEE/hza_resolve_phcsev_hr9_2022preEE_sf \
+    --hometitle "Custom Photon CSEV High R9 2022preEE" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2022preEE_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022preEE_sf/plots/Data_2022preEE \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022preEE_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2022preEE"
 
 
   # Photon CSEV SFs
@@ -44,7 +91,7 @@ publish_electron() {
     --dest resolve_phcsev_lr9_2023postBPixHole/hza_resolve_phcsev_lr9_2023postBPixHole_sf \
     --hometitle "Custom Photon CSEV Low R9 2023postBPixHole" \
     --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2023postBPixHole_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPixHole_sf/plots/Data_2024C \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPixHole_sf/plots/Data_2023postBPixHole \
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPixHole_sf \
     --section-url "#Resolve_Photon_CSEV_LowR9_2023postBPixHole"
 
@@ -52,7 +99,7 @@ publish_electron() {
     --dest resolve_phcsev_lr9_2023postBPix/hza_resolve_phcsev_lr9_2023postBPix_sf \
     --hometitle "Custom Photon CSEV Low R9 2023postBPix" \
     --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2023postBPix_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPix_sf/plots/Data_2024C \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPix_sf/plots/Data_2023postBPix \
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPix_sf \
     --section-url "#Resolve_Photon_CSEV_LowR9_2023postBPix"
 
@@ -60,7 +107,7 @@ publish_electron() {
     --dest resolve_phcsev_lr9_2023preBPix/hza_resolve_phcsev_lr9_2023preBPix_sf \
     --hometitle "Custom Photon CSEV Low R9 2023preBPix" \
     --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2023preBPix_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023preBPix_sf/plots/Data_2024C \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023preBPix_sf/plots/Data_2023preBPix \
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023preBPix_sf \
     --section-url "#Resolve_Photon_CSEV_LowR9_2023preBPix"
 
@@ -68,7 +115,7 @@ publish_electron() {
     --dest resolve_phcsev_lr9_2022postEE/hza_resolve_phcsev_lr9_2022postEE_sf \
     --hometitle "Custom Photon CSEV Low R9 2022postEE" \
     --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2022postEE_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022postEE_sf/plots/Data_2024C \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022postEE_sf/plots/Data_2022postEE \
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022postEE_sf \
     --section-url "#Resolve_Photon_CSEV_LowR9_2022postEE"
 
@@ -76,7 +123,7 @@ publish_electron() {
     --dest resolve_phcsev_lr9_2022preEE/hza_resolve_phcsev_lr9_2022preEE_sf \
     --hometitle "Custom Photon CSEV Low R9 2022preEE" \
     --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2022preEE_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022preEE_sf/plots/Data_2024C \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022preEE_sf/plots/Data_2022preEE \
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022preEE_sf \
     --section-url "#Resolve_Photon_CSEV_LowR9_2022preEE"
 

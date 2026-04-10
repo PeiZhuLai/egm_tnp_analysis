@@ -29,15 +29,15 @@ sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcs
 ###------------------------------------------------------------------------------------------------------------
 
 # Electron ID and Trigger SFs
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_2024 hza_elid_nongap_2024_sf &
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2024 hza_elid_gap_2024_sf &
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf &
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf &
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf &
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf &
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf &
-sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf &
-#------------------------------------------------------------------------------------------------------------
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_2024 hza_elid_nongap_2024_sf &
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2024 hza_elid_gap_2024_sf &
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf &
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf &
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf &
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf &
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf &
+# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf &
+# #------------------------------------------------------------------------------------------------------------
 
 # Custom Photon ID
 # -------- High pT --------
