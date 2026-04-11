@@ -32,18 +32,11 @@ import etc.inputs.tnpSampleDef as tnpSamples
 tnpTreeDir = 'tnpPhoIDs'
 
 samplesDef = {
-        'data'  : tnpSamples.Run3_2024['Data_2024C'].clone(),
-        'mcNom' : tnpSamples.Run3_2024['DY_MC_LO_2024'].clone(),
-        'tagSel': tnpSamples.Run3_2024['DY_MC_LO_2024'].clone(),
-        'mcAlt': tnpSamples.Run3_2024['DY_MC_NLO_2024'].clone(),
+        'data'  : tnpSamples.Run3_2024_zmmg['Data_2024'].clone(),
+        'mcNom' : tnpSamples.Run3_2024_zmmg['DY_MC_LO_2024'].clone(),
+        'tagSel': tnpSamples.Run3_2024_zmmg['DY_MC_LO_2024'].clone(),
+        'mcAlt': tnpSamples.Run3_2024_zmmg['DY_MC_NLO_2024'].clone(),
     }
-## can add data sample easily
-samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024D'] )
-samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024E'] )
-samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024F'] )
-samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024G'] )
-samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024H'] )
-samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024I'] )
 
 
 ## can add data sample easily
@@ -71,16 +64,11 @@ if not samplesDef['tagSel'] is None:
 # if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
 # if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 
-## set MC weight, can use several pileup rw for different data taking 
-mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_madgraph_pho.pu.puTree.root'
-mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_amcatnloext_pho.pu.puTree.root'
-weightName = 'weights_data_Run2023C.totWeight'
+## zmmg ntuples already carry the final event weight in-tree
+weightName = 'totWeight'
 if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
-if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree(mcNom_puFile)
-if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree(mcAlt_puFile)
-if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFile)
 
 #############################################################
 ########## bining definition  [can be nD bining]

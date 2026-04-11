@@ -36,10 +36,10 @@ import etc.inputs.tnpSampleDef as tnpSamples
 tnpTreeDir = 'tnpPhoIDs'
 
 samplesDef = {
-        'data'  : tnpSamples.Run3_2023postBPix['Data_2023postBPix'].clone(),
-        'mcNom' : tnpSamples.Run3_2023postBPix['DY_MC_LO_2023postBPix'].clone(),
-        'tagSel': tnpSamples.Run3_2023postBPix['DY_MC_LO_2023postBPix'].clone(),
-        'mcAlt': tnpSamples.Run3_2023postBPix['DY_MC_NLO_2023postBPix'].clone(),
+        'data'  : tnpSamples.Run3_2023postBPix_zmmg['Data_2023postBPix'].clone(),
+        'mcNom' : tnpSamples.Run3_2023postBPix_zmmg['DY_MC_LO_2023postBPix'].clone(),
+        'tagSel': tnpSamples.Run3_2023postBPix_zmmg['DY_MC_LO_2023postBPix'].clone(),
+        'mcAlt': tnpSamples.Run3_2023postBPix_zmmg['DY_MC_NLO_2023postBPix'].clone(),
     }
 
 
@@ -68,16 +68,11 @@ if not samplesDef['tagSel'] is None:
 # if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
 # if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 
-## set MC weight, can use several pileup rw for different data taking 
-mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/postBPIX/DY_madgraph_pho.pu.puTree.root'
-mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/postBPIX/DY_amcatnloext_pho.pu.puTree.root'
-weightName = 'weights_data_Run2023D.totWeight'
+## zmmg ntuples already carry the final event weight in-tree
+weightName = 'totWeight'
 if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
-if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree(mcNom_puFile)
-if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree(mcAlt_puFile)
-if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFile)
 
 #############################################################
 ########## bining definition  [can be nD bining]
