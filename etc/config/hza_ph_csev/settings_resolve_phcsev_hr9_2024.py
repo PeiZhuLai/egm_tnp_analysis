@@ -33,9 +33,9 @@ tnpTreeDir = 'tnpPhoIDs'
 
 samplesDef = {
         'data'  : tnpSamples.Run3_2024_zmmg['Data_2024'].clone(),
-        'mcNom' : tnpSamples.Run3_2024_zmmg['DY_MC_LO_2024'].clone(),
-        'tagSel': tnpSamples.Run3_2024_zmmg['DY_MC_LO_2024'].clone(),
-        'mcAlt': tnpSamples.Run3_2024_zmmg['DY_MC_NLO_2024'].clone(),
+        'mcNom' : tnpSamples.Run3_2024_zmmg['DY_MC_NLO_2024'].clone(),
+        'tagSel': tnpSamples.Run3_2024_zmmg['DY_MC_NLO_2024'].clone(),
+        'mcAlt': tnpSamples.Run3_2024_zmmg['DY_MC_LO_2024'].clone(),
     }
 
 
@@ -55,8 +55,8 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2024')
-    samplesDef['tagSel'].set_cut('tag_Ele_pt > 35 && abs(tag_sc_eta) < 2.1')
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_NLO_2024')
+    # samplesDef['tagSel'].set_cut('tag_Ele_pt > 35 && abs(tag_sc_eta) < 2.1')
 
 ## set MC weight, simple way (use tree weight) 
 # weightName = 'totWeight'

@@ -33,9 +33,9 @@ tnpTreeDir = 'tnpPhoIDs'
 
 samplesDef = {
         'data'  : tnpSamples.Run3_2023preBPix_zmmg['Data_2023preBPix'].clone(),
-        'mcNom' : tnpSamples.Run3_2023preBPix_zmmg['DY_MC_LO_2023preBPix'].clone(),
-        'tagSel': tnpSamples.Run3_2023preBPix_zmmg['DY_MC_LO_2023preBPix'].clone(),
-        'mcAlt': tnpSamples.Run3_2023preBPix_zmmg['DY_MC_NLO_2023preBPix'].clone(),
+        'mcNom' : tnpSamples.Run3_2023preBPix_zmmg['DY_MC_NLO_2023preBPix'].clone(),
+        'tagSel': tnpSamples.Run3_2023preBPix_zmmg['DY_MC_NLO_2023preBPix'].clone(),
+        'mcAlt': tnpSamples.Run3_2023preBPix_zmmg['DY_MC_LO_2023preBPix'].clone(),
     }
 
 
@@ -55,8 +55,8 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2023preBPix')
-    samplesDef['tagSel'].set_cut('tag_Ele_pt > 50 && abs(tag_sc_eta) < 2.17 && ph_mva122XV1 > 0.99 && ph_r9 > 0.99')
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_NLO_2023preBPix')
+    # samplesDef['tagSel'].set_cut('tag_Ele_pt > 50 && abs(tag_sc_eta) < 2.17 && ph_mva122XV1 > 0.99 && ph_r9 > 0.99')
 
 ## set MC weight, simple way (use tree weight) 
 # weightName = 'totWeight'
