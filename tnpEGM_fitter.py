@@ -122,6 +122,22 @@ for s in tnpConf.samplesDef.keys():
     setattr( sample, 'tree'     ,'%s/fitter_tree' % tnpConf.tnpTreeDir )
     setattr( sample, 'histFile' , '%s/%s_%s.root' % ( outputDirectory , sample.name, args.flag ) )
 
+missing_sample_inputs = []
+for s in tnpConf.samplesDef.keys():
+    sample = tnpConf.samplesDef[s]
+    if sample is None:
+        continue
+    for p in sample.path:
+        if not os.path.exists(p):
+            missing_sample_inputs.append((s, sample.name, p))
+
+if missing_sample_inputs:
+    print('[tnpEGM_fitter] Missing input ROOT files:')
+    for sample_key, sample_name, path in missing_sample_inputs:
+        print('  - samplesDef[%s] (%s): %s' % (sample_key, sample_name, path))
+    print('[tnpEGM_fitter] Abort before histogram creation. The later "Bad numerical expression" messages come from building formulas on an empty TChain.')
+    sys.exit(1)
+
 
 if args.createHists:
 
