@@ -74,8 +74,8 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 ########## bining definition  [can be nD bining]
 #############################################################
 biningDef = [
-   { 'var' : 'event_nPV' , 'type': 'float', 'bins': [10,15,20,25,30,35,40,50,100] },
-   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,15,20,25,35,50,70,200] },
+   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-1.566,-1.4442,0.0,1.4442,1.566,2.5] },
+   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,35,50,80] },
 ]
 
 #############################################################
@@ -83,19 +83,10 @@ biningDef = [
 #############################################################
 ### cut
 cutBase   = 'ph_r9 > 0.96'
+# cutBase   = ''
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 
-   0 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   1 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   2 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   3 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   4 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   5 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   6 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   7 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   8 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
-   9 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
 }
 
 #### or remove any additional cut (default)

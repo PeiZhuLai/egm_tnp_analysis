@@ -74,8 +74,8 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 ########## bining definition  [can be nD bining]
 #############################################################
 biningDef = [
-   { 'var' : 'event_nPV' , 'type': 'float', 'bins': [10,15,20,25,30,35,40,50,100] },
-   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,15,20,25,35,50,70,200] },
+   { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-1.566,-1.4442,0.0,1.4442,1.566,2.5] },
+   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,35,50,80] },
 ]
 
 #############################################################
