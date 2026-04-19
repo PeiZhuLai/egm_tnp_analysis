@@ -29,31 +29,31 @@ sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcs
 ##------------------------------------------------------------------------------------------------------------
 
 # Electron ID and Trigger SFs
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_2024 hza_elid_nongap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2024 hza_elid_gap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf &
-# #------------------------------------------------------------------------------------------------------------
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_2024 hza_elid_nongap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2024 hza_elid_gap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf &
+#------------------------------------------------------------------------------------------------------------
 
 # Custom Photon ID
-# -------- High pT --------
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022preEE hza_resolve_phid_2022preEE_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022postEE hza_resolve_phid_2022postEE_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023preBPix hza_resolve_phid_2023preBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023postBPix hza_resolve_phid_2023postBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023postBPixHole hza_resolve_phid_2023postBPixHole_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2024 hza_resolve_phid_2024_sf &
+##-------- High pT --------
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022preEE hza_resolve_phid_2022preEE_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022postEE hza_resolve_phid_2022postEE_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023preBPix hza_resolve_phid_2023preBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023postBPix hza_resolve_phid_2023postBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023postBPixHole hza_resolve_phid_2023postBPixHole_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2024 hza_resolve_phid_2024_sf &
 
-# -------- Low pT --------
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022preEE hza_resolve_phid_lowpt_2022preEE_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022postEE hza_resolve_phid_lowpt_2022postEE_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023preBPix hza_resolve_phid_lowpt_2023preBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023postBPix hza_resolve_phid_lowpt_2023postBPix_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023postBPixHole hza_resolve_phid_lowpt_2023postBPixHole_sf &
-# sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2024 hza_resolve_phid_lowpt_2024_sf &
+##-------- Low pT --------
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022preEE hza_resolve_phid_lowpt_2022preEE_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022postEE hza_resolve_phid_lowpt_2022postEE_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023preBPix hza_resolve_phid_lowpt_2023preBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023postBPix hza_resolve_phid_lowpt_2023postBPix_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023postBPixHole hza_resolve_phid_lowpt_2023postBPixHole_sf &
+sh $baseDir/run.sh egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2024 hza_resolve_phid_lowpt_2024_sf &
 
 # BUILD_CPP=1 sh $baseDir/run.sh egm_tnp_analysis.etc.config.settings_resolve_pho_2022preEE hza_phid_2022preEE_sf

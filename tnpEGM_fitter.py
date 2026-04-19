@@ -278,6 +278,20 @@ for s in tnpConf.samplesDef.keys():
     setattr( sample, 'altSigFit' , '%s/%s_%s.altSigFit.root'  % ( outputDirectory , sample.name, args.flag ) )
     setattr( sample, 'altBkgFit' , '%s/%s_%s.altBkgFit.root'  % ( outputDirectory , sample.name, args.flag ) )
     setattr( sample, 'altSigBkgFit' , '%s/%s_%s.altSigBkgFit.root'  % ( outputDirectory , sample.name, args.flag ) )
+    setattr( sample, 'diagnosticsSettingsTag', args.settings )
+    setattr( sample, 'diagnosticsFlag', args.flag )
+
+pool = None
+
+def _current_fit_type():
+    fit_type = 'nominalFit'
+    if args.altSig:
+        fit_type = 'altSigFit'
+    if args.altBkg:
+        fit_type = 'altBkgFit'
+    if args.altSigBkg:
+        fit_type = 'altSigBkgFit'
+    return fit_type
 
 if  args.doFit:
     print(" ======== Fitting ========")
@@ -285,15 +299,15 @@ if  args.doFit:
     def parallel_fit(ib):
         if (args.binNumber >= 0 and ib == args.binNumber) or args.binNumber < 0:
             if args.altSig and not args.addGaus:
-                tnpRoot.histFitterAltSig(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltSigFit )
+                tnpRoot.histFitterAltSig(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltSigFit, bin_index=ib )
             elif args.altSig and args.addGaus:
-                tnpRoot.histFitterAltSig(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltSigFit_addGaus, 1)
+                tnpRoot.histFitterAltSig(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltSigFit_addGaus, 1, bin_index=ib)
             elif args.altBkg:
-                tnpRoot.histFitterAltBkg(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltBkgFit )
+                tnpRoot.histFitterAltBkg(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltBkgFit, bin_index=ib )
             elif args.altSigBkg:
-                tnpRoot.histFitterAltSigBkg(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltSigBkgFit )
+                tnpRoot.histFitterAltSigBkg(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltSigBkgFit, bin_index=ib )
             else:
-                tnpRoot.histFitterNominal( sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParNomFit )
+                tnpRoot.histFitterNominal( sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParNomFit, bin_index=ib )
     pool = Pool()
     pool.map(parallel_fit, range(len(tnpBins['bins'])))
 
@@ -304,16 +318,13 @@ if  args.doFit:
 ####################################################################
 if  args.doPlot:
     fileName = sampleToFit.nominalFit
-    fitType  = 'nominalFit'
-    if args.altSig : 
+    fitType  = _current_fit_type()
+    if fitType == 'altSigFit':
         fileName = sampleToFit.altSigFit
-        fitType  = 'altSigFit'
-    if args.altBkg : 
+    if fitType == 'altBkgFit':
         fileName = sampleToFit.altBkgFit
-        fitType  = 'altBkgFit'
-    if args.altSigBkg : 
+    if fitType == 'altSigBkgFit':
         fileName = sampleToFit.altSigBkgFit
-        fitType  = 'altSigBkgFit'
         
     os.system('hadd -f %s %s' % (fileName, fileName.replace('.root', '-*.root')))
 
@@ -328,9 +339,13 @@ if  args.doPlot:
         if (args.binNumber >= 0 and ib == args.binNumber) or args.binNumber < 0:
             tnpRoot.histPlotter( fileName, tnpBins['bins'][ib], plottingDir )
 
+    summaryPath = tnpRoot.build_fit_diagnostics_summary(sampleToFit, fitType, tnpBins['bins'], args.binNumber)
+    print(' ===> Fit diagnostics summary saved in <=======')
+    print(summaryPath)
     print(' ===> Plots saved in <=======')
-    pool.close()
-    pool.join()
+    if pool is not None:
+        pool.close()
+        pool.join()
 #    print 'localhost/%s/' % plottingDir
 
 
