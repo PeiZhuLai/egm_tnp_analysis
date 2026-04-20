@@ -15,7 +15,7 @@
       }
     }
   },
-  "created_at_utc": "2026-04-19T15:59:26.515529+00:00",
+  "created_at_utc": "2026-04-20T05:34:21.722442+00:00",
   "derived": {
     "efficiency": 0.9999839297575954,
     "efficiency_error": 7.286720935664184e-08,
@@ -55,9 +55,9 @@
           "error": 0.0,
           "isConstant": false,
           "max": 5.0,
-          "min": -5.0,
+          "min": 0.1,
           "name": "meanF",
-          "value": 0.0
+          "value": 0.20000000000000012
         },
         {
           "error": 0.0,
@@ -66,14 +66,6 @@
           "min": 0.5,
           "name": "nSigF",
           "value": 0.5
-        },
-        {
-          "error": 0.0,
-          "isConstant": false,
-          "max": 1.5000382546675357,
-          "min": 0.40001020124467623,
-          "name": "sigmaF",
-          "value": 0.5000127515558452
         }
       ],
       "floatParsInit": [
@@ -81,9 +73,9 @@
           "error": 0.0,
           "isConstant": false,
           "max": 5.0,
-          "min": -5.0,
+          "min": 0.1,
           "name": "meanF",
-          "value": -0.0
+          "value": 0.2
         },
         {
           "error": 0.0,
@@ -92,14 +84,6 @@
           "min": 0.5,
           "name": "nSigF",
           "value": 0.5
-        },
-        {
-          "error": 0.0,
-          "isConstant": false,
-          "max": 1.5000382546675357,
-          "min": 0.40001020124467623,
-          "name": "sigmaF",
-          "value": 0.5000127515558452
         }
       ],
       "minNll": 1.0,
@@ -242,30 +226,6 @@
         "value": 0.9
       },
       {
-        "max": 5.0,
-        "min": -5.0,
-        "name": "meanF",
-        "raw": "meanF[-0.0,-5.0,5.0]",
-        "tokens": [
-          "-0.0",
-          "-5.0",
-          "5.0"
-        ],
-        "value": -0.0
-      },
-      {
-        "max": 5.0,
-        "min": 0.5,
-        "name": "sigmaF",
-        "raw": "sigmaF[0.9,0.5,5.0]",
-        "tokens": [
-          "0.9",
-          "0.5",
-          "5.0"
-        ],
-        "value": 0.9
-      },
-      {
         "max": 80.0,
         "min": 50.0,
         "name": "acmsP",
@@ -314,18 +274,6 @@
         "value": 87.0
       },
       {
-        "max": 80.0,
-        "min": 50.0,
-        "name": "acmsF",
-        "raw": "acmsF[60.,50.,80.]",
-        "tokens": [
-          "60.",
-          "50.",
-          "80."
-        ],
-        "value": 60.0
-      },
-      {
         "max": 0.08,
         "min": 0.01,
         "name": "betaF",
@@ -338,18 +286,6 @@
         "value": 0.05
       },
       {
-        "max": 2.0,
-        "min": -2.0,
-        "name": "gammaF",
-        "raw": "gammaF[0.1, -2, 2]",
-        "tokens": [
-          "0.1",
-          "-2",
-          "2"
-        ],
-        "value": 0.1
-      },
-      {
         "max": 90.0,
         "min": 82.0,
         "name": "peakF",
@@ -360,21 +296,65 @@
           "90.0"
         ],
         "value": 87.0
+      },
+      {
+        "max": 5.0,
+        "min": 0.1,
+        "name": "meanF",
+        "raw": "meanF[0.2,0.1,5.0]",
+        "tokens": [
+          "0.2",
+          "0.1",
+          "5.0"
+        ],
+        "value": 0.2
+      },
+      {
+        "name": "sigmaF",
+        "raw": "sigmaF[1.5]",
+        "tokens": [
+          "1.5"
+        ],
+        "value": 1.5
+      },
+      {
+        "max": 80.0,
+        "min": 40.0,
+        "name": "acmsF",
+        "raw": "acmsF[60.,40.,80.]",
+        "tokens": [
+          "60.",
+          "40.",
+          "80."
+        ],
+        "value": 60.0
+      },
+      {
+        "max": 0.1,
+        "min": -2.0,
+        "name": "gammaF",
+        "raw": "gammaF[0.01, -2, 0.1]",
+        "tokens": [
+          "0.01",
+          "-2",
+          "0.1"
+        ],
+        "value": 0.01
       }
     ],
     "effective_raw": [
       "meanP[-0.0,-5.0,5.0]",
       "sigmaP[0.9,0.5,5.0]",
-      "meanF[-0.0,-5.0,5.0]",
-      "sigmaF[0.9,0.5,5.0]",
       "acmsP[60.,50.,80.]",
       "betaP[0.05,0.01,0.08]",
       "gammaP[0.1, -2, 2]",
       "peakP[87.0,82.0,90.0]",
-      "acmsF[60.,50.,80.]",
       "betaF[0.05,0.01,0.08]",
-      "gammaF[0.1, -2, 2]",
-      "peakF[87.0,82.0,90.0]"
+      "peakF[87.0,82.0,90.0]",
+      "meanF[0.2,0.1,5.0]",
+      "sigmaF[1.5]",
+      "acmsF[60.,40.,80.]",
+      "gammaF[0.01, -2, 0.1]"
     ],
     "functions": [
       "Gaussian::sigResPass(x,meanP,sigmaP)",
@@ -409,30 +389,6 @@
         "value": 0.9
       },
       {
-        "max": 5.0,
-        "min": -5.0,
-        "name": "meanF",
-        "raw": "meanF[-0.0,-5.0,5.0]",
-        "tokens": [
-          "-0.0",
-          "-5.0",
-          "5.0"
-        ],
-        "value": -0.0
-      },
-      {
-        "max": 5.0,
-        "min": 0.5,
-        "name": "sigmaF",
-        "raw": "sigmaF[0.9,0.5,5.0]",
-        "tokens": [
-          "0.9",
-          "0.5",
-          "5.0"
-        ],
-        "value": 0.9
-      },
-      {
         "max": 80.0,
         "min": 50.0,
         "name": "acmsP",
@@ -481,18 +437,6 @@
         "value": 87.0
       },
       {
-        "max": 80.0,
-        "min": 50.0,
-        "name": "acmsF",
-        "raw": "acmsF[60.,50.,80.]",
-        "tokens": [
-          "60.",
-          "50.",
-          "80."
-        ],
-        "value": 60.0
-      },
-      {
         "max": 0.08,
         "min": 0.01,
         "name": "betaF",
@@ -505,18 +449,6 @@
         "value": 0.05
       },
       {
-        "max": 2.0,
-        "min": -2.0,
-        "name": "gammaF",
-        "raw": "gammaF[0.1, -2, 2]",
-        "tokens": [
-          "0.1",
-          "-2",
-          "2"
-        ],
-        "value": 0.1
-      },
-      {
         "max": 90.0,
         "min": 82.0,
         "name": "peakF",
@@ -527,21 +459,65 @@
           "90.0"
         ],
         "value": 87.0
+      },
+      {
+        "max": 5.0,
+        "min": 0.1,
+        "name": "meanF",
+        "raw": "meanF[0.2,0.1,5.0]",
+        "tokens": [
+          "0.2",
+          "0.1",
+          "5.0"
+        ],
+        "value": 0.2
+      },
+      {
+        "name": "sigmaF",
+        "raw": "sigmaF[1.5]",
+        "tokens": [
+          "1.5"
+        ],
+        "value": 1.5
+      },
+      {
+        "max": 80.0,
+        "min": 40.0,
+        "name": "acmsF",
+        "raw": "acmsF[60.,40.,80.]",
+        "tokens": [
+          "60.",
+          "40.",
+          "80."
+        ],
+        "value": 60.0
+      },
+      {
+        "max": 0.1,
+        "min": -2.0,
+        "name": "gammaF",
+        "raw": "gammaF[0.01, -2, 0.1]",
+        "tokens": [
+          "0.01",
+          "-2",
+          "0.1"
+        ],
+        "value": 0.01
       }
     ],
     "requested_raw": [
       "meanP[-0.0,-5.0,5.0]",
       "sigmaP[0.9,0.5,5.0]",
-      "meanF[-0.0,-5.0,5.0]",
-      "sigmaF[0.9,0.5,5.0]",
       "acmsP[60.,50.,80.]",
       "betaP[0.05,0.01,0.08]",
       "gammaP[0.1, -2, 2]",
       "peakP[87.0,82.0,90.0]",
-      "acmsF[60.,50.,80.]",
       "betaF[0.05,0.01,0.08]",
-      "gammaF[0.1, -2, 2]",
-      "peakF[87.0,82.0,90.0]"
+      "peakF[87.0,82.0,90.0]",
+      "meanF[0.2,0.1,5.0]",
+      "sigmaF[1.5]",
+      "acmsF[60.,40.,80.]",
+      "gammaF[0.01, -2, 0.1]"
     ]
   }
 }

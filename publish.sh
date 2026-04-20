@@ -128,7 +128,7 @@ publish_electron() {
     --section-url "#Resolve_Photon_CSEV_LowR9_2022preEE"
 
   # Electron Trigger SFs
-  # Double Trigger Lower Leg 12
+  # Double Electron Trigger Lower Leg 12
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
     --dest resolve_dielleg12trigger_gap_2024/hza_dielleg12trigger_gap_2024_sf \
     --hometitle "Custom Electron Double Lower Leg Trigger12 Gap 2024" \
@@ -145,7 +145,7 @@ publish_electron() {
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_nongap_2024_sf \
     --section-url "#Resolve_Electron_Double_Lower_Trigger12_nongap_2024"
 
-  # Double Trigger Upper Leg 23
+  # Double Electron Trigger Upper Leg 23
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
     --dest resolve_dielleg23trigger_gap_2024/hza_dielleg23trigger_gap_2024_sf \
     --hometitle "Custom Electron Double Upper Leg Trigger23 Gap 2024" \
@@ -162,7 +162,7 @@ publish_electron() {
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_nongap_2024_sf \
     --section-url "#Resolve_Electron_Double_Upper_Trigger23_nongap_2024"
 
-  # Single Trigger 30
+  # Electron Single Trigger 30
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
     --dest resolve_sielleg30trigger_gap_2024/hza_sielleg30trigger_gap_2024_sf \
     --hometitle "Custom Electron Single Trigger30 Gap 2024" \
@@ -196,7 +196,23 @@ publish_electron() {
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_2024_sf \
     --section-url "#Resolve_Electron_ID_nongap_2024"
 
-  # Low pT
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_elid_nongap_highpT_2024/hza_elid_nongap_highpT_2024_sf \
+    --hometitle "Custom Electron ID Nongap High pT 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_highpT_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_highpT_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_highpT_2024_sf \
+    --section-url "#Resolve_Electron_ID_nongap_highpT_2024"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_elid_nongap_lowpT_2024/hza_elid_nongap_lowpT_2024_sf \
+    --hometitle "Custom Electron ID Nongap Low pT 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_lowpT_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_lowpT_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_lowpT_2024_sf \
+    --section-url "#Resolve_Electron_ID_nongap_lowpT_2024"
+
+  # Photon ID Low pT
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
     --dest resolve_ph_lowpt_2023postBPix/hza_resolve_phid_lowpt_2024 \
     --hometitle "Resolve Custom Photon ID Low pT 2024"\
@@ -245,7 +261,7 @@ publish_electron() {
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_lowpt_2022preEE_sf \
     --section-url "#Resolve_Custom_Photon_ID_lowpt_2022preEE"
 
-  # High pT
+  # Photon ID High pT
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
     --dest resolve_ph_2023postBPix/hza_resolve_phid_2024 \
     --hometitle "Resolve Custom Photon ID 2024"\
@@ -343,6 +359,14 @@ publish_muon() {
   MUON_FITS_ROOT="${MUON_FITS_ROOT:-${MUON_TNP_ROOT}/fits_data/muon/generalTracks/Z/Run2024}"
   MUON_SUMMARY_ROOT="${MUON_SUMMARY_ROOT:-${MUON_TNP_ROOT}/plots/muon/generalTracks/Z/Run2024}"
 
+  publish_muon_one \
+    "Muon miniIso < 0.15 2024" \
+    "NUM_MuIso0p15_DEN_HToZa_SignalMuons_Trigger" \
+    "muon_miniIso0p15_2024"
+  publish_muon_one \
+    "Muon miniIso < 0.1 2024" \
+    "NUM_MuIso0p1_DEN_HToZa_SignalMuons_Trigger" \
+    "muon_miniIso0p1_2024"
   publish_muon_one \
     "Muon Double Trigger Lower Leg 2024" \
     "NUM_Mu8leg_DEN_HToZa_SignalMuons" \

@@ -112,7 +112,7 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFil
 #############################################################
 biningDef = [
    { 'var' : 'el_sc_eta' , 'type': 'float', 'bins': [-1.566,-1.4442, 0.0, 1.4442, 1.566] },
-   { 'var' : 'el_et' , 'type': 'float', 'bins': [7,12,35,500] },
+   { 'var' : 'el_et' , 'type': 'float', 'bins': [7,25,27,35,50,100,500] },
 ]
 
 #############################################################
