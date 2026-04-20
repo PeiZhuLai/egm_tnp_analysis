@@ -9,7 +9,7 @@
 # python tnpEGM_fitter.py $1 --flag $2 --sumUp
 
 baseDir="/afs/cern.ch/work/p/pelai/HZa/TnP/CMSSW_11_2_0/src/egm_tnp_analysis"
-max_jobs=6
+max_jobs=3
 pids=()
 
 run_job() {
@@ -52,16 +52,16 @@ wait_for_batch() {
 ##------------------------------------------------------------------------------------------------------------
 
 # Electron ID and Trigger SFs
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2024 hza_elid_gap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_2024 hza_elid_nongap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2024 hza_elid_gap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_2024 hza_elid_nongap_2024_sf
 run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_highpT_2024 hza_elid_nongap_highpT_2024_sf
 run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_lowpT_2024 hza_elid_nongap_lowpT_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf
 #------------------------------------------------------------------------------------------------------------
 
 # Custom Photon ID

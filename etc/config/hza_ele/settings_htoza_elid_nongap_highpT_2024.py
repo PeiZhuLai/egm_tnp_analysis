@@ -21,7 +21,7 @@ baseline_cut = (
 
 # flag to be Tested
 flags = {
-    'hza_elid_nongap_high_pT_2024_sf': (
+    'hza_elid_nongap_highpT_2024_sf': (
         '('
         + baseline_cut +
         '('
