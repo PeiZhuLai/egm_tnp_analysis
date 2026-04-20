@@ -6,6 +6,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_with_updates
 
 #############################################################
 ########## General settings
@@ -225,10 +226,10 @@ additionalCuts = None
 ########## fitting params to tune fit by hand if necessary
 #############################################################
 tnpParNomFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.4,2.87]",
-    "meanF[-0.0,-2.6,5.0]","sigmaF[1.0,0.5,2.1]",
-    "acmsP[60.,39.,80.]","betaP[0.05,0.01,0.09]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-    "acmsF[60.,35.,75.]","betaF[0.05,0.01,0.11]","gammaF[0.1, 0.02, 2]","peakF[87.0,82.0,90.0]",
+    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]","sigmaF[2.0,0.5,5.0]",
+    "acmsP[60.,45.,70.]","betaP[0.05,0.01,0.08]","gammaP[0.04, 0.02, 2]","peakP[87.0,82.0,90.0]",
+    "acmsF[60.,35.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.04, 0.02, 2]","peakF[87.0,82.0,90.0]",
     ]
 
 # # 15
@@ -261,8 +262,8 @@ tnpParAltSigFit = [
     "alphaF[2.0,1.2,3.5]",
     "nF[3,0,5]",
     "sosF[1,0.5,5.0]",
-    "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
-    "acmsF[60.,35.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.02, 1]","peakF[89.0,82.0,90.0]",
+    "acmsP[40.,35.,48.]","betaP[0.04,0.005,0.06]","gammaP[0.04, 0.02, 1]","peakP[89.0,82.0,90.0]",
+    "acmsF[50.,40.,70.]","betaF[0.04,0.01,0.06]","gammaF[0.04, 0.02, 1]","peakF[89.0,82.0,90.0]",
     ]
      
 tnpParAltBkgFit = [
@@ -274,15 +275,15 @@ tnpParAltBkgFit = [
 
 tnpParAltSigBkgFit = [
   'meanP[-0.0, -5.0, 5.0]',
-  'meanF[-0.0, -5.0, 5.0]',
   'sigmaP[0.5, 0.1, 2.0]',
-  'sigmaF[0.5, 0.1, 2.0]',
   'sigmaP_2[0.5, 0.1, 2.0]',
-  'sigmaF_2[0.5, 0.1, 3.0]',
   'sosP[0.10, 0.0, 1.0]',
+  'meanF[-1.0, -5.0, 4.3]',
+  'sigmaF[0.5, 0.1, 2.0]',
+  'sigmaF_2[0.5, 0.1, 3.0]',
   'sosF[0.12, 0.0, 1.0]',
   'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
+  'alphaP_2[-0.012, -1, 0]',
   'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
-  'alphaP_2[-0.020, -1, 0]',
-  'alphaF_2[-0.014, -1, 0.05]',
+  'alphaF_2[-0.04, -1, -0.029]',
 ]

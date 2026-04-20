@@ -354,6 +354,30 @@ def build_fit_diagnostics_summary(sample, fit_type, tnp_bins, selected_bin=-1):
                 payload = json.load(handle)
             fit_result = payload.get('fit_result', {})
             derived = payload.get('derived', {}) or {}
+            histograms = payload.get('histograms', {}) or {}
+            hist_pass = histograms.get('pass', {}) or {}
+            hist_fail = histograms.get('fail', {}) or {}
+            pass_raw = hist_pass.get('raw_integral')
+            fail_raw = hist_fail.get('raw_integral')
+            pass_fit_window = hist_pass.get('fit_window_integral')
+            fail_fit_window = hist_fail.get('fit_window_integral')
+            pass_zero_stat = (pass_raw or 0) <= 0 and (pass_fit_window or 0) <= 0
+            fail_zero_stat = (fail_raw or 0) <= 0 and (fail_fit_window or 0) <= 0
+            attention_reasons = []
+
+            if pass_zero_stat:
+                attention_reasons.append('pass_zero_stat')
+            if fail_zero_stat:
+                attention_reasons.append('fail_zero_stat')
+            if not fit_result.get('pass'):
+                attention_reasons.append('missing_pass_fit_result')
+            elif fit_result.get('pass_quality') != 'ok' and not pass_zero_stat:
+                attention_reasons.append('bad_pass_fit')
+            if not fit_result.get('fail'):
+                attention_reasons.append('missing_fail_fit_result')
+            elif fit_result.get('fail_quality') != 'ok' and not fail_zero_stat:
+                attention_reasons.append('bad_fail_fit')
+
             entry.update({
                 'pass_status': fit_result.get('pass', {}).get('status') if fit_result.get('pass') else None,
                 'pass_covQual': fit_result.get('pass', {}).get('covQual') if fit_result.get('pass') else None,
@@ -365,15 +389,29 @@ def build_fit_diagnostics_summary(sample, fit_type, tnp_bins, selected_bin=-1):
                 'efficiency_error': derived.get('efficiency_error'),
                 'nSigP': (derived.get('nSigP') or {}).get('value'),
                 'nSigF': (derived.get('nSigF') or {}).get('value'),
+                'hist_stats': {
+                    'pass': {
+                        'raw_integral': pass_raw,
+                        'fit_window_integral': pass_fit_window,
+                    },
+                    'fail': {
+                        'raw_integral': fail_raw,
+                        'fit_window_integral': fail_fit_window,
+                    },
+                },
+                'zero_stat_like': pass_zero_stat or fail_zero_stat,
+                'attention_reasons': attention_reasons,
+                'tuning_candidate': any(
+                    reason in ('bad_pass_fit', 'bad_fail_fit', 'missing_pass_fit_result', 'missing_fail_fit_result')
+                    for reason in attention_reasons
+                ),
             })
-            entry['needs_attention'] = (
-                entry.get('pass_quality') != 'ok' or
-                entry.get('fail_quality') != 'ok' or
-                not fit_result.get('pass') or
-                not fit_result.get('fail')
-            )
+            entry['needs_attention'] = bool(attention_reasons)
         else:
             entry['needs_attention'] = True
+            entry['attention_reasons'] = ['missing_diagnostic']
+            entry['zero_stat_like'] = False
+            entry['tuning_candidate'] = True
 
         entries.append(entry)
 
