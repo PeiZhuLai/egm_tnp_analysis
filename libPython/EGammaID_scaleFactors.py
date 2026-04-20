@@ -78,6 +78,38 @@ def _is_eta_like(axis_name):
     return _normalize_axis_name(axis_name) in ("eta", "absEta")
 
 
+def _format_eta_boundary(value):
+    rounded_to_3 = round(value, 3)
+    precision = 4 if abs(value - rounded_to_3) > 1e-6 else 3
+    return f"{value:.{precision}f}"
+
+
+def _legend_label(axis_name, key):
+    normalized = _normalize_axis_name(axis_name)
+    low = float(key[0])
+    high = float(key[1])
+
+    if normalized == "eta":
+        return "%s #leq #eta #leq %s" % (
+            _format_eta_boundary(low),
+            _format_eta_boundary(high),
+        )
+
+    if normalized == "absEta":
+        return "%s #leq | #eta | #leq %s" % (
+            _format_eta_boundary(low),
+            _format_eta_boundary(high),
+        )
+
+    if normalized == "pT":
+        return "%3.0f #leq p_{T} #leq %3.0f GeV" % (low, high)
+
+    if normalized == "nVtx":
+        return "%3.0f #leq nVtx #leq %3.0f" % (low, high)
+
+    return "%g #leq x #leq %g" % (low, high)
+
+
 def _infer_x_limits(effis, x_axis):
     xmin = None
     xmax = None
@@ -121,6 +153,40 @@ def _measurement_tag(plot_path):
 
 def _make_plot_output_path(plot_path, stem):
     return os.path.join(os.path.dirname(plot_path), f"HZa_{stem}_{_measurement_tag(plot_path)}")
+
+
+def _collect_abs_eta_bins(eff_graph):
+    abs_eta_bins = set()
+
+    for second_axis_bin in eff_graph.effList.keys():
+        for first_axis_bin in eff_graph.effList[second_axis_bin].keys():
+            abs_eta_bin = (abs(first_axis_bin[0]), abs(first_axis_bin[1]))
+            abs_eta_bin = (min(abs_eta_bin), max(abs_eta_bin))
+            if abs(abs_eta_bin[0] - abs_eta_bin[1]) <= 1e-6:
+                continue
+            abs_eta_bins.add(abs_eta_bin)
+
+    return sorted(abs_eta_bins)
+
+
+def _choose_custom_first_axis_bining(filein, eff_graph):
+    actual_abs_eta_bins = _collect_abs_eta_bins(eff_graph)
+    measurement_key = ("%s %s" % (_measurement_tag(filein), os.path.basename(filein))).lower()
+    is_gap_measurement = "_gap_" in measurement_key and "_nongap_" not in measurement_key
+
+    if is_gap_measurement and actual_abs_eta_bins:
+        return actual_abs_eta_bins
+
+    if ("lowpt" in measurement_key) and ("hole" in measurement_key):
+        return [(0.000, 1.444)]
+
+    if "lowpt" in measurement_key:
+        return [(0.000, 1.444), (1.566, 2.000), (2.000, 2.500)]
+
+    if "hole" in measurement_key:
+        return [(0.000, 0.800), (0.800, 1.444)]
+
+    return [(0.000, 0.800), (0.800, 1.444), (1.566, 2.000), (2.000, 2.500)]
 
 
 
@@ -335,12 +401,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
         listOfTGraph1.append( grBinsEffData )
         listOfTGraph2.append( grBinsSF ) 
         listOfMC.append( grBinsEffMC   )
-        if 'eta' in yAxis or 'Eta' in yAxis:
-            leg.AddEntry( grBinsEffData, '%1.3f #leq | #eta | #leq  %1.3f' % (float(key[0]),float(key[1])), "PL")        
-        elif 'pt' in yAxis or 'pT' in yAxis:
-            leg.AddEntry( grBinsEffData, '%3.0f #leq p_{T} #leq  %3.0f GeV' % (float(key[0]),float(key[1])), "PL")        
-        elif 'vtx' in yAxis or 'Vtx' in yAxis or 'PV' in yAxis:
-            leg.AddEntry( grBinsEffData, '%3.0f #leq nVtx #leq  %3.0f'      % (float(key[0]),float(key[1])), "PL")        
+        leg.AddEntry(grBinsEffData, _legend_label(yAxis, key), "PL")
     
     # 若全部 bin 都被 skip，避免後面存取 list[0] 炸掉
     if len(listOfTGraph1) == 0:
@@ -560,23 +621,7 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     customFirstAxisBining = []
 
     if effGraph.etaLikeAxis:
-        if ("Lowpt" in filein) and ("Hole" in filein):
-            customFirstAxisBining.append((0.000, 1.444))
-
-        elif "Lowpt" in filein:
-            customFirstAxisBining.append((0.000, 1.444))
-            customFirstAxisBining.append((1.566, 2.000))
-            customFirstAxisBining.append((2.000, 2.500))
-
-        elif "Hole" in filein:
-            customFirstAxisBining.append((0.000, 0.800))
-            customFirstAxisBining.append((0.800, 1.444))
-
-        else:
-            customFirstAxisBining.append((0.000, 0.800))
-            customFirstAxisBining.append((0.800, 1.444))
-            customFirstAxisBining.append((1.566, 2.000))
-            customFirstAxisBining.append((2.000, 2.500))
+        customFirstAxisBining = _choose_custom_first_axis_bining(filein, effGraph)
     else:
         first_axis_bins = set()
         for second_axis_bin in effGraph.effList.keys():
