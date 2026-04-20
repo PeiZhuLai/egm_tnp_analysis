@@ -357,10 +357,10 @@ def build_fit_diagnostics_summary(sample, fit_type, tnp_bins, selected_bin=-1):
             histograms = payload.get('histograms', {}) or {}
             hist_pass = histograms.get('pass', {}) or {}
             hist_fail = histograms.get('fail', {}) or {}
-            pass_raw = hist_pass.get('raw_integral')
-            fail_raw = hist_fail.get('raw_integral')
-            pass_fit_window = hist_pass.get('fit_window_integral')
-            fail_fit_window = hist_fail.get('fit_window_integral')
+            pass_raw = hist_pass.get('integral_full', hist_pass.get('raw_integral'))
+            fail_raw = hist_fail.get('integral_full', hist_fail.get('raw_integral'))
+            pass_fit_window = hist_pass.get('integral_fit_window', hist_pass.get('fit_window_integral'))
+            fail_fit_window = hist_fail.get('integral_fit_window', hist_fail.get('fit_window_integral'))
             pass_zero_stat = (pass_raw or 0) <= 0 and (pass_fit_window or 0) <= 0
             fail_zero_stat = (fail_raw or 0) <= 0 and (fail_fit_window or 0) <= 0
             attention_reasons = []
@@ -391,12 +391,12 @@ def build_fit_diagnostics_summary(sample, fit_type, tnp_bins, selected_bin=-1):
                 'nSigF': (derived.get('nSigF') or {}).get('value'),
                 'hist_stats': {
                     'pass': {
-                        'raw_integral': pass_raw,
-                        'fit_window_integral': pass_fit_window,
+                        'integral_full': pass_raw,
+                        'integral_fit_window': pass_fit_window,
                     },
                     'fail': {
-                        'raw_integral': fail_raw,
-                        'fit_window_integral': fail_fit_window,
+                        'integral_full': fail_raw,
+                        'integral_fit_window': fail_fit_window,
                     },
                 },
                 'zero_stat_like': pass_zero_stat or fail_zero_stat,

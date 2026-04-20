@@ -147,22 +147,6 @@ tnpParNomFit = [
     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
-tnpParNomFitByBin = {
-    4: params_with_updates(
-        tnpParNomFit,
-        "meanF[0.2,0.1,5.0]",
-        "sigmaF[1.5]",
-        "acmsF[60.,40.,80.]",
-        "gammaF[0.01, -2, 0.1]",
-    ),
-    15: params_with_updates(
-        tnpParNomFit,
-        "sigmaF[1.0,0.0,3.0]",
-        "acmsF[60.,50.,70.]",
-        "betaF[0.05,0.05,0.07]",
-        "gammaF[0.01, -2, 2]",
-    ),
-}
 
 # # 15
 # tnpParNomFit = [
