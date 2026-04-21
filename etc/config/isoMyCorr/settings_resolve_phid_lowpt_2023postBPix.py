@@ -6,6 +6,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_with_updates
 
 #############################################################
 ########## General settings
@@ -283,6 +284,17 @@ tnpParAltBkgFit = [
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
+tnpParAltBkgFitByBin = {
+    3: params_with_updates(
+        tnpParAltBkgFit,
+        "meanP[-1.2,-5.0,5.0]",
+        "sigmaP[3.0,0.8,8.0]",
+        "meanF[-4.0,-5.0,5.0]",
+        "sigmaF[6.0,1.0,12.0]",
+        "alphaP[-0.2,-5.,5.]",
+        "alphaF[-0.2,-5.,5.]",
+    ),
+}
 
 tnpParAltSigBkgFit = [
   'meanP[-0.0, -5.0, 5.0]',

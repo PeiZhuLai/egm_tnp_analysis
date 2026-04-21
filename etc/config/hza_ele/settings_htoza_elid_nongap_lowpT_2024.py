@@ -193,6 +193,15 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 tnpParAltSigBkgFitByBin = {
+    5: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[0.35, 0.1, 1.5]',
+        'sigmaP_2[0.25, 0.1, 1.5]',
+        'sosP[0.05, 0.0, 1.0]',
+        'alphaP[2.0, 0.8, 4.0]',
+        'nP[0.3, 0.0, 2.0]',
+        'alphaP_2[-0.03, -1, 0.05]',
+    ),
     6: params_with_updates(
         tnpParAltSigBkgFit,
         'alphaF_2[-0.014, -1, 0.]',

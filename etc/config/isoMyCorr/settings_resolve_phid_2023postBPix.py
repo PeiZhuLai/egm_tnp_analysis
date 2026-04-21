@@ -6,6 +6,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_with_updates
 
 #############################################################
 ########## General settings
@@ -234,6 +235,35 @@ tnpParNomFit = [
     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,55.,80.]","betaF[0.05,0.05,0.07]","gammaF[0.1, 0.03, 2]","peakF[87.0,82.0,90.0]",
     ]
+_highpt_nominal_override = (
+    "acmsP[70.,45.,95.]",
+    "betaP[0.05,0.005,0.10]",
+    "gammaP[0.08,-2,2]",
+    "acmsF[70.,45.,95.]",
+    "betaF[0.06,0.005,0.12]",
+    "gammaF[0.06,0.005,2]",
+    "sigmaF[1.2,0.2,3.5]",
+)
+tnpParNomFitByBin = {
+    3: params_with_updates(
+        tnpParNomFit,
+        "acmsP[70.,45.,95.]",
+        "betaP[0.05,0.005,0.10]",
+        "gammaP[0.08,-2,2]",
+        "acmsF[70.,45.,95.]",
+        "betaF[0.05,0.005,0.10]",
+        "gammaF[0.06,0.005,2]",
+        "sigmaF[1.6,0.2,6.0]",
+    ),
+    20: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    21: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    23: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    24: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    25: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    26: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    28: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    29: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+}
 
 # # 4
 # tnpParNomFit = [
@@ -250,6 +280,22 @@ tnpParAltSigFit = [
     "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
     "acmsF[60.,50.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.01, 1]","peakF[89.0,82.0,90.0]",
     ]
+tnpParAltSigFitByBin = {
+    3: params_with_updates(
+        tnpParAltSigFit,
+        "sigmaP[4.5,2.0,8.5]",
+        "sigmaF[4.5,2.0,10.0]",
+        "sosP[1.2,0.3,6.0]",
+        "sosF[2.0,0.3,8.0]",
+        "acmsP[70.,45.,95.]",
+        "betaP[0.04,0.005,0.08]",
+        "gammaP[0.08,0.002,1.5]",
+        "acmsF[70.,45.,95.]",
+        "betaF[0.04,0.005,0.08]",
+        "gammaF[0.04,0.002,1.5]",
+        "meanF[-2.0,-5.0,5.0]",
+    ),
+}
      
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",

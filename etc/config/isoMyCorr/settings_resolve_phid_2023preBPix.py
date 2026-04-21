@@ -6,6 +6,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_with_updates
 
 #############################################################
 ########## General settings
@@ -221,6 +222,18 @@ tnpParNomFit = [
     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+tnpParNomFitByBin = {
+    0: params_with_updates(
+        tnpParNomFit,
+        "acmsP[70.,45.,95.]",
+        "betaP[0.05,0.005,0.10]",
+        "gammaP[0.06,-2,2]",
+        "acmsF[70.,45.,95.]",
+        "betaF[0.05,0.005,0.10]",
+        "gammaF[0.06,-2,2]",
+        "sigmaF[1.5,0.2,4.5]",
+    ),
+}
 
 # # 15
 # tnpParNomFit = [
@@ -252,6 +265,14 @@ tnpParAltBkgFit = [
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
+tnpParAltBkgFitByBin = {
+    9: params_with_updates(
+        tnpParAltBkgFit,
+        "alphaF[-0.5,-5.,1.0]",
+        "meanF[-1.7,-5.0,5.0]",
+        "sigmaF[3.5,0.8,8.0]",
+    ),
+}
 
 
 tnpParAltSigBkgFit = [
@@ -268,6 +289,18 @@ tnpParAltSigBkgFit = [
   'alphaP_2[-0.012, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]
+tnpParAltSigBkgFitByBin = {
+    6: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[0.8, 0.1, 3.0]',
+        'sigmaF[0.8, 0.1, 3.0]',
+        'sigmaP_2[1.0, 0.1, 3.0]',
+        'sigmaF_2[1.0, 0.1, 4.0]',
+        'sosP[0.20, 0.0, 1.0]',
+        'sosF[0.20, 0.0, 1.0]',
+        'alphaF_2[-0.023, -1, 0.05]',
+    ),
+}
 
 # ## 06
 # tnpParAltSigBkgFit = [

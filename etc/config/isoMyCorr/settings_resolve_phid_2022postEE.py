@@ -6,6 +6,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_with_updates
 
 #############################################################
 ########## General settings
@@ -222,6 +223,28 @@ tnpParNomFit = [
     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+tnpParNomFitByBin = {
+    6: params_with_updates(
+        tnpParNomFit,
+        "acmsP[70.,45.,95.]",
+        "betaP[0.05,0.005,0.10]",
+        "gammaP[0.05,-2,1.0]",
+        "acmsF[70.,45.,95.]",
+        "betaF[0.05,0.005,0.10]",
+        "gammaF[0.05,-2,2]",
+        "sigmaF[1.4,0.3,4.5]",
+    ),
+    19: params_with_updates(
+        tnpParNomFit,
+        "acmsP[70.,45.,95.]",
+        "betaP[0.05,0.005,0.10]",
+        "gammaP[0.05,-2,1.0]",
+        "acmsF[70.,45.,95.]",
+        "betaF[0.05,0.005,0.10]",
+        "gammaF[0.05,-2,2]",
+        "sigmaF[1.2,0.2,3.5]",
+    ),
+}
 
 # # 6
 # tnpParNomFit = [

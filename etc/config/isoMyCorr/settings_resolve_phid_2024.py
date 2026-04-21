@@ -231,6 +231,25 @@ tnpParNomFit = [
     "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.08, 0.005, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[70.,45.,90.]","betaF[0.04,0.005,0.10]","gammaF[0.08, 0.005, 2]","peakF[87.0,82.0,90.0]",
     ]
+_highpt_nominal_override = (
+    "acmsP[70.,45.,95.]",
+    "betaP[0.05,0.005,0.10]",
+    "gammaP[0.08,-2,2]",
+    "acmsF[70.,45.,95.]",
+    "betaF[0.06,0.005,0.12]",
+    "gammaF[0.06,0.005,2]",
+    "sigmaF[1.2,0.2,3.5]",
+)
+tnpParNomFitByBin = {
+    20: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    21: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    23: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    24: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    25: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    26: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    28: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+    29: params_with_updates(tnpParNomFit, *_highpt_nominal_override),
+}
 
 # # 15
 # tnpParNomFit = [
@@ -265,7 +284,9 @@ tnpParAltBkgFit = [
 tnpParAltBkgFitByBin = {
     6: params_with_updates(
         tnpParAltBkgFit,
-        "alphaF[-1.8,-5.,-1.8]",
+        "meanF[-1.2,-5.0,5.0]",
+        "sigmaF[3.0,0.8,8.0]",
+        "alphaF[-0.8,-5.,0.5]",
     ),
 }
 
