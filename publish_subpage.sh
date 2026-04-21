@@ -466,15 +466,27 @@ if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
   }
 </style>
 <div class="center">
-  <h2>Welcome to H -> Za -> ll gamma gamma efficiency and scale factors measurement.</h2>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <h2>
-    This page contains links to the scale factor measurement fits and results for the Run 3 2022+2023+2024 Higgs to Za analysis.<br>
+  Welcome to the \(H \to Z\gamma \to \ell\ell\gamma\) and
+  \(H \to Za \to \ell\ell\gamma\gamma\) (\(\ell = e, \mu\))
+  efficiency and scale factor measurement
+  </h2>
+  <h2>The same electron and muon selection criteria are used in both analyses.</h2>
+  <h2>Photon-related efficiency and scale factors are only considered in the H&rarr;Za analysis.</h2>
+  <h2>
+    Links to the lepton scale factor measurement fits and results for the Run 3 2024+2025+2026 \(H \to Z\gamma \to \ell\ell\gamma\) analysis (\(\ell = e,\mu\)).<br>
+  </h2>
+  <h2>
+    Links to the photon-related scale factor measurement fits and results for the Run 3 2022+2023+2024 \(H \to Za \to \ell\ell\gamma\gamma\) analysis (\(\ell = e,\mu\)).<br>
   </h2>
   <h2>
     Presentations will be given to the MUO POG
-    <a href="https://indico.cern.ch/event/XXXXXXX" target="_blank">here</a>
+    <a href="https://indico.cern.ch/event/XXXXXXX" target="_blank">muon presentation</a>
     and to the EGM POG
-    <a href="https://indico.cern.ch/event/YYYYYYY" target="_blank">here</a>.
+    <a href="https://indico.cern.ch/event/ELECTRON_ID" target="_blank">electron presentation</a>
+    and
+    <a href="https://indico.cern.ch/event/PHOTON_ID" target="_blank">photon presentation</a>.
     (Left the space for the future)<br>
   </h2>
   <h2>See below links for plots.</h2>
