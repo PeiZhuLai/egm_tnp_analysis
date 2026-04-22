@@ -145,6 +145,32 @@ tnpParNomFit = [
     "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+_lowpt_nominal_tail_common = (
+    "acmsP[60.,25.,110.]",
+    "betaP[0.07,0.001,0.15]",
+    "gammaP[0.05,-2,2.]",
+    "acmsF[95.,25.,130.]",
+    "betaF[0.06,0.001,0.18]",
+    "gammaF[0.05,-2,2.]",
+)
+tnpParNomFitByBin = {
+    0: params_with_updates(
+        tnpParNomFit,
+        "meanP[-2.0,-5.0,5.0]",
+        "sigmaP[1.8,0.5,5.0]",
+        "meanF[-2.5,-8.0,5.0]",
+        "sigmaF[4.5,0.5,9.0]",
+        *_lowpt_nominal_tail_common,
+    ),
+    5: params_with_updates(
+        tnpParNomFit,
+        "meanP[-2.0,-5.0,5.0]",
+        "sigmaP[1.9,0.5,5.0]",
+        "meanF[-2.8,-8.0,5.0]",
+        "sigmaF[5.0,0.5,10.0]",
+        *_lowpt_nominal_tail_common,
+    ),
+}
 
 # # 15
 # tnpParNomFit = [
@@ -169,6 +195,48 @@ tnpParAltSigFit = [
     "acmsP[65.,45.,90.]","betaP[0.04,0.005,0.08]","gammaP[0.08, 0.002, 1.5]","peakP[89.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.04,0.005,0.08]","gammaF[0.08, 0.002, 1.5]","peakF[89.0,82.0,90.0]",
     ]
+_lowpt_altsig_tail_common = (
+    "acmsP[75.,25.,120.]",
+    "betaP[0.06,0.001,0.15]",
+    "gammaP[0.08,0.001,2.0]",
+    "acmsF[95.,25.,130.]",
+    "betaF[0.06,0.001,0.15]",
+    "gammaF[0.08,0.001,2.0]",
+)
+tnpParAltSigFitByBin = {
+    0: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-1.6,-5.0,5.0]",
+        "sigmaP[6.0,1.0,12.0]",
+        "sigmaP_2[1.5,0.3,10.0]",
+        "alphaP[2.5,0.8,4.5]",
+        "nP[0.8,-2.0,8.0]",
+        "sosP[2.5,0.1,8.0]",
+        "meanF[-2.3,-6.0,5.0]",
+        "sigmaF[6.0,1.0,12.0]",
+        "sigmaF_2[1.5,0.3,10.0]",
+        "alphaF[2.0,0.8,4.5]",
+        "nF[0.8,0.0,8.0]",
+        "sosF[1.0,0.0,8.0]",
+        *_lowpt_altsig_tail_common,
+    ),
+    5: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-1.5,-5.0,5.0]",
+        "sigmaP[6.0,1.0,12.0]",
+        "sigmaP_2[1.2,0.3,10.0]",
+        "alphaP[2.0,0.8,4.5]",
+        "nP[0.8,-2.0,8.0]",
+        "sosP[2.5,0.1,8.0]",
+        "meanF[-2.8,-6.0,5.0]",
+        "sigmaF[6.0,1.0,12.0]",
+        "sigmaF_2[1.5,0.3,10.0]",
+        "alphaF[2.0,0.8,4.5]",
+        "nF[0.8,0.0,8.0]",
+        "sosF[1.0,0.0,8.0]",
+        *_lowpt_altsig_tail_common,
+    ),
+}
      
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
