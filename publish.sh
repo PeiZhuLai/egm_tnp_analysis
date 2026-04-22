@@ -184,7 +184,7 @@ publish_electron() {
     --dest resolve_elid_gap_2024/hza_elid_gap_2024_sf \
     --hometitle "Custom Electron ID Gap 2024" \
     --title "Efficiency / Scale Factor Measurements — hza_elid_gap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_2024_sf/plots/Data_2024 \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_gap_2024_sf/plots/Data_2024 \
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_gap_2024_sf \
     --section-url "#Resolve_Electron_ID_gap_2024"
 
