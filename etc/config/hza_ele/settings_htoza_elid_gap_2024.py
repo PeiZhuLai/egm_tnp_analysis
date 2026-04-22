@@ -170,13 +170,23 @@ tnpParNomFitByBin = {
         "sigmaF[3.0,0.8,4.5]",
         *_gap_nominal_low_common,
     ),
+    1: params_with_updates(
+        tnpParNomFit,
+        "meanF[-1.0,-5.0,1.0]",
+        "sigmaF[3.0,1.0,4.5]",
+        "acmsF[50.,25.,70.]",
+        "betaF[0.01,0.0005,0.05]",
+        "gammaF[0.02,-0.1,0.3]",
+    ),
     2: params_with_updates(
         tnpParNomFit,
         "meanP[-0.5,-5.0,5.0]",
         "sigmaP[1.4,0.5,2.5]",
         "meanF[-1.2,-5.0,1.0]",
-        "sigmaF[2.8,0.8,4.2]",
-        *_gap_nominal_low_common,
+        "sigmaF[3.0,1.0,4.5]",
+        "acmsF[52.,25.,72.]",
+        "betaF[0.01,0.0005,0.05]",
+        "gammaF[0.02,-0.1,0.3]",
     ),
     3: params_with_updates(
         tnpParNomFit,
@@ -258,6 +268,12 @@ tnpParAltBkgFit = [
     "alphaF[0.,-5.,5.]",
     ]
 tnpParAltBkgFitByBin = {
+    1: params_with_updates(
+        tnpParAltBkgFit,
+        "meanF[-0.9,-3.0,1.0]",
+        "sigmaF[3.0,1.5,4.5]",
+        "alphaF[-0.05,-1.,1.]",
+    ),
     3: params_with_updates(
         tnpParAltBkgFit,
         "meanP[-0.95,-5.0,5.0]",
