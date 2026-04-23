@@ -118,11 +118,11 @@ tnpParNomFit = [
     "acmsF[60.,35.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.04, 0.02, 2]","peakF[87.0,82.0,90.0]",
     ]
 _PURE_SIGNAL_NOMINAL = (
-    "meanF[-0.0,-1.2,0.8]",
-    "sigmaF[1.2,0.4,2.0]",
-    "acmsF[35.,20.,50.]",
-    "betaF[0.005,0.0005,0.02]",
-    "gammaF[0.03,0.001,0.12]",
+    "meanF[-0.0,-0.8,0.5]",
+    "sigmaF[1.0,0.2,1.6]",
+    "acmsF[30.,10.,42.]",
+    "betaF[0.001,0.0001,0.012]",
+    "gammaF[0.01,0.0005,0.06]",
 )
 tnpParNomFitByBin = {
     5: params_with_updates(
@@ -189,9 +189,9 @@ tnpParAltBkgFit = [
     "alphaF[0.,-5.,5.]",
     ]
 _PURE_SIGNAL_ALTBKG = (
-    "meanF[-0.0,-1.2,0.8]",
-    "sigmaF[1.2,0.4,2.0]",
-    "alphaF[-0.8,-5.,-0.05]",
+    "meanF[-0.0,-0.8,0.5]",
+    "sigmaF[1.0,0.2,1.6]",
+    "alphaF[-1.8,-5.,-0.2]",
 )
 tnpParAltBkgFitByBin = {
     5: params_with_updates(
@@ -215,13 +215,13 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.04, -1, -0.029]',
 ]
 _PURE_SIGNAL_ALTSIGBKG = (
-    'meanF[-0.0, -1.2, 0.8]',
-    'sigmaF[0.6, 0.2, 1.2]',
-    'sigmaF_2[0.5, 0.1, 1.2]',
-    'sosF[0.03, 0.0, 0.2]',
-    'alphaF[1.8, 1.2, 2.6]',
-    'nF[0.6, 0.0, 2.0]',
-    'alphaF_2[-0.8, -5., -0.05]',
+    'meanF[-0.0, -0.8, 0.5]',
+    'sigmaF[0.5, 0.1, 1.0]',
+    'sigmaF_2[0.4, 0.1, 1.0]',
+    'sosF[0.02, 0.0, 0.12]',
+    'alphaF[1.6, 1.1, 2.2]',
+    'nF[0.8, 0.0, 2.5]',
+    'alphaF_2[-1.8, -5., -0.2]',
 )
 tnpParAltSigBkgFitByBin = {
     5: params_with_updates(
