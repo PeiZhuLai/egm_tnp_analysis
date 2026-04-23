@@ -126,10 +126,26 @@ tnpParNomFit = [
     "acmsF[65.,55.,80.]","betaF[0.05,0.05,0.07]","gammaF[0.1, 0.03, 2]","peakF[87.0,82.0,90.0]",
     ]
 tnpParNomFitByBin = {
+    0: params_with_updates(
+        tnpParNomFit,
+        "meanF[-0.2,-1.5,1.0]",
+        "sigmaF[1.2,0.4,2.2]",
+        "acmsF[45.,25.,65.]",
+        "betaF[0.01,0.0005,0.04]",
+        "gammaF[0.02,0.001,0.25]",
+    ),
     3: params_with_updates(
         tnpParNomFit,
         "meanF[-0.2,-1.5,1.0]",
         "sigmaF[1.4,0.4,2.4]",
+        "acmsF[45.,25.,65.]",
+        "betaF[0.01,0.0005,0.04]",
+        "gammaF[0.02,0.001,0.25]",
+    ),
+    5: params_with_updates(
+        tnpParNomFit,
+        "meanF[-0.2,-2.0,1.0]",
+        "sigmaF[1.8,0.5,3.0]",
         "acmsF[45.,25.,65.]",
         "betaF[0.01,0.0005,0.04]",
         "gammaF[0.02,0.001,0.25]",
@@ -165,6 +181,12 @@ tnpParAltBkgFitByBin = {
         "sigmaF[1.4,0.4,2.4]",
         "alphaF[-0.08,-0.3,-0.005]",
     ),
+    5: params_with_updates(
+        tnpParAltBkgFit,
+        "meanF[-0.2,-2.0,1.0]",
+        "sigmaF[1.8,0.5,3.0]",
+        "alphaF[-0.08,-0.3,-0.005]",
+    ),
 }
 
 # ##06
@@ -190,12 +212,32 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 tnpParAltSigBkgFitByBin = {
+    0: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[-0.2, -1.5, 1.0]',
+        'sigmaF[0.6, 0.2, 1.2]',
+        'sigmaF_2[0.5, 0.1, 1.2]',
+        'sosF[0.05, 0.0, 0.4]',
+        'alphaF[2.0, 1.4, 3.0]',
+        'nF[0.5, 0.0, 2.0]',
+        'alphaF_2[-0.08, -0.3, -0.005]',
+    ),
     3: params_with_updates(
         tnpParAltSigBkgFit,
         'meanF[-0.2, -1.5, 1.0]',
         'sigmaF[0.6, 0.2, 1.2]',
         'sigmaF_2[0.5, 0.1, 1.2]',
         'sosF[0.05, 0.0, 0.4]',
+        'alphaF[2.0, 1.4, 3.0]',
+        'nF[0.5, 0.0, 2.0]',
+        'alphaF_2[-0.08, -0.3, -0.005]',
+    ),
+    5: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[-0.2, -2.0, 1.0]',
+        'sigmaF[0.8, 0.2, 1.5]',
+        'sigmaF_2[0.6, 0.1, 1.5]',
+        'sosF[0.08, 0.0, 0.5]',
         'alphaF[2.0, 1.4, 3.0]',
         'nF[0.5, 0.0, 2.0]',
         'alphaF_2[-0.08, -0.3, -0.005]',
