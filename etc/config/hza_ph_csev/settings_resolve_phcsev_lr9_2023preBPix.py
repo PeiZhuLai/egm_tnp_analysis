@@ -6,6 +6,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_with_updates
 
 #############################################################
 ########## General settings
@@ -111,6 +112,24 @@ tnpParNomFit = [
     "acmsP[60.,39.,80.]","betaP[0.05,0.01,0.09]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[60.,35.,75.]","betaF[0.05,0.01,0.11]","gammaF[0.1, 0.02, 2]","peakF[87.0,82.0,90.0]",
     ]
+tnpParNomFitByBin = {
+    3: params_with_updates(
+        tnpParNomFit,
+        "meanF[-0.2,-2.0,1.0]",
+        "sigmaF[1.8,0.5,3.0]",
+        "acmsF[45.,25.,65.]",
+        "betaF[0.01,0.0005,0.04]",
+        "gammaF[0.02,0.001,0.25]",
+    ),
+    5: params_with_updates(
+        tnpParNomFit,
+        "meanF[-0.2,-2.0,1.0]",
+        "sigmaF[1.8,0.5,3.0]",
+        "acmsF[45.,25.,65.]",
+        "betaF[0.01,0.0005,0.04]",
+        "gammaF[0.02,0.001,0.25]",
+    ),
+}
 
 # # 15
 # tnpParNomFit = [
@@ -152,6 +171,20 @@ tnpParAltBkgFit = [
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
+tnpParAltBkgFitByBin = {
+    3: params_with_updates(
+        tnpParAltBkgFit,
+        "meanF[-0.2,-2.0,1.0]",
+        "sigmaF[1.8,0.5,3.0]",
+        "alphaF[-0.08,-0.3,-0.005]",
+    ),
+    5: params_with_updates(
+        tnpParAltBkgFit,
+        "meanF[-0.2,-2.0,1.0]",
+        "sigmaF[1.8,0.5,3.0]",
+        "alphaF[-0.08,-0.3,-0.005]",
+    ),
+}
 
 tnpParAltSigBkgFit = [
   'meanP[-0.0, -5.0, 5.0]',
@@ -167,3 +200,25 @@ tnpParAltSigBkgFit = [
   'alphaP_2[-0.020, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]
+tnpParAltSigBkgFitByBin = {
+    3: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[-0.2, -2.0, 1.0]',
+        'sigmaF[0.8, 0.2, 1.5]',
+        'sigmaF_2[0.6, 0.1, 1.5]',
+        'sosF[0.08, 0.0, 0.5]',
+        'alphaF[2.0, 1.4, 3.0]',
+        'nF[0.5, 0.0, 2.0]',
+        'alphaF_2[-0.08, -0.3, -0.005]',
+    ),
+    5: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[-0.2, -2.0, 1.0]',
+        'sigmaF[0.8, 0.2, 1.5]',
+        'sigmaF_2[0.6, 0.1, 1.5]',
+        'sosF[0.08, 0.0, 0.5]',
+        'alphaF[2.0, 1.4, 3.0]',
+        'nF[0.5, 0.0, 2.0]',
+        'alphaF_2[-0.08, -0.3, -0.005]',
+    ),
+}
