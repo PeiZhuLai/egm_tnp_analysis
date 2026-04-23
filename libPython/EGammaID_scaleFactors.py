@@ -163,13 +163,22 @@ def _collect_abs_eta_bins(eff_graph):
     return sorted(abs_eta_bins)
 
 
+def _is_gap_eta_bin(eta_bin, tol=1e-4):
+    low = min(float(eta_bin[0]), float(eta_bin[1]))
+    high = max(float(eta_bin[0]), float(eta_bin[1]))
+    return abs(low - 1.4442) <= tol and abs(high - 1.566) <= tol
+
+
 def _choose_custom_first_axis_bining(filein, eff_graph):
     actual_abs_eta_bins = _collect_abs_eta_bins(eff_graph)
     measurement_key = ("%s %s" % (_measurement_tag(filein), os.path.basename(filein))).lower()
     is_gap_measurement = "_gap_" in measurement_key and "_nongap_" not in measurement_key
     uses_actual_abs_eta_bins = is_gap_measurement or ("phcsev" in measurement_key)
+    is_phcsev_measurement = "phcsev" in measurement_key
 
     if uses_actual_abs_eta_bins and actual_abs_eta_bins:
+        if is_phcsev_measurement:
+            actual_abs_eta_bins = [eta_bin for eta_bin in actual_abs_eta_bins if not _is_gap_eta_bin(eta_bin)]
         return actual_abs_eta_bins
 
     if ("lowpt" in measurement_key) and ("hole" in measurement_key):
