@@ -125,30 +125,33 @@ tnpParNomFit = [
     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,55.,80.]","betaF[0.05,0.05,0.07]","gammaF[0.1, 0.03, 2]","peakF[87.0,82.0,90.0]",
     ]
+# These bins are effectively signal-only; keep the fail-side background negligible near the Z peak.
+_PURE_SIGNAL_NOMINAL = (
+    "meanF[-0.0,-1.0,0.8]",
+    "sigmaF[1.0,0.3,1.8]",
+    "acmsF[35.,20.,50.]",
+    "betaF[0.005,0.0005,0.02]",
+    "gammaF[0.03,0.001,0.12]",
+)
+_PURE_SIGNAL_NOMINAL_WIDE = (
+    "meanF[-0.0,-1.2,0.8]",
+    "sigmaF[1.2,0.4,2.0]",
+    "acmsF[35.,20.,50.]",
+    "betaF[0.005,0.0005,0.02]",
+    "gammaF[0.03,0.001,0.12]",
+)
 tnpParNomFitByBin = {
     0: params_with_updates(
         tnpParNomFit,
-        "meanF[-0.2,-1.5,1.0]",
-        "sigmaF[1.2,0.4,2.2]",
-        "acmsF[45.,25.,65.]",
-        "betaF[0.01,0.0005,0.04]",
-        "gammaF[0.02,0.001,0.25]",
+        *_PURE_SIGNAL_NOMINAL,
     ),
     3: params_with_updates(
         tnpParNomFit,
-        "meanF[-0.2,-1.5,1.0]",
-        "sigmaF[1.4,0.4,2.4]",
-        "acmsF[45.,25.,65.]",
-        "betaF[0.01,0.0005,0.04]",
-        "gammaF[0.02,0.001,0.25]",
+        *_PURE_SIGNAL_NOMINAL,
     ),
     5: params_with_updates(
         tnpParNomFit,
-        "meanF[-0.2,-2.0,1.0]",
-        "sigmaF[1.8,0.5,3.0]",
-        "acmsF[45.,25.,65.]",
-        "betaF[0.01,0.0005,0.04]",
-        "gammaF[0.02,0.001,0.25]",
+        *_PURE_SIGNAL_NOMINAL_WIDE,
     ),
 }
 
@@ -174,18 +177,28 @@ tnpParAltBkgFit = [
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
+_PURE_SIGNAL_ALTBKG = (
+    "meanF[-0.0,-1.0,0.8]",
+    "sigmaF[1.0,0.3,1.8]",
+    "alphaF[-0.8,-5.,-0.05]",
+)
+_PURE_SIGNAL_ALTBKG_WIDE = (
+    "meanF[-0.0,-1.2,0.8]",
+    "sigmaF[1.2,0.4,2.0]",
+    "alphaF[-0.8,-5.,-0.05]",
+)
 tnpParAltBkgFitByBin = {
+    0: params_with_updates(
+        tnpParAltBkgFit,
+        *_PURE_SIGNAL_ALTBKG,
+    ),
     3: params_with_updates(
         tnpParAltBkgFit,
-        "meanF[-0.2,-1.5,1.0]",
-        "sigmaF[1.4,0.4,2.4]",
-        "alphaF[-0.08,-0.3,-0.005]",
+        *_PURE_SIGNAL_ALTBKG,
     ),
     5: params_with_updates(
         tnpParAltBkgFit,
-        "meanF[-0.2,-2.0,1.0]",
-        "sigmaF[1.8,0.5,3.0]",
-        "alphaF[-0.08,-0.3,-0.005]",
+        *_PURE_SIGNAL_ALTBKG_WIDE,
     ),
 }
 
@@ -211,35 +224,35 @@ tnpParAltSigBkgFit = [
   'alphaP_2[-0.012, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]
+_PURE_SIGNAL_ALTSIGBKG = (
+    'meanF[-0.0, -1.0, 0.8]',
+    'sigmaF[0.5, 0.15, 1.0]',
+    'sigmaF_2[0.4, 0.1, 1.0]',
+    'sosF[0.02, 0.0, 0.2]',
+    'alphaF[1.8, 1.2, 2.6]',
+    'nF[0.6, 0.0, 2.0]',
+    'alphaF_2[-0.8, -5., -0.05]',
+)
+_PURE_SIGNAL_ALTSIGBKG_WIDE = (
+    'meanF[-0.0, -1.2, 0.8]',
+    'sigmaF[0.6, 0.2, 1.2]',
+    'sigmaF_2[0.5, 0.1, 1.2]',
+    'sosF[0.03, 0.0, 0.2]',
+    'alphaF[1.8, 1.2, 2.6]',
+    'nF[0.6, 0.0, 2.0]',
+    'alphaF_2[-0.8, -5., -0.05]',
+)
 tnpParAltSigBkgFitByBin = {
     0: params_with_updates(
         tnpParAltSigBkgFit,
-        'meanF[-0.2, -1.5, 1.0]',
-        'sigmaF[0.6, 0.2, 1.2]',
-        'sigmaF_2[0.5, 0.1, 1.2]',
-        'sosF[0.05, 0.0, 0.4]',
-        'alphaF[2.0, 1.4, 3.0]',
-        'nF[0.5, 0.0, 2.0]',
-        'alphaF_2[-0.08, -0.3, -0.005]',
+        *_PURE_SIGNAL_ALTSIGBKG,
     ),
     3: params_with_updates(
         tnpParAltSigBkgFit,
-        'meanF[-0.2, -1.5, 1.0]',
-        'sigmaF[0.6, 0.2, 1.2]',
-        'sigmaF_2[0.5, 0.1, 1.2]',
-        'sosF[0.05, 0.0, 0.4]',
-        'alphaF[2.0, 1.4, 3.0]',
-        'nF[0.5, 0.0, 2.0]',
-        'alphaF_2[-0.08, -0.3, -0.005]',
+        *_PURE_SIGNAL_ALTSIGBKG,
     ),
     5: params_with_updates(
         tnpParAltSigBkgFit,
-        'meanF[-0.2, -2.0, 1.0]',
-        'sigmaF[0.8, 0.2, 1.5]',
-        'sigmaF_2[0.6, 0.1, 1.5]',
-        'sosF[0.08, 0.0, 0.5]',
-        'alphaF[2.0, 1.4, 3.0]',
-        'nF[0.5, 0.0, 2.0]',
-        'alphaF_2[-0.08, -0.3, -0.005]',
+        *_PURE_SIGNAL_ALTSIGBKG_WIDE,
     ),
 }
