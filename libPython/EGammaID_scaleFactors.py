@@ -89,13 +89,7 @@ def _legend_label(axis_name, key):
     low = float(key[0])
     high = float(key[1])
 
-    if normalized == "eta":
-        return "%s #leq #eta #leq %s" % (
-            _format_eta_boundary(low),
-            _format_eta_boundary(high),
-        )
-
-    if normalized == "absEta":
+    if normalized in ("eta", "absEta"):
         return "%s #leq | #eta | #leq %s" % (
             _format_eta_boundary(low),
             _format_eta_boundary(high),
@@ -173,8 +167,9 @@ def _choose_custom_first_axis_bining(filein, eff_graph):
     actual_abs_eta_bins = _collect_abs_eta_bins(eff_graph)
     measurement_key = ("%s %s" % (_measurement_tag(filein), os.path.basename(filein))).lower()
     is_gap_measurement = "_gap_" in measurement_key and "_nongap_" not in measurement_key
+    uses_actual_abs_eta_bins = is_gap_measurement or ("phcsev" in measurement_key)
 
-    if is_gap_measurement and actual_abs_eta_bins:
+    if uses_actual_abs_eta_bins and actual_abs_eta_bins:
         return actual_abs_eta_bins
 
     if ("lowpt" in measurement_key) and ("hole" in measurement_key):
