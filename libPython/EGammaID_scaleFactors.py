@@ -163,10 +163,20 @@ def _collect_abs_eta_bins(eff_graph):
     return sorted(abs_eta_bins)
 
 
-def _is_gap_eta_bin(eta_bin, tol=1e-4):
+def _is_gap_eta_bin(eta_bin, tol=0.01):
     low = min(float(eta_bin[0]), float(eta_bin[1]))
     high = max(float(eta_bin[0]), float(eta_bin[1]))
     return abs(low - 1.4442) <= tol and abs(high - 1.566) <= tol
+
+
+def _drop_gap_eta_graphs(graphs):
+    if not graphs:
+        return graphs
+    return {
+        key: value
+        for key, value in graphs.items()
+        if not _is_gap_eta_bin(key)
+    }
 
 
 def _choose_custom_first_axis_bining(filein, eff_graph):
@@ -649,10 +659,19 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     cDummy = rt.TCanvas()
     cDummy.Print( pdfout + "[" )
 
+    pt_eff_data = effGraph.pt_1DGraph_list_customEtaBining(customFirstAxisBining, 0)
+    pt_eff_mc = effGraph.pt_1DGraph_list_customEtaBining(customFirstAxisBining, -1)
+    pt_sf = effGraph.pt_1DGraph_list_customEtaBining(customFirstAxisBining, 1)
+
+    if "phcsev" in _measurement_tag(filein).lower():
+        pt_eff_data = _drop_gap_eta_graphs(pt_eff_data)
+        pt_eff_mc = _drop_gap_eta_graphs(pt_eff_mc)
+        pt_sf = _drop_gap_eta_graphs(pt_sf)
+
     #---------------------------------------------------------------
-    EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customFirstAxisBining, 0 ) ,  # Data
-                 effGraph.pt_1DGraph_list_customEtaBining(customFirstAxisBining, -1 ) , # MC
-                 effGraph.pt_1DGraph_list_customEtaBining(customFirstAxisBining, 1 ) ,  # SF
+    EffiGraph1D( pt_eff_data ,  # Data
+                 pt_eff_mc   , # MC
+                 pt_sf       ,  # SF
                  pdfout,
                  xAxis = axis[0], yAxis = axis[1] )
     #---------------------------------------------------------------
