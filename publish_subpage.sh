@@ -174,6 +174,10 @@ if [[ -n "${SRC_SUMMARY}" && -d "${SRC_SUMMARY}" ]]; then
       "--include=**/HZa_SF2D_hza_*.png"
       "--include=HZa_SFvseta_*.png"
       "--include=**/HZa_SFvseta_*.png"
+      "--include=HZa_SFvsabsEta_*.png"
+      "--include=**/HZa_SFvsabsEta_*.png"
+      "--include=HZa_SFvsabseta_*.png"
+      "--include=**/HZa_SFvsabseta_*.png"
       "--include=HZa_SFvsnVtx_hza_resolve_phcsev_*.png"
       "--include=**/HZa_SFvsnVtx_hza_resolve_phcsev_*.png"
       "--include=pelai_SFvsnVtx_hza_resolve_phcsev_*.png"
@@ -320,7 +324,8 @@ files = sorted(
     if p.is_file() and p.suffix.lower() in suffixes
 )
 
-# Photon CSEV pages: prefer the nVtx summary card over the legacy SFvsEta card.
+# Photon CSEV pages: prefer the nVtx summary card over the legacy SFvsEta card,
+# while still keeping any SFvsabsEta summary plots.
 has_hza_nvtx = any(
     fnmatch.fnmatch(fpath, "summary/HZa_SFvsnVtx_hza_resolve_phcsev_*")
     for fpath in files
@@ -330,16 +335,25 @@ has_legacy_pelai_nvtx = any(
     for fpath in files
 )
 if has_hza_nvtx or has_legacy_pelai_nvtx:
+    legacy_eta_patterns = (
+        "summary/HZa_SFvseta_hza_resolve_phcsev_*",
+        "summary/HZa_SFvsEta_hza_resolve_phcsev_*",
+    )
+    abs_eta_patterns = (
+        "summary/HZa_SFvsabsEta_hza_resolve_phcsev_*",
+        "summary/HZa_SFvsabseta_hza_resolve_phcsev_*",
+    )
     files = [
         fpath
         for fpath in files
-        if not fnmatch.fnmatch(fpath, "summary/HZa_SFvseta_hza_resolve_phcsev_*")
+        if not any(fnmatch.fnmatch(fpath, pattern) for pattern in legacy_eta_patterns)
         and not (has_hza_nvtx and fnmatch.fnmatch(fpath, "summary/pelai_SFvsnVtx_hza_resolve_phcsev_*"))
     ]
     if not order_patterns:
         nvtx_pattern = "summary/HZa_SFvsnVtx_hza_resolve_phcsev_*" if has_hza_nvtx else "summary/pelai_SFvsnVtx_hza_resolve_phcsev_*"
         order_patterns = [
             "summary/HZa_SF2D_hza_resolve_phcsev_*",
+            *abs_eta_patterns,
             nvtx_pattern,
             "summary/HZa_SFvspT_hza_resolve_phcsev_*",
         ]
