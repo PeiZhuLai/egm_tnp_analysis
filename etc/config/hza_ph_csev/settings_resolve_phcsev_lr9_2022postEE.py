@@ -76,7 +76,7 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 biningDef = [
 #    { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-1.566,-1.4442,0.0,1.4442,1.566,2.5] },
    { 'var' : 'ph_sc_abseta' , 'type': 'float', 'bins': [0.0,1.4442,1.566,2.5] },
-   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,80] },
+   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,80] },
 ]
 
 #############################################################

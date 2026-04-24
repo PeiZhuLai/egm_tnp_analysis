@@ -75,28 +75,28 @@ Run3_2024_ele = {
 #---------------- photon CSEV efficiency measrement samples ----------------
 eoszmmg = '/eos/home-p/pelai/HZa/root_P2Root/run3_tnp_zmmg'
 Run3_2022preEE_zmmg = {
-        'DY_MC_NLO_2022preEE'    : tnpSample('DY_MC_NLO_2022preEE',    eoszmmg + '/DYJetsToLL/2022preEE.root', isMC=True, nEvts = 203271136),
-        'DY_MC_LO_2022preEE'     : tnpSample('DY_MC_LO_2022preEE',     eoszmmg + '/DYJetsToLL_MLM/2022preEE.root', isMC=True, nEvts = 202883601),
+        'DY_MC_NLO_2022preEE'    : tnpSample('DY_MC_NLO_2022preEE',    eoszmmg + '/DYJetsToLL/2022preEE.root', isMC=True, nEvts = 2607),
+        'DY_MC_LO_2022preEE'     : tnpSample('DY_MC_LO_2022preEE',     eoszmmg + '/DYJetsToLL_MLM/2022preEE.root', isMC=True, nEvts = 578),
         'Data_2022preEE'         : tnpSample('Data_2022preEE',         eoszmmg + '/Data_tnp_zmmg/2022preEE.root', lumi = 7.98),
         }
 Run3_2022postEE_zmmg = {
-        'DY_MC_NLO_2022postEE'   : tnpSample('DY_MC_NLO_2022postEE',   eoszmmg + '/DYJetsToLL/2022postEE.root', isMC=True, nEvts = 203271136),
-        'DY_MC_LO_2022postEE'    : tnpSample('DY_MC_LO_2022postEE',    eoszmmg + '/DYJetsToLL_MLM/2022postEE.root', isMC=True, nEvts = 202883601),
+        'DY_MC_NLO_2022postEE'   : tnpSample('DY_MC_NLO_2022postEE',   eoszmmg + '/DYJetsToLL/2022postEE.root', isMC=True, nEvts = 8742),
+        'DY_MC_LO_2022postEE'    : tnpSample('DY_MC_LO_2022postEE',    eoszmmg + '/DYJetsToLL_MLM/2022postEE.root', isMC=True, nEvts = 2351),
         'Data_2022postEE'        : tnpSample('Data_2022postEE',        eoszmmg + '/Data_tnp_zmmg/2022postEE.root', lumi = 26.67),
         }
 Run3_2023preBPix_zmmg = {
-        'DY_MC_NLO_2023preBPix'  : tnpSample('DY_MC_NLO_2023preBPix',  eoszmmg + '/DYJetsToLL/2023preBPix.root', isMC=True, nEvts = 203271136),
-        'DY_MC_LO_2023preBPix'   : tnpSample('DY_MC_LO_2023preBPix',   eoszmmg + '/DYJetsToLL_MLM/2023preBPix.root', isMC=True, nEvts = 202883601),
-        'Data_2023preBPix'       : tnpSample('Data_2023preBPix',       eoszmmg + '/Data_tnp_zmmg/2023preBPix.root', lumi = 108.95),
+        'DY_MC_NLO_2023preBPix'  : tnpSample('DY_MC_NLO_2023preBPix',  eoszmmg + '/DYJetsToLL/2023preBPix.root', isMC=True, nEvts = 5160),
+        'DY_MC_LO_2023preBPix'   : tnpSample('DY_MC_LO_2023preBPix',   eoszmmg + '/DYJetsToLL_MLM/2023preBPix.root', isMC=True, nEvts = 3054),
+        'Data_2023preBPix'       : tnpSample('Data_2023preBPix',       eoszmmg + '/Data_tnp_zmmg/2023preBPix.root', lumi = 18.06),
         }
 Run3_2023postBPix_zmmg = {
-        'DY_MC_NLO_2023postBPix' : tnpSample('DY_MC_NLO_2023postBPix', eoszmmg + '/DYJetsToLL/2023postBPix.root', isMC=True, nEvts = 203271136),
-        'DY_MC_LO_2023postBPix'  : tnpSample('DY_MC_LO_2023postBPix',  eoszmmg + '/DYJetsToLL_MLM/2023postBPix.root', isMC=True, nEvts = 202883601),
-        'Data_2023postBPix'      : tnpSample('Data_2023postBPix',      eoszmmg + '/Data_tnp_zmmg/2023postBPix.root', lumi = 108.95),
+        'DY_MC_NLO_2023postBPix' : tnpSample('DY_MC_NLO_2023postBPix', eoszmmg + '/DYJetsToLL/2023postBPix.root', isMC=True, nEvts = 2494),
+        'DY_MC_LO_2023postBPix'  : tnpSample('DY_MC_LO_2023postBPix',  eoszmmg + '/DYJetsToLL_MLM/2023postBPix.root', isMC=True, nEvts = 1640),
+        'Data_2023postBPix'      : tnpSample('Data_2023postBPix',      eoszmmg + '/Data_tnp_zmmg/2023postBPix.root', lumi = 9.693),
         }
 Run3_2024_zmmg = {
-        'DY_MC_NLO_2024'         : tnpSample('DY_MC_NLO_2024',         eoszmmg + '/DYJetsTo2Mu/2024.root', isMC=True, nEvts = 203271136),
-        'DY_MC_LO_2024'          : tnpSample('DY_MC_LO_2024',          eoszmmg + '/DYJetsToLL_MLM/2024.root', isMC=True, nEvts = 202883601),
+        'DY_MC_NLO_2024'         : tnpSample('DY_MC_NLO_2024',         eoszmmg + '/DYJetsTo2Mu/2024.root', isMC=True, nEvts = 638995),
+        'DY_MC_LO_2024'          : tnpSample('DY_MC_LO_2024',          eoszmmg + '/DYJetsToLL_MLM/2024.root', isMC=True, nEvts = 716402),
         'Data_2024'              : tnpSample('Data_2024',              eoszmmg + '/Data_tnp_zmmg/2024.root', lumi = 108.95),
         }
 #--------------------------------------------------------------------------------
