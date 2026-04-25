@@ -58,12 +58,12 @@ run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2022
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_2024 hza_elid_nongap_2024_sf
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_highpT_2024 hza_elid_nongap_highpT_2024_sf
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_nongap_lowpT_2024 hza_elid_nongap_lowpT_2024_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_nongap_2024 hza_dielleg12trigger_nongap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg12trigger_gap_2024 hza_dielleg12trigger_gap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_nongap_2024 hza_dielleg23trigger_nongap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_dielleg23trigger_gap_2024 hza_dielleg23trigger_gap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf
 #------------------------------------------------------------------------------------------------------------
 # Tunning 
 

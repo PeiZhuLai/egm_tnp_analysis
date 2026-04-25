@@ -416,13 +416,27 @@ if args.sumUp:
     fOut = open( effFileName,'w')
     
     # 用來組合 JSON 的暫存
-    _binTuples = []          # (v1_low,v1_high,v2_low,v2_high)
-    _sf_pass   = []
-    _unc_pass  = []
-    _sf_fail   = []
-    _unc_fail  = []
+    _jsonRecords = []
     _var1_name = None
     _var2_name = None
+
+    def _json_var_name(name):
+        name = str(name).strip()
+        var_map = {
+            'el_pt': 'pt',
+            'el_et': 'pt',
+            'el_sc_et': 'pt',
+            'probe_Ele_pt': 'pt',
+            'probe_pt': 'pt',
+            'ph_et': 'pt',
+            'ph_pt': 'pt',
+            'el_eta': 'eta',
+            'el_sc_eta': 'eta',
+            'probe_sc_eta': 'eta',
+            'ph_sc_eta': 'eta',
+            'ph_eta': 'eta',
+        }
+        return var_map.get(name, name)
 
     for ib in range(len(tnpBins['bins'])):
         effis = tnpRoot.getAllEffi( info, tnpBins['bins'][ib] )
@@ -458,12 +472,10 @@ if args.sumUp:
         # 正規化變數命名（映射 ph_et -> pt；ph_sc_eta -> eta）
         if _var1_name is not None:
             _var1_name = _var1_name.strip()
-            if _var1_name == 'ph_sc_eta':
-                _var1_name = 'eta'
+            _var1_name = _json_var_name(_var1_name)
         if _var2_name is not None:
             _var2_name = _var2_name.strip()
-            if _var2_name == 'ph_et':
-                _var2_name = 'pt'
+            _var2_name = _json_var_name(_var2_name)
         # 效率與不確定度
         eff_data, unc_data = effis['dataNominal'][0], effis['dataNominal'][1]
         eff_mc  , unc_mc   = effis['mcNominal'  ][0], effis['mcNominal'  ][1]
@@ -488,11 +500,20 @@ if args.sumUp:
             dfdA = -1.0 / max(1e-12, (1 - eff_mc))
             dfdB = (1 - eff_data) / max(1e-12, (1 - eff_mc)**2)
             unc_fail = math.sqrt( (dfdA * unc_data)**2 + (dfdB * unc_mc)**2 )
-        _sf_pass.append(sf_pass)
-        _unc_pass.append(unc_pass)
-        _sf_fail.append(sf_fail)
-        _unc_fail.append(unc_fail)
-        _binTuples.append( (float(v1Range[0]), float(v1Range[2]), float(v2Range[0]), float(v2Range[2])) )
+        _jsonRecords.append({
+            'ranges': {
+                _var1_name: (float(v1Range[0]), float(v1Range[2])),
+                _var2_name: (float(v2Range[0]), float(v2Range[2])),
+            },
+            'effdata': eff_data,
+            'systdata': unc_data,
+            'effmc': eff_mc,
+            'systmc': unc_mc,
+            'sf_pass': sf_pass,
+            'unc_pass': unc_pass,
+            'sf_fail': sf_fail,
+            'unc_fail': unc_fail,
+        })
 
     fOut.close()
 
@@ -510,83 +531,78 @@ if args.sumUp:
     egm_sf.doEGM_SFs(effFileName,sampleToFit.lumi)
 
     if args.exportJson:
-        # 邊界重建
-        edges1_lows = sorted({b[0] for b in _binTuples})
-        edges2_lows = sorted({b[2] for b in _binTuples})
-        last_high1 = max(b[1] for b in _binTuples)
-        last_high2 = max(b[3] for b in _binTuples)
-        edges1 = edges1_lows + ([last_high1] if edges1_lows[-1] != last_high1 else [])
-        edges2 = edges2_lows + ([last_high2] if edges2_lows[-1] != last_high2 else [])
-        out_json = {
-            "schema_version": 2,
-            "description": "auto-generated scale factors",
-            "corrections": [
-                {
-                    "name": "sf_pass",
-                    "version": 1,
-                    "inputs": [
-                        {"name": _var1_name, "type": "real", "description": _var1_name},
-                        {"name": _var2_name, "type": "real", "description": _var2_name}
-                    ],
-                    "output": {"name": "sf", "type": "real", "description": "data/MC scale factor (pass)"},
-                    "data": {
-                        "nodetype": "multibinning",
-                        "inputs": [_var1_name, _var2_name],
-                        "edges": [edges1, edges2],
-                        "content": _sf_pass,
-                        "flow": "clamp"
-                    }
-                },
-                {
-                    "name": "unc_pass",
-                    "version": 1,
-                    "inputs": [
-                        {"name": _var1_name, "type": "real", "description": _var1_name},
-                        {"name": _var2_name, "type": "real", "description": _var2_name}
-                    ],
-                    "output": {"name": "sf", "type": "real", "description": "uncertainty (pass)"},
-                    "data": {
-                        "nodetype": "multibinning",
-                        "inputs": [_var1_name, _var2_name],
-                        "edges": [edges1, edges2],
-                        "content": _unc_pass,
-                        "flow": "clamp"
-                    }
-                },
-                {
-                    "name": "sf_fail",
-                    "version": 1,
-                    "inputs": [
-                        {"name": _var1_name, "type": "real", "description": _var1_name},
-                        {"name": _var2_name, "type": "real", "description": _var2_name}
-                    ],
-                    "output": {"name": "sf", "type": "real", "description": "data/MC scale factor (fail)"},
-                    "data": {
-                        "nodetype": "multibinning",
-                        "inputs": [_var1_name, _var2_name],
-                        "edges": [edges1, edges2],
-                        "content": _sf_fail,
-                        "flow": "clamp"
-                    }
-                },
-                {
-                    "name": "unc_fail",
-                    "version": 1,
-                    "inputs": [
-                        {"name": _var1_name, "type": "real", "description": _var1_name},
-                        {"name": _var2_name, "type": "real", "description": _var2_name}
-                    ],
-                    "output": {"name": "sf", "type": "real", "description": "uncertainty (fail)"},
-                    "data": {
-                        "nodetype": "multibinning",
-                        "inputs": [_var1_name, _var2_name],
-                        "edges": [edges1, edges2],
-                        "content": _unc_fail,
-                        "flow": "clamp"
-                    }
+        def _edges_for(axis):
+            lows = sorted({rec['ranges'][axis][0] for rec in _jsonRecords})
+            last_high = max(rec['ranges'][axis][1] for rec in _jsonRecords)
+            return lows + ([last_high] if lows[-1] != last_high else [])
+
+        def _content_for(axis_names, value_name):
+            import itertools
+            edges_by_axis = {axis: _edges_for(axis) for axis in axis_names}
+            values_by_bin = {}
+            for rec in _jsonRecords:
+                idx = tuple(edges_by_axis[axis].index(rec['ranges'][axis][0]) for axis in axis_names)
+                values_by_bin[idx] = rec[value_name]
+            shape = [range(len(edges_by_axis[axis]) - 1) for axis in axis_names]
+            return [values_by_bin[tuple(idx)] for idx in itertools.product(*shape)]
+
+        def _correction(name, axis_names, edges, content, output_description):
+            return {
+                "name": name,
+                "version": 1,
+                "inputs": [
+                    {"name": axis, "type": "real", "description": axis}
+                    for axis in axis_names
+                ],
+                "output": {"name": "sf", "type": "real", "description": output_description},
+                "data": {
+                    "nodetype": "multibinning",
+                    "inputs": axis_names,
+                    "edges": edges,
+                    "content": content,
+                    "flow": "clamp"
                 }
-            ]
-        }
+            }
+
+        axis_names = [_var1_name, _var2_name]
+        export_mode = getattr(tnpConf, 'exportJsonFormat', None)
+        if export_mode is None:
+            flag_lower = args.flag.lower()
+            export_mode = 'efficiency' if ('trigger' in flag_lower or 'trig' in flag_lower) else 'sf'
+
+        if export_mode == 'efficiency' and set(['pt', 'eta']).issubset(set(axis_names)):
+            axis_names = ['pt', 'eta'] + [axis for axis in axis_names if axis not in ('pt', 'eta')]
+
+        edges = [_edges_for(axis) for axis in axis_names]
+
+        if export_mode == 'efficiency':
+            out_json = {
+                "schema_version": 2,
+                "description": "",
+                "corrections": [
+                    _correction("effdata", axis_names, edges, _content_for(axis_names, "effdata"), "data eff"),
+                    _correction("systdata", axis_names, edges, _content_for(axis_names, "systdata"), "data unc"),
+                    _correction("effmc", axis_names, edges, _content_for(axis_names, "effmc"), "MC eff"),
+                    _correction("systmc", axis_names, edges, _content_for(axis_names, "systmc"), "MC unc"),
+                ]
+            }
+        else:
+            axis_names = [_var1_name, _var2_name]
+            edges = [_edges_for(axis) for axis in axis_names]
+            sf_pass = _content_for(axis_names, "sf_pass")
+            unc_pass = _content_for(axis_names, "unc_pass")
+            sf_fail = _content_for(axis_names, "sf_fail")
+            unc_fail = _content_for(axis_names, "unc_fail")
+            out_json = {
+                "schema_version": 2,
+                "description": "auto-generated scale factors",
+                "corrections": [
+                    _correction("sf_pass", axis_names, edges, sf_pass, "data/MC scale factor (pass)"),
+                    _correction("unc_pass", axis_names, edges, unc_pass, "uncertainty (pass)"),
+                    _correction("sf_fail", axis_names, edges, sf_fail, "data/MC scale factor (fail)"),
+                    _correction("unc_fail", axis_names, edges, unc_fail, "uncertainty (fail)"),
+                ]
+            }
         _json_path = os.path.join(outputDirectory, f'{args.flag}.json')
         with open(_json_path, 'w') as jf:
             json.dump(out_json, jf, indent=2)
