@@ -36,7 +36,7 @@ wait_for_batch() {
 # Photon CSEV SFs
 ### -------- High R9 --------
 # run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2022preEE hza_resolve_phcsev_hr9_2022preEE_sf
-run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2022postEE hza_resolve_phcsev_hr9_2022postEE_sf
+# run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2022postEE hza_resolve_phcsev_hr9_2022postEE_sf
 # run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2023preBPix hza_resolve_phcsev_hr9_2023preBPix_sf
 # run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2023postBPix hza_resolve_phcsev_hr9_2023postBPix_sf
 # run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2023postBPixHole hza_resolve_phcsev_hr9_2023postBPixHole_sf
@@ -44,7 +44,7 @@ run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_hr9_2022
 
 ### -------- Low R9 --------
 # run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2022preEE hza_resolve_phcsev_lr9_2022preEE_sf
-run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2022postEE hza_resolve_phcsev_lr9_2022postEE_sf
+# run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2022postEE hza_resolve_phcsev_lr9_2022postEE_sf
 # run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2023preBPix hza_resolve_phcsev_lr9_2023preBPix_sf
 # run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2023postBPix hza_resolve_phcsev_lr9_2023postBPix_sf
 # run_job egm_tnp_analysis.etc.config.hza_ph_csev.settings_resolve_phcsev_lr9_2023postBPixHole hza_resolve_phcsev_lr9_2023postBPixHole_sf
