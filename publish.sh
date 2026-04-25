@@ -214,7 +214,7 @@ publish_electron() {
 
   # Photon ID Low pT
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_ph_lowpt_2023postBPix/hza_resolve_phid_lowpt_2024 \
+    --dest resolve_ph_lowpt_2024/hza_resolve_phid_lowpt_2024 \
     --hometitle "Resolve Custom Photon ID Low pT 2024"\
     --title "Efficiency / Scale Factor Measurements — hza_resolve_phid_lowpt_2024" \
     --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_lowpt_2024_sf/plots/Data_2024C \
@@ -263,7 +263,7 @@ publish_electron() {
 
   # Photon ID High pT
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_ph_2023postBPix/hza_resolve_phid_2024 \
+    --dest resolve_ph_2024/hza_resolve_phid_2024 \
     --hometitle "Resolve Custom Photon ID 2024"\
     --title "Efficiency / Scale Factor Measurements — hza_resolve_phid_2024" \
     --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_2024_sf/plots/Data_2024C \
