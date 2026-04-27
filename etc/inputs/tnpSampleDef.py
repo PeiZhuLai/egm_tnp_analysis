@@ -65,13 +65,19 @@ Run3_2024 = {
         }
 
 #---------------- electron offline selection, single-/double-trigger efficiency measrement samples ----------------
-eos2024ele = '/eos/project/h/htozg-dy-privatemc/pelai/root_make_TnP_ntuple'
+eos2024ele = '/eos/project/h/htozg-dy-privatemc/pelai/root_merged_eTnP_ntuple'
 Run3_2024_ele = {
         'DY_MC_NLO_2024' : tnpSample('DY_MC_NLO_2024', eos2024ele + '/mc/DY_NLO_2024/DY_NLO_2024.root', isMC=True, nEvts = 203271136),
         'DY_MC_LO_2024'  : tnpSample('DY_MC_LO_2024',  eos2024ele + '/mc/DY_LO_2024/DY_LO_2024.root', isMC=True, nEvts = 202883601),
         'Data_2024'      : tnpSample('Data_2024',      eos2024ele + '/data/Data_2024.root', lumi = 108.95),
         }
-
+#---------------- electron offline selection, single-/double-trigger efficiency measrement samples ----------------
+eos2025ele = '/eos/project/h/htozg-dy-privatemc/pelai/root_merged_eTnP_ntuple'
+Run3_2025_ele = {
+        'DY_MC_NLO_2025' : tnpSample('DY_MC_NLO_2025', eos2025ele + '/mc/DY_NLO_2024/DY_NLO_2024.root', isMC=True, nEvts = 203271136),
+        'DY_MC_LO_2025'  : tnpSample('DY_MC_LO_2025',  eos2025ele + '/mc/DY_LO_2024/DY_LO_2024.root', isMC=True, nEvts = 202883601),
+        'Data_2025'      : tnpSample('Data_2025',      eos2025ele + '/data/Data_2025.root', lumi = 110.67),
+        }
 #---------------- photon CSEV efficiency measrement samples ----------------
 eoszmmg = '/eos/home-p/pelai/HZa/root_P2Root/run3_tnp_zmmg'
 Run3_2022preEE_zmmg = {
