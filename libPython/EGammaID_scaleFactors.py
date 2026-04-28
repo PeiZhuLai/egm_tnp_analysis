@@ -90,7 +90,7 @@ def _legend_label(axis_name, key):
     high = float(key[1])
 
     if normalized in ("eta", "absEta"):
-        return "%s #leq | #eta | #leq %s" % (
+        return "%s #leq #left|#eta#right| #leq %s" % (
             _format_eta_boundary(low),
             _format_eta_boundary(high),
         )
@@ -187,6 +187,10 @@ def _choose_custom_first_axis_bining(filein, eff_graph):
     is_phcsev_measurement = "phcsev" in measurement_key
 
     if uses_actual_abs_eta_bins and actual_abs_eta_bins:
+        if is_gap_measurement:
+            gap_eta_bins = [eta_bin for eta_bin in actual_abs_eta_bins if _is_gap_eta_bin(eta_bin)]
+            if gap_eta_bins:
+                return gap_eta_bins
         if is_phcsev_measurement:
             actual_abs_eta_bins = [eta_bin for eta_bin in actual_abs_eta_bins if not _is_gap_eta_bin(eta_bin)]
         return actual_abs_eta_bins
@@ -673,7 +677,8 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
                  pt_eff_mc   , # MC
                  pt_sf       ,  # SF
                  pdfout,
-                 xAxis = axis[0], yAxis = axis[1] )
+                 xAxis = axis[0],
+                 yAxis = "absEta" if effGraph.etaLikeAxis else axis[1] )
     #---------------------------------------------------------------
     # EffiGraph1D( effGraph.pt_1DGraph_list(typeGR=0),   # eff Data
     #              effGraph.pt_1DGraph_list(typeGR=-1),  # eff MC
