@@ -25,125 +25,106 @@ EOF
 }
 
 publish_electron() {
-
-  # Photon CSEV SFs
-  ### -------- High R9 --------
+  
+  #------------------------------------------------------------------------------------------------
+  # Electron ID
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_hr9_2024/hza_resolve_phcsev_hr9_2024_sf \
-    --hometitle "Custom Photon CSEV High R9 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2024_sf \
-    --section-url "#Resolve_Photon_CSEV_HighR9_2024"
-
-  bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_hr9_2023postBPixHole/hza_resolve_phcsev_hr9_2023postBPixHole_sf \
-    --hometitle "Custom Photon CSEV High R9 2023postBPixHole" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2023postBPixHole_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPixHole_sf/plots/Data_2023postBPix \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPixHole_sf \
-    --section-url "#Resolve_Photon_CSEV_HighR9_2023postBPixHole"
+    --dest resolve_elid_gap_2024/hza_elid_gap_2024_sf \
+    --hometitle "Custom Electron ID Gap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_gap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_gap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_gap_2024_sf \
+    --section-url "#Resolve_Electron_ID_gap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_hr9_2023postBPix/hza_resolve_phcsev_hr9_2023postBPix_sf \
-    --hometitle "Custom Photon CSEV High R9 2023postBPix" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2023postBPix_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPix_sf/plots/Data_2023postBPix \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPix_sf \
-    --section-url "#Resolve_Photon_CSEV_HighR9_2023postBPix"
+    --dest resolve_elid_gap_2025/hza_elid_gap_2025_sf \
+    --hometitle "Custom Electron ID Gap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_gap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_gap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_gap_2025_sf \
+    --section-url "#Resolve_Electron_ID_gap_2025"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_hr9_2023preBPix/hza_resolve_phcsev_hr9_2023preBPix_sf \
-    --hometitle "Custom Photon CSEV High R9 2023preBPix" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2023preBPix_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023preBPix_sf/plots/Data_2023preBPix \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023preBPix_sf \
-    --section-url "#Resolve_Photon_CSEV_HighR9_2023preBPix"
+    --dest resolve_elid_nongap_2024/hza_elid_nongap_2024_sf \
+    --hometitle "Custom Electron ID Nongap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_2024_sf \
+    --section-url "#Resolve_Electron_ID_nongap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_hr9_2022postEE/hza_resolve_phcsev_hr9_2022postEE_sf \
-    --hometitle "Custom Photon CSEV High R9 2022postEE" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2022postEE_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022postEE_sf/plots/Data_2022postEE \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022postEE_sf \
-    --section-url "#Resolve_Photon_CSEV_HighR9_2022postEE"
+    --dest resolve_elid_nongap_2025/hza_elid_nongap_2025_sf \
+    --hometitle "Custom Electron ID Nongap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_2025_sf \
+    --section-url "#Resolve_Electron_ID_nongap_2025"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_hr9_2022preEE/hza_resolve_phcsev_hr9_2022preEE_sf \
-    --hometitle "Custom Photon CSEV High R9 2022preEE" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2022preEE_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022preEE_sf/plots/Data_2022preEE \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022preEE_sf \
-    --section-url "#Resolve_Photon_CSEV_HighR9_2022preEE"
-
-
-  # Photon CSEV SFs
-  ### -------- Low R9 --------
-  bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_lr9_2024/hza_resolve_phcsev_lr9_2024_sf \
-    --hometitle "Custom Photon CSEV Low R9 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2024_sf \
-    --section-url "#Resolve_Photon_CSEV_LowR9_2024"
+    --dest resolve_elid_nongap_highpT_2024/hza_elid_nongap_highpT_2024_sf \
+    --hometitle "Custom Electron ID Nongap High pT 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_highpT_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_highpT_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_highpT_2024_sf \
+    --section-url "#Resolve_Electron_ID_nongap_highpT_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_lr9_2023postBPixHole/hza_resolve_phcsev_lr9_2023postBPixHole_sf \
-    --hometitle "Custom Photon CSEV Low R9 2023postBPixHole" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2023postBPixHole_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPixHole_sf/plots/Data_2023postBPix \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPixHole_sf \
-    --section-url "#Resolve_Photon_CSEV_LowR9_2023postBPixHole"
+    --dest resolve_elid_nongap_highpT_2025/hza_elid_nongap_highpT_2025_sf \
+    --hometitle "Custom Electron ID Nongap High pT 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_highpT_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_highpT_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_highpT_2025_sf \
+    --section-url "#Resolve_Electron_ID_nongap_highpT_2025"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_lr9_2023postBPix/hza_resolve_phcsev_lr9_2023postBPix_sf \
-    --hometitle "Custom Photon CSEV Low R9 2023postBPix" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2023postBPix_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPix_sf/plots/Data_2023postBPix \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPix_sf \
-    --section-url "#Resolve_Photon_CSEV_LowR9_2023postBPix"
+    --dest resolve_elid_nongap_lowpT_2024/hza_elid_nongap_lowpT_2024_sf \
+    --hometitle "Custom Electron ID Nongap Low pT 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_lowpT_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_lowpT_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_lowpT_2024_sf \
+    --section-url "#Resolve_Electron_ID_nongap_lowpT_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_lr9_2023preBPix/hza_resolve_phcsev_lr9_2023preBPix_sf \
-    --hometitle "Custom Photon CSEV Low R9 2023preBPix" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2023preBPix_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023preBPix_sf/plots/Data_2023preBPix \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023preBPix_sf \
-    --section-url "#Resolve_Photon_CSEV_LowR9_2023preBPix"
-
-  bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_lr9_2022postEE/hza_resolve_phcsev_lr9_2022postEE_sf \
-    --hometitle "Custom Photon CSEV Low R9 2022postEE" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2022postEE_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022postEE_sf/plots/Data_2022postEE \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022postEE_sf \
-    --section-url "#Resolve_Photon_CSEV_LowR9_2022postEE"
-
-  bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_phcsev_lr9_2022preEE/hza_resolve_phcsev_lr9_2022preEE_sf \
-    --hometitle "Custom Photon CSEV Low R9 2022preEE" \
-    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2022preEE_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022preEE_sf/plots/Data_2022preEE \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022preEE_sf \
-    --section-url "#Resolve_Photon_CSEV_LowR9_2022preEE"
+    --dest resolve_elid_nongap_lowpT_2025/hza_elid_nongap_lowpT_2025_sf \
+    --hometitle "Custom Electron ID Nongap Low pT 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_lowpT_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_lowpT_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_lowpT_2025_sf \
+    --section-url "#Resolve_Electron_ID_nongap_lowpT_2025"
 
   # Electron Trigger SFs
-  # Double Electron Trigger Lower Leg 12
+  # Electron Single Trigger 30
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_dielleg12trigger_gap_2024/hza_dielleg12trigger_gap_2024_sf \
-    --hometitle "Custom Electron Double Lower Leg Trigger12 Gap 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_dielleg12trigger_gap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_gap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_gap_2024_sf \
-    --section-url "#Resolve_Electron_Double_Lower_Trigger12_gap_2024"
+    --dest resolve_sielleg30trigger_gap_2024/hza_sielleg30trigger_gap_2024_sf \
+    --hometitle "Custom Electron Single Trigger30 Gap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_sielleg30trigger_gap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_gap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_gap_2024_sf \
+    --section-url "#Resolve_Electron_Single_Trigger30_gap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_dielleg12trigger_nongap_2024/hza_dielleg12trigger_nongap_2024_sf \
-    --hometitle "Custom Electron Double Lower Leg Trigger12 Nongap 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_dielleg12trigger_nongap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_nongap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_nongap_2024_sf \
-    --section-url "#Resolve_Electron_Double_Lower_Trigger12_nongap_2024"
+    --dest resolve_sielleg30trigger_gap_2025/hza_sielleg30trigger_gap_2025_sf \
+    --hometitle "Custom Electron Single Trigger30 Gap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_sielleg30trigger_gap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_gap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_gap_2025_sf \
+    --section-url "#Resolve_Electron_Single_Trigger30_gap_2025"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_sielleg30trigger_nongap_2024/hza_sielleg30trigger_nongap_2024_sf \
+    --hometitle "Custom Electron Single Trigger30 Nongap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_sielleg30trigger_nongap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_nongap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_nongap_2024_sf \
+    --section-url "#Resolve_Electron_Single_Trigger30_nongap_2024"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_sielleg30trigger_nongap_2025/hza_sielleg30trigger_nongap_2025_sf \
+    --hometitle "Custom Electron Single Trigger30 Nongap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_sielleg30trigger_nongap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_nongap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_nongap_2025_sf \
+    --section-url "#Resolve_Electron_Single_Trigger30_nongap_2025"
 
   # Double Electron Trigger Upper Leg 23
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
@@ -155,6 +136,14 @@ publish_electron() {
     --section-url "#Resolve_Electron_Double_Upper_Trigger23_gap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_dielleg23trigger_gap_2025/hza_dielleg23trigger_gap_2025_sf \
+    --hometitle "Custom Electron Double Upper Leg Trigger23 Gap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg23trigger_gap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_gap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_gap_2025_sf \
+    --section-url "#Resolve_Electron_Double_Upper_Trigger23_gap_2025"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
     --dest resolve_dielleg23trigger_nongap_2024/hza_dielleg23trigger_nongap_2024_sf \
     --hometitle "Custom Electron Double Upper Leg Trigger23 Nongap 2024" \
     --title "Efficiency / Scale Factor Measurements — hza_dielleg23trigger_nongap_2024_sf" \
@@ -162,56 +151,114 @@ publish_electron() {
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_nongap_2024_sf \
     --section-url "#Resolve_Electron_Double_Upper_Trigger23_nongap_2024"
 
-  # Electron Single Trigger 30
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_sielleg30trigger_gap_2024/hza_sielleg30trigger_gap_2024_sf \
-    --hometitle "Custom Electron Single Trigger30 Gap 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_sielleg30trigger_gap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_gap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_gap_2024_sf \
-    --section-url "#Resolve_Electron_Single_Trigger30_gap_2024"
+    --dest resolve_dielleg23trigger_nongap_2025/hza_dielleg23trigger_nongap_2025_sf \
+    --hometitle "Custom Electron Double Upper Leg Trigger23 Nongap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg23trigger_nongap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_nongap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg23trigger_nongap_2025_sf \
+    --section-url "#Resolve_Electron_Double_Upper_Trigger23_nongap_2025"
+
+  # Double Electron Trigger Lower Leg 12
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_dielleg12trigger_gap_2024/hza_dielleg12trigger_gap_2024_sf \
+    --hometitle "Custom Electron Double Lower Leg Trigger12 Gap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg12trigger_gap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_gap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_gap_2024_sf \
+    --section-url "#Resolve_Electron_Double_Lower_Trigger12_gap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_sielleg30trigger_nongap_2024/hza_sielleg30trigger_nongap_2024_sf \
-    --hometitle "Custom Electron Single Trigger30 Nongap 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_sielleg30trigger_nongap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_nongap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_sielleg30trigger_nongap_2024_sf \
-    --section-url "#Resolve_Electron_Single_Trigger30_nongap_2024"
-
-  # Electron ID
-  bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_elid_gap_2024/hza_elid_gap_2024_sf \
-    --hometitle "Custom Electron ID Gap 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_elid_gap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_gap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_gap_2024_sf \
-    --section-url "#Resolve_Electron_ID_gap_2024"
+    --dest resolve_dielleg12trigger_gap_2025/hza_dielleg12trigger_gap_2025_sf \
+    --hometitle "Custom Electron Double Lower Leg Trigger12 Gap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg12trigger_gap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_gap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_gap_2025_sf \
+    --section-url "#Resolve_Electron_Double_Lower_Trigger12_gap_2025"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_elid_nongap_2024/hza_elid_nongap_2024_sf \
-    --hometitle "Custom Electron ID Nongap 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_2024_sf \
-    --section-url "#Resolve_Electron_ID_nongap_2024"
+    --dest resolve_dielleg12trigger_nongap_2024/hza_dielleg12trigger_nongap_2024_sf \
+    --hometitle "Custom Electron Double Lower Leg Trigger12 Nongap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg12trigger_nongap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_nongap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_nongap_2024_sf \
+    --section-url "#Resolve_Electron_Double_Lower_Trigger12_nongap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_elid_nongap_highpT_2024/hza_elid_nongap_highpT_2024_sf \
-    --hometitle "Custom Electron ID Nongap High pT 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_highpT_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_highpT_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_highpT_2024_sf \
-    --section-url "#Resolve_Electron_ID_nongap_highpT_2024"
+    --dest resolve_dielleg12trigger_nongap_2025/hza_dielleg12trigger_nongap_2025_sf \
+    --hometitle "Custom Electron Double Lower Leg Trigger12 Nongap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_dielleg12trigger_nongap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_nongap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_dielleg12trigger_nongap_2025_sf \
+    --section-url "#Resolve_Electron_Double_Lower_Trigger12_nongap_2025"
+
+  # Electron miniIso 0.15
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_elminiIso0p15_gap_2024/hza_elminiIso0p15_gap_2024_sf \
+    --hometitle "Custom Electron miniIso0p15 Gap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elminiIso0p15_gap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p15_gap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p15_gap_2024_sf \
+    --section-url "#Resolve_Electron_miniIso0p15_gap_2024"
 
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
-    --dest resolve_elid_nongap_lowpT_2024/hza_elid_nongap_lowpT_2024_sf \
-    --hometitle "Custom Electron ID Nongap Low pT 2024" \
-    --title "Efficiency / Scale Factor Measurements — hza_elid_nongap_lowpT_2024_sf" \
-    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_lowpT_2024_sf/plots/Data_2024 \
-    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elid_nongap_lowpT_2024_sf \
-    --section-url "#Resolve_Electron_ID_nongap_lowpT_2024"
+    --dest resolve_elminiIso0p15_gap_2025/hza_elminiIso0p15_gap_2025_sf \
+    --hometitle "Custom Electron miniIso0p15 Gap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_elminiIso0p15_gap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p15_gap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p15_gap_2025_sf \
+    --section-url "#Resolve_Electron_miniIso0p15_gap_2025"
 
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_elminiIso0p15_nongap_2024/hza_elminiIso0p15_nongap_2024_sf \
+    --hometitle "Custom Electron miniIso0p15 Nongap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elminiIso0p15_nongap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p15_nongap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p15_nongap_2024_sf \
+    --section-url "#Resolve_Electron_miniIso0p15_nongap_2024"
+  
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_elminiIso0p15_nongap_2025/hza_elminiIso0p15_nongap_2025_sf \
+    --hometitle "Custom Electron miniIso0p15 Nongap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_elminiIso0p15_nongap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p15_nongap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p15_nongap_2025_sf \
+    --section-url "#Resolve_Electron_miniIso0p15_nongap_2025"
+
+  # Electron miniIso 0.1
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_elminiIso0p1_gap_2024/hza_elminiIso0p1_gap_2024_sf \
+    --hometitle "Custom Electron miniIso0p1 Gap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elminiIso0p1_gap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p1_gap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p1_gap_2024_sf \
+    --section-url "#Resolve_Electron_miniIso0p1_gap_2024"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_elminiIso0p1_gap_2025/hza_elminiIso0p1_gap_2025_sf \
+    --hometitle "Custom Electron miniIso0p1 Gap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_elminiIso0p1_gap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p1_gap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p1_gap_2025_sf \
+    --section-url "#Resolve_Electron_miniIso0p1_gap_2025"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_elminiIso0p1_nongap_2024/hza_elminiIso0p1_nongap_2024_sf \
+    --hometitle "Custom Electron miniIso0p1 Nongap 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_elminiIso0p1_nongap_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p1_nongap_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p1_nongap_2024_sf \
+    --section-url "#Resolve_Electron_miniIso0p1_nongap_2024"
+  
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_elminiIso0p1_nongap_2025/hza_elminiIso0p1_nongap_2025_sf \
+    --hometitle "Custom Electron miniIso0p1 Nongap 2025" \
+    --title "Efficiency / Scale Factor Measurements — hza_elminiIso0p1_nongap_2025_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p1_nongap_2025_sf/plots/Data_2025 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_elminiIso0p1_nongap_2025_sf \
+    --section-url "#Resolve_Electron_miniIso0p1_nongap_2025"
+  
+  #------------------------------------------------------------------------------------------------
   # Photon ID Low pT
   bash "${SCRIPT_DIR}/publish_subpage.sh" \
     --dest resolve_ph_lowpt_2024/hza_resolve_phid_lowpt_2024 \
@@ -309,6 +356,107 @@ publish_electron() {
     --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_2022preEE_sf/plots/Data_2022preEE \
     --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phid_2022preEE_sf \
     --section-url "#Resolve_Custom_Photon_ID_2022preEE"
+  
+  # Photon CSEV SFs
+  ### -------- High R9 --------
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2024/hza_resolve_phcsev_hr9_2024_sf \
+    --hometitle "Custom Photon CSEV High R9 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2024_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2024"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2023postBPixHole/hza_resolve_phcsev_hr9_2023postBPixHole_sf \
+    --hometitle "Custom Photon CSEV High R9 2023postBPixHole" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2023postBPixHole_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPixHole_sf/plots/Data_2023postBPix \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPixHole_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2023postBPixHole"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2023postBPix/hza_resolve_phcsev_hr9_2023postBPix_sf \
+    --hometitle "Custom Photon CSEV High R9 2023postBPix" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2023postBPix_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPix_sf/plots/Data_2023postBPix \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023postBPix_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2023postBPix"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2023preBPix/hza_resolve_phcsev_hr9_2023preBPix_sf \
+    --hometitle "Custom Photon CSEV High R9 2023preBPix" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2023preBPix_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023preBPix_sf/plots/Data_2023preBPix \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2023preBPix_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2023preBPix"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2022postEE/hza_resolve_phcsev_hr9_2022postEE_sf \
+    --hometitle "Custom Photon CSEV High R9 2022postEE" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2022postEE_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022postEE_sf/plots/Data_2022postEE \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022postEE_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2022postEE"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_hr9_2022preEE/hza_resolve_phcsev_hr9_2022preEE_sf \
+    --hometitle "Custom Photon CSEV High R9 2022preEE" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_hr9_2022preEE_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022preEE_sf/plots/Data_2022preEE \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_hr9_2022preEE_sf \
+    --section-url "#Resolve_Photon_CSEV_HighR9_2022preEE"
+
+  # Photon CSEV SFs
+  ### -------- Low R9 --------
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_lr9_2024/hza_resolve_phcsev_lr9_2024_sf \
+    --hometitle "Custom Photon CSEV Low R9 2024" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2024_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2024_sf/plots/Data_2024 \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2024_sf \
+    --section-url "#Resolve_Photon_CSEV_LowR9_2024"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_lr9_2023postBPixHole/hza_resolve_phcsev_lr9_2023postBPixHole_sf \
+    --hometitle "Custom Photon CSEV Low R9 2023postBPixHole" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2023postBPixHole_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPixHole_sf/plots/Data_2023postBPix \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPixHole_sf \
+    --section-url "#Resolve_Photon_CSEV_LowR9_2023postBPixHole"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_lr9_2023postBPix/hza_resolve_phcsev_lr9_2023postBPix_sf \
+    --hometitle "Custom Photon CSEV Low R9 2023postBPix" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2023postBPix_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPix_sf/plots/Data_2023postBPix \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023postBPix_sf \
+    --section-url "#Resolve_Photon_CSEV_LowR9_2023postBPix"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_lr9_2023preBPix/hza_resolve_phcsev_lr9_2023preBPix_sf \
+    --hometitle "Custom Photon CSEV Low R9 2023preBPix" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2023preBPix_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023preBPix_sf/plots/Data_2023preBPix \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2023preBPix_sf \
+    --section-url "#Resolve_Photon_CSEV_LowR9_2023preBPix"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_lr9_2022postEE/hza_resolve_phcsev_lr9_2022postEE_sf \
+    --hometitle "Custom Photon CSEV Low R9 2022postEE" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2022postEE_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022postEE_sf/plots/Data_2022postEE \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022postEE_sf \
+    --section-url "#Resolve_Photon_CSEV_LowR9_2022postEE"
+
+  bash "${SCRIPT_DIR}/publish_subpage.sh" \
+    --dest resolve_phcsev_lr9_2022preEE/hza_resolve_phcsev_lr9_2022preEE_sf \
+    --hometitle "Custom Photon CSEV Low R9 2022preEE" \
+    --title "Efficiency / Scale Factor Measurements — hza_resolve_phcsev_lr9_2022preEE_sf" \
+    --src-fits /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022preEE_sf/plots/Data_2022preEE \
+    --src-summary /eos/home-p/pelai/HZa/root_TnP/hza_resolve_phcsev_lr9_2022preEE_sf \
+    --section-url "#Resolve_Photon_CSEV_LowR9_2022preEE"
+
 }
 
 publish_muon_one() {
@@ -360,6 +508,22 @@ publish_muon() {
   MUON_SUMMARY_ROOT="${MUON_SUMMARY_ROOT:-${MUON_TNP_ROOT}/plots/muon/generalTracks/Z/Run2024}"
 
   publish_muon_one \
+    "Muon Offline Selection 2024" \
+    "NUM_HToZa_SignalMuons_DEN_TrackerMuons" \
+    "muon_offline_selection_2024"
+  publish_muon_one \
+    "Muon Single Trigger 2024" \
+    "NUM_Mu24leg_DEN_HToZa_SignalMuons" \
+    "muon_single_trigger_2024"
+  publish_muon_one \
+    "Muon Double Trigger Upper Leg 2024" \
+    "NUM_Mu17leg_DEN_HToZa_SignalMuons" \
+    "muon_double_trigger_upper_leg_2024"
+  publish_muon_one \
+    "Muon Double Trigger Lower Leg 2024" \
+    "NUM_Mu8leg_DEN_HToZa_SignalMuons" \
+    "muon_double_trigger_lower_leg_2024"
+  publish_muon_one \
     "Muon miniIso < 0.15 2024" \
     "NUM_MuIso0p15_DEN_HToZa_SignalMuons_Trigger" \
     "muon_miniIso0p15_2024"
@@ -367,22 +531,6 @@ publish_muon() {
     "Muon miniIso < 0.1 2024" \
     "NUM_MuIso0p1_DEN_HToZa_SignalMuons_Trigger" \
     "muon_miniIso0p1_2024"
-  publish_muon_one \
-    "Muon Double Trigger Lower Leg 2024" \
-    "NUM_Mu8leg_DEN_HToZa_SignalMuons" \
-    "muon_double_trigger_lower_leg_2024"
-  publish_muon_one \
-    "Muon Double Trigger Upper Leg 2024" \
-    "NUM_Mu17leg_DEN_HToZa_SignalMuons" \
-    "muon_double_trigger_upper_leg_2024"
-  publish_muon_one \
-    "Muon Single Trigger 2024" \
-    "NUM_Mu24leg_DEN_HToZa_SignalMuons" \
-    "muon_single_trigger_2024"
-  publish_muon_one \
-    "Muon Offline Selection 2024" \
-    "NUM_HToZa_SignalMuons_DEN_TrackerMuons" \
-    "muon_offline_selection_2024"
 }
 
 MODE="${1:-electron}"
