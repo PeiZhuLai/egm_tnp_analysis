@@ -246,6 +246,17 @@ tnpParAltBkgFit = [
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
+tnpParAltBkgFitByBin = {
+    5: params_with_updates(
+        tnpParAltBkgFit,
+        "meanP[-2.5,-5.0,1.0]",
+        "sigmaP[2.4,0.8,5.0]",
+        "alphaP[-0.04,-0.20,0.02]",
+        "meanF[-3.0,-5.0,1.0]",
+        "sigmaF[4.5,1.2,8.0]",
+        "alphaF[-0.02,-0.10,0.03]",
+    ),
+}
 
 
 tnpParAltSigBkgFit = [

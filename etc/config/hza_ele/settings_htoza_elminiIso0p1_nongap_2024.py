@@ -4,7 +4,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
-from etc.config.fit_param_utils import params_with_updates
+from etc.config.fit_param_utils import params_for_bins, params_with_updates
 
 #############################################################
 ########## General settings
@@ -219,3 +219,73 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+tnpParNomFitByBin = {}
+tnpParNomFitByBin.update(params_for_bins(
+    tnpParNomFit,
+    (1, 6, 12, 14),
+    "meanP[-1.5,-6.0,5.0]",
+    "sigmaP[3.0,0.8,6.5]",
+    "acmsP[78.,45.,95.]",
+    "betaP[0.02,0.001,0.08]",
+    "gammaP[0.04,-0.1,0.8]",
+    "peakP[87.0,82.0,90.0]",
+))
+tnpParNomFitByBin.update(params_for_bins(
+    tnpParNomFit,
+    (17, 18, 22),
+    "meanP[-0.5,-5.0,5.0]",
+    "sigmaP[2.0,0.8,5.0]",
+    "meanF[-0.8,-5.0,3.0]",
+    "sigmaF[2.2,0.8,5.5]",
+    "acmsP[88.,70.,95.]",
+    "betaP[0.03,0.001,0.08]",
+    "gammaP[0.04,-0.1,0.6]",
+))
+
+tnpParAltSigFitByBin = params_for_bins(
+    tnpParAltSigFit,
+    (3, 4, 6, 9, 11, 13, 15),
+    "meanP[-2.0,-8.0,5.0]",
+    "sigmaP[4.0,0.8,8.0]",
+    "sigmaP_2[1.5,0.4,7.0]",
+    "alphaP[2.0,0.8,4.5]",
+    "nP[0.8,-2.0,8.0]",
+    "sosP[1.5,0.1,7.0]",
+    "meanF[-2.0,-8.0,5.0]",
+    "sigmaF[4.0,0.8,9.0]",
+    "sigmaF_2[1.2,0.4,7.0]",
+    "alphaF[1.6,0.8,4.5]",
+    "nF[0.6,0.0,8.0]",
+    "sosF[1.2,0.1,7.0]",
+    "acmsP[78.,45.,100.]",
+    "betaP[0.02,0.001,0.08]",
+    "gammaP[0.04,0.001,0.8]",
+    "acmsF[78.,45.,100.]",
+    "betaF[0.02,0.001,0.08]",
+    "gammaF[0.04,0.001,0.8]",
+)
+
+tnpParAltBkgFitByBin = params_for_bins(
+    tnpParAltBkgFit,
+    (1, 2, 4),
+    "meanP[-2.0,-6.0,5.0]",
+    "sigmaP[3.0,0.8,7.0]",
+    "alphaP[-0.01,-0.06,0.03]",
+    "meanF[-2.0,-6.0,5.0]",
+    "sigmaF[3.5,0.8,8.0]",
+    "alphaF[-0.01,-0.06,0.03]",
+)
+
+tnpParAltSigBkgFitByBin.update(params_for_bins(
+    tnpParAltSigBkgFit,
+    (1, 2, 4),
+    'sigmaP[0.8, 0.2, 2.5]',
+    'sigmaP_2[1.2, 0.1, 3.0]',
+    'sosP[0.30, 0.0, 1.2]',
+    'alphaP_2[-0.01, -0.08, 0.]',
+    'sigmaF[0.8, 0.2, 2.5]',
+    'sigmaF_2[1.0, 0.1, 3.0]',
+    'sosF[0.25, 0.0, 1.2]',
+    'alphaF_2[-0.01, -0.08, 0.]',
+))

@@ -180,6 +180,15 @@ tnpParAltBkgFit = [
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
+tnpParAltBkgFitByBin = {
+    2: params_with_updates(
+        tnpParAltBkgFit,
+        "sigmaP[1.2,0.6,3.0]",
+        "alphaP[-0.002,-0.04,0.03]",
+        "sigmaF[1.2,0.6,3.0]",
+        "alphaF[-0.002,-0.04,0.03]",
+    ),
+}
 
 
 tnpParAltSigBkgFit = [
@@ -197,6 +206,17 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 tnpParAltSigBkgFitByBin = {
+    2: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[0.5, 0.1, 1.5]',
+        'sigmaP_2[0.8, 0.1, 2.5]',
+        'sosP[0.15, 0.0, 0.8]',
+        'alphaP_2[-0.004, -0.05, 0.]',
+        'sigmaF[0.5, 0.1, 1.8]',
+        'sigmaF_2[0.8, 0.1, 2.5]',
+        'sosF[0.15, 0.0, 0.8]',
+        'alphaF_2[-0.004, -0.05, 0.]',
+    ),
     6: params_with_updates(
         tnpParAltSigBkgFit,
         'alphaF_2[-0.014, -1, 0.]',

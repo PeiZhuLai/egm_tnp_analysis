@@ -13,3 +13,11 @@ def params_with_updates(base_params, *updated_params):
         params = [item for item in params if not str(item).startswith(prefix)]
         params.append(updated)
     return params
+
+
+def params_for_bins(base_params, bins, *updated_params):
+    """Return the same parameter override for each bin in bins."""
+    return dict(
+        (bin_index, params_with_updates(base_params, *updated_params))
+        for bin_index in bins
+    )

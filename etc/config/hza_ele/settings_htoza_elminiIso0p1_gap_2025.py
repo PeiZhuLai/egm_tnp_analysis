@@ -4,7 +4,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
-from etc.config.fit_param_utils import params_with_updates
+from etc.config.fit_param_utils import params_for_bins, params_with_updates
 
 #############################################################
 ########## General settings
@@ -173,6 +173,22 @@ tnpParAltSigFit = [
     "acmsP[65.,45.,90.]","betaP[0.04,0.005,0.08]","gammaP[0.08, 0.002, 1.5]","peakP[89.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.04,0.005,0.08]","gammaF[0.08, 0.002, 1.5]","peakF[89.0,82.0,90.0]",
     ]
+tnpParAltSigFitByBin = params_for_bins(
+    tnpParAltSigFit,
+    (1, 2),
+    "sigmaP[2.5,0.7,7.0]",
+    "sigmaP_2[1.2,0.5,5.0]",
+    "sosP[0.8,0.2,4.0]",
+    "sigmaF[2.8,0.8,7.0]",
+    "sigmaF_2[1.2,0.5,5.0]",
+    "sosF[0.8,0.2,4.0]",
+    "acmsP[88.,70.,95.]",
+    "betaP[0.02,0.001,0.06]",
+    "gammaP[0.02,0.001,0.5]",
+    "acmsF[88.,70.,95.]",
+    "betaF[0.02,0.001,0.06]",
+    "gammaF[0.02,0.001,0.5]",
+)
      
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",

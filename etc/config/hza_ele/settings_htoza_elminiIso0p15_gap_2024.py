@@ -4,7 +4,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
-from etc.config.fit_param_utils import params_with_updates
+from etc.config.fit_param_utils import params_for_bins, params_with_updates
 
 #############################################################
 ########## General settings
@@ -149,6 +149,20 @@ tnpParNomFit = [
     "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+tnpParNomFitByBin = params_for_bins(
+    tnpParNomFit,
+    (1, 2),
+    "sigmaP[1.2,0.5,3.0]",
+    "sigmaF[1.2,0.5,3.5]",
+    "acmsP[89.,78.,92.]",
+    "betaP[0.02,0.001,0.06]",
+    "gammaP[0.02,-0.05,0.20]",
+    "peakP[89.0,86.0,91.0]",
+    "acmsF[88.,76.,92.]",
+    "betaF[0.02,0.001,0.06]",
+    "gammaF[0.02,-0.05,0.20]",
+    "peakF[89.0,86.0,91.0]",
+)
 
 # # 15
 # tnpParNomFit = [
@@ -173,6 +187,23 @@ tnpParAltSigFit = [
     "acmsP[65.,45.,90.]","betaP[0.04,0.005,0.08]","gammaP[0.08, 0.002, 1.5]","peakP[89.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.04,0.005,0.08]","gammaF[0.08, 0.002, 1.5]","peakF[89.0,82.0,90.0]",
     ]
+tnpParAltSigFitByBin = {
+    1: params_with_updates(
+        tnpParAltSigFit,
+        "sigmaP[2.5,0.7,7.0]",
+        "sigmaP_2[1.2,0.5,5.0]",
+        "sosP[0.8,0.2,4.0]",
+        "sigmaF[2.8,0.8,7.0]",
+        "sigmaF_2[1.2,0.5,5.0]",
+        "sosF[0.8,0.2,4.0]",
+        "acmsP[62.,45.,78.]",
+        "betaP[0.02,0.001,0.06]",
+        "gammaP[0.03,0.001,0.6]",
+        "acmsF[62.,45.,78.]",
+        "betaF[0.02,0.001,0.06]",
+        "gammaF[0.03,0.001,0.6]",
+    ),
+}
      
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
@@ -180,6 +211,14 @@ tnpParAltBkgFit = [
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
+tnpParAltBkgFitByBin = params_for_bins(
+    tnpParAltBkgFit,
+    (1, 2),
+    "sigmaP[1.2,0.6,3.0]",
+    "alphaP[-0.002,-0.04,0.03]",
+    "sigmaF[1.2,0.6,3.0]",
+    "alphaF[-0.002,-0.04,0.03]",
+)
 
 
 tnpParAltSigBkgFit = [
@@ -197,6 +236,28 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 tnpParAltSigBkgFitByBin = {
+    1: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[0.5, 0.1, 1.5]',
+        'sigmaP_2[0.8, 0.1, 2.5]',
+        'sosP[0.15, 0.0, 0.8]',
+        'alphaP_2[-0.004, -0.05, 0.]',
+        'sigmaF[0.5, 0.1, 1.8]',
+        'sigmaF_2[0.8, 0.1, 2.5]',
+        'sosF[0.15, 0.0, 0.8]',
+        'alphaF_2[-0.004, -0.05, 0.]',
+    ),
+    2: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[0.5, 0.1, 1.5]',
+        'sigmaP_2[0.8, 0.1, 2.5]',
+        'sosP[0.15, 0.0, 0.8]',
+        'alphaP_2[-0.004, -0.05, 0.]',
+        'sigmaF[0.5, 0.1, 1.8]',
+        'sigmaF_2[0.8, 0.1, 2.5]',
+        'sosF[0.15, 0.0, 0.8]',
+        'alphaF_2[-0.004, -0.05, 0.]',
+    ),
     6: params_with_updates(
         tnpParAltSigBkgFit,
         'alphaF_2[-0.014, -1, 0.]',
