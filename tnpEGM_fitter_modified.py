@@ -248,21 +248,46 @@ for s in tnpConf.samplesDef.keys():
 if args.mcSig :
     sampleToFit = tnpConf.samplesDef['mcNom']
 
+def _resolve_fit_params(base_attr, bin_index, tnp_bin):
+    params = list(getattr(tnpConf, base_attr))
+    override_map = getattr(tnpConf, '%sByBin' % base_attr, None)
+    if not override_map:
+        return params
+
+    override = None
+    if bin_index in override_map:
+        override = override_map[bin_index]
+    elif str(bin_index) in override_map:
+        override = override_map[str(bin_index)]
+    elif tnp_bin['name'] in override_map:
+        override = override_map[tnp_bin['name']]
+
+    if override:
+        print('[tnpEGM_fitter] override %s for bin %s (%s)' % (base_attr, bin_index, tnp_bin['name']))
+        return list(override)
+    return params
+
 if  args.doFit:
     print(" ======== Fitting ========")
     sampleToFit.dump()
     def parallel_fit(ib):
         if (args.binNumber >= 0 and ib == args.binNumber) or args.binNumber < 0:
+            tnp_bin = tnpBins['bins'][ib]
             if args.altSig and not args.addGaus:
-                tnpRoot.histFitterAltSig(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltSigFit )
+                fit_params = _resolve_fit_params('tnpParAltSigFit', ib, tnp_bin)
+                tnpRoot.histFitterAltSig(  sampleToFit, tnp_bin, fit_params, bin_index=ib )
             elif args.altSig and args.addGaus:
-                tnpRoot.histFitterAltSig(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltSigFit_addGaus, 1)
+                fit_params = _resolve_fit_params('tnpParAltSigFit_addGaus', ib, tnp_bin)
+                tnpRoot.histFitterAltSig(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib)
             elif args.altBkg:
-                tnpRoot.histFitterAltBkg(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltBkgFit )
+                fit_params = _resolve_fit_params('tnpParAltBkgFit', ib, tnp_bin)
+                tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib )
             elif args.altSigBkg:
-                tnpRoot.histFitterAltSigBkg(  sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParAltSigBkgFit )
+                fit_params = _resolve_fit_params('tnpParAltSigBkgFit', ib, tnp_bin)
+                tnpRoot.histFitterAltSigBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib )
             else:
-                tnpRoot.histFitterNominal( sampleToFit, tnpBins['bins'][ib], tnpConf.tnpParNomFit )
+                fit_params = _resolve_fit_params('tnpParNomFit', ib, tnp_bin)
+                tnpRoot.histFitterNominal( sampleToFit, tnp_bin, fit_params, bin_index=ib )
     pool = Pool()
     pool.map(parallel_fit, range(len(tnpBins['bins'])))
 

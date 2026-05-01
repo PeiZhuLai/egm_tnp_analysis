@@ -174,8 +174,6 @@ void tnpFitter::fits(bool mcTruth,bool isMC,string title, bool isaddGaus) {
     _work->var("sigmaF")->setConstant();
   }
 
-  _work->var("sigmaF")->setVal(_work->var("sigmaP")->getVal());
-  _work->var("sigmaF")->setRange(0.8* _work->var("sigmaP")->getVal(), 3.0* _work->var("sigmaP")->getVal());
   if( isMC == 1 ) resFail = pdfFail->fitTo(*_work->data("hFail"), Minimizer("Minuit2", "MIGRAD"), Minos(_useMinos), Strategy(2), SumW2Error(kTRUE),Save(),Range("fitMassRange"));
   else resFail = pdfFail->fitTo(*_work->data("hFail"), Minimizer("Minuit2", "MIGRAD"), Minos(_useMinos), Strategy(2), SumW2Error(kFALSE),Save(),Range("fitMassRange"));
   //RooFitResult* resFail = pdfFail->fitTo(*_work->data("hFail"),Minos(_useMinos),SumW2Error(kTRUE),Save());
