@@ -337,11 +337,14 @@ tnpParAltSigFitByBin = {
     3: params_with_updates(
         tnpParAltSigFit,
         "meanF[-0.5,-4.0,3.0]",
-        "sigmaF[2.8,0.9,5.8]",
-        "sigmaF_2[1.2,0.4,4.5]",
-        "sosF[0.9,0.0,3.5]",
+        "sigmaF[4.0,1.0,7.0]",
+        "sigmaF_2[1.6,0.4,5.5]",
+        "sosF[1.2,0.0,4.5]",
         "alphaF[1.6,0.8,4.0]",
         "nF[0.6,0.0,5.0]",
+        "acmsF[55.,30.,75.]",
+        "betaF[0.055,0.005,0.12]",
+        "gammaF[0.035,0.001,0.60]",
     ),
     8: params_with_updates(
         tnpParAltSigFit,
