@@ -293,10 +293,32 @@ def _current_fit_type():
         fit_type = 'altSigBkgFit'
     return fit_type
 
-def _resolve_fit_params(base_attr, bin_index, tnp_bin):
+def _workspace_param_name(param):
+    param = str(param).strip()
+    if '[' not in param:
+        return None
+    return param.split('[', 1)[0].strip()
+
+def _changed_param_names(base_attr, override_params):
+    base_by_name = {}
+    for item in getattr(tnpConf, base_attr):
+        name = _workspace_param_name(item)
+        if name:
+            base_by_name[name] = str(item)
+
+    changed = set()
+    for item in override_params:
+        name = _workspace_param_name(item)
+        if name and name in base_by_name and str(item) != base_by_name[name]:
+            changed.add(name)
+    return changed
+
+def _resolve_fit_params(base_attr, bin_index, tnp_bin, return_changed_names=False):
     params = list(getattr(tnpConf, base_attr))
     override_map = getattr(tnpConf, '%sByBin' % base_attr, None)
     if not override_map:
+        if return_changed_names:
+            return params, set()
         return params
 
     override = None
@@ -309,7 +331,12 @@ def _resolve_fit_params(base_attr, bin_index, tnp_bin):
 
     if override:
         print('[tnpEGM_fitter] override %s for bin %s (%s)' % (base_attr, bin_index, tnp_bin['name']))
-        return list(override)
+        params = list(override)
+        if return_changed_names:
+            return params, _changed_param_names(base_attr, params)
+        return params
+    if return_changed_names:
+        return params, set()
     return params
 
 if  args.doFit:
@@ -319,11 +346,24 @@ if  args.doFit:
         if (args.binNumber >= 0 and ib == args.binNumber) or args.binNumber < 0:
             tnp_bin = tnpBins['bins'][ib]
             if args.altSig and not args.addGaus:
-                fit_params = _resolve_fit_params('tnpParAltSigFit', ib, tnp_bin)
-                tnpRoot.histFitterAltSig(  sampleToFit, tnp_bin, fit_params, bin_index=ib )
+                fit_params, changed_names = _resolve_fit_params('tnpParAltSigFit', ib, tnp_bin, return_changed_names=True)
+                tnpRoot.histFitterAltSig(
+                    sampleToFit,
+                    tnp_bin,
+                    fit_params,
+                    bin_index=ib,
+                    preserve_params_from_mc=changed_names,
+                )
             elif args.altSig and args.addGaus:
-                fit_params = _resolve_fit_params('tnpParAltSigFit_addGaus', ib, tnp_bin)
-                tnpRoot.histFitterAltSig(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib)
+                fit_params, changed_names = _resolve_fit_params('tnpParAltSigFit_addGaus', ib, tnp_bin, return_changed_names=True)
+                tnpRoot.histFitterAltSig(
+                    sampleToFit,
+                    tnp_bin,
+                    fit_params,
+                    1,
+                    bin_index=ib,
+                    preserve_params_from_mc=changed_names,
+                )
             elif args.altBkg:
                 fit_params = _resolve_fit_params('tnpParAltBkgFit', ib, tnp_bin)
                 tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib )

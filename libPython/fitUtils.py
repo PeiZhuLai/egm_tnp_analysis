@@ -427,13 +427,14 @@ def build_fit_diagnostics_summary(sample, fit_type, tnp_bins, selected_bin=-1):
 
     return summary_path
 
-def createWorkspaceForAltSig( sample, tnpBin, tnpWorkspaceParam ):
+def createWorkspaceForAltSig( sample, tnpBin, tnpWorkspaceParam, preserve_params_from_mc=None ):
     """
     根據 MC 參考檔案的 RooFitResult 覆寫部分參數；若缺失則保持原樣。
     為避免多程序修改同一列表，使用複本後再回傳。
     """
     # 使用複本避免 multiprocessing 共享列表被就地修改
     localParams = list(tnpWorkspaceParam)
+    preserve_params_from_mc = set(preserve_params_from_mc or [])
 
     def _removeAndAppend(paramName, value):
         x = re.compile('%s.*?' % paramName)
@@ -489,6 +490,9 @@ def createWorkspaceForAltSig( sample, tnpBin, tnpWorkspaceParam ):
     for ipar in range(len(fitParF)):
         pName = fitParF[ipar].GetName()
         if pName in listOfParam:
+            if pName in preserve_params_from_mc:
+                logging.warning(f'保留手動設定 {pName}，不使用 MC 覆寫')
+                continue
             logging.warning(f'覆寫 {pName} -> {fitParF[ipar].getVal():2.3f}')
             _removeAndAppend(pName, fitParF[ipar].getVal())
 
@@ -497,6 +501,9 @@ def createWorkspaceForAltSig( sample, tnpBin, tnpWorkspaceParam ):
     for ipar in range(len(fitParP)):
         pName = fitParP[ipar].GetName()
         if pName in listOfParam:
+            if pName in preserve_params_from_mc:
+                logging.warning(f'保留手動設定 {pName}，不使用 MC 覆寫')
+                continue
             logging.warning(f'覆寫 {pName} -> {fitParP[ipar].getVal():2.3f}')
             _removeAndAppend(pName, fitParP[ipar].getVal())
 
@@ -585,9 +592,21 @@ def histFitterNominal( sample, tnpBin, tnpWorkspaceParam, bin_index=None ):
 #############################################################
 ########## alternate signal fitter
 #############################################################
-def histFitterAltSig( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None ):
+def histFitterAltSig(
+    sample,
+    tnpBin,
+    tnpWorkspaceParam,
+    isaddGaus=0,
+    bin_index=None,
+    preserve_params_from_mc=None,
+):
 
-    tnpWorkspacePar = createWorkspaceForAltSig( sample,  tnpBin, tnpWorkspaceParam )
+    tnpWorkspacePar = createWorkspaceForAltSig(
+        sample,
+        tnpBin,
+        tnpWorkspaceParam,
+        preserve_params_from_mc=preserve_params_from_mc,
+    )
 
     tnpWorkspaceFunc = [
         "tailLeft[1]",
@@ -663,6 +682,7 @@ def histFitterAltSig( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=
             'truth_fail_template_uses_pass_hist': False,
             'truth_template_source': 'etc/inputs/ZeeGenLevel.root',
             'add_gaussian_fail_component': bool(isaddGaus),
+            'preserved_params_from_mc': sorted(preserve_params_from_mc or []),
         },
     )
 
