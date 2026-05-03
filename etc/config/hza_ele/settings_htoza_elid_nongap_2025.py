@@ -334,6 +334,15 @@ tnpParAltSigFitByBin = {
         "gammaP[0.08,0.001,2.0]",
         *_nongap_altsig_fail_falling,
     ),
+    3: params_with_updates(
+        tnpParAltSigFit,
+        "meanF[-0.5,-4.0,3.0]",
+        "sigmaF[2.8,0.9,5.8]",
+        "sigmaF_2[1.2,0.4,4.5]",
+        "sosF[0.9,0.0,3.5]",
+        "alphaF[1.6,0.8,4.0]",
+        "nF[0.6,0.0,5.0]",
+    ),
     8: params_with_updates(
         tnpParAltSigFit,
         "meanP[-2.1,-5.0,5.0]",
