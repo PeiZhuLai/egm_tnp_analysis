@@ -85,7 +85,7 @@ run_job egm_tnp_analysis.etc./config.hza_ele.settings_htoza_elid_nongap_lowpT_20
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_nongap_2025 hza_elminiIso0p1_nongap_2025_sf
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_gap_2025 hza_elminiIso0p1_gap_2025_sf
 run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2025 hza_elminiIso0p15_nongap_2025_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2025 hza_elminiIso0p15_gap_2025_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2025 hza_elminiIso0p15_gap_2025_sf
 #------------------------------------------------------------------------------------------------------------
 # Tunning 
 
