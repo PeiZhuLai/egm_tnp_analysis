@@ -233,22 +233,22 @@ tnpParAltSigFitByBin = {
     18: params_with_updates(
         tnpParAltSigFit,
         "meanF[0.0,-4.0,3.0]",
-        "sigmaF[4.5,0.8,7.0]",
-        "sigmaF_2[0.8,0.3,4.0]",
-        "sosF[1.0,0.0,4.0]",
-        "acmsF[62.,42.,82.]",
-        "betaF[0.025,0.001,0.06]",
-        "gammaF[0.04,0.001,0.6]",
+        "sigmaF[5.5,0.8,9.0]",
+        "sigmaF_2[1.2,0.3,5.5]",
+        "sosF[1.8,0.0,5.5]",
+        "acmsF[60.,40.,85.]",
+        "betaF[0.02,0.001,0.055]",
+        "gammaF[0.035,0.001,0.6]",
     ),
     21: params_with_updates(
         tnpParAltSigFit,
-        "meanF[0.5,-3.0,4.0]",
-        "sigmaF[4.5,0.8,7.0]",
-        "sigmaF_2[0.8,0.3,4.0]",
-        "sosF[0.8,0.0,3.0]",
-        "acmsF[62.,42.,82.]",
-        "betaF[0.025,0.001,0.06]",
-        "gammaF[0.04,0.001,0.6]",
+        "meanF[0.0,-4.5,4.0]",
+        "sigmaF[5.5,0.8,9.0]",
+        "sigmaF_2[1.2,0.3,5.5]",
+        "sosF[1.5,0.0,5.0]",
+        "acmsF[60.,40.,85.]",
+        "betaF[0.02,0.001,0.055]",
+        "gammaF[0.035,0.001,0.6]",
     ),
     23: params_with_updates(
         tnpParAltSigFit,
@@ -261,6 +261,20 @@ tnpParAltSigFitByBin = {
         "gammaP[0.05,0.001,1.0]",
     ),
 }
+tnpParAltSigFitByBin.update(params_for_bins(
+    tnpParAltSigFit,
+    (0, 1, 2, 3, 4, 5, 7, 10, 11, 13, 14, 15),
+    "meanP[-1.2,-6.0,5.0]",
+    "sigmaP[4.5,1.0,8.0]",
+    "sigmaP_2[2.0,0.4,6.0]",
+    "alphaP[1.6,0.7,4.5]",
+    "nP[0.8,-2.0,8.0]",
+    "sosP[1.4,0.0,5.0]",
+    "acmsP[58.,35.,82.]",
+    "betaP[0.02,0.001,0.06]",
+    "gammaP[0.04,0.001,0.8]",
+    "peakP[87.0,82.0,89.0]",
+))
 
 tnpParAltBkgFitByBin = params_for_bins(
     tnpParAltBkgFit,
@@ -275,15 +289,15 @@ tnpParAltBkgFitByBin = params_for_bins(
 tnpParAltBkgFitByBin.update({
     6: params_with_updates(
         tnpParAltBkgFit,
-        "meanF[-3.0,-7.0,2.0]",
-        "sigmaF[5.0,1.0,8.0]",
-        "alphaF[-0.08,-0.30,0.00]",
+        "meanF[-2.5,-7.0,2.0]",
+        "sigmaF[4.0,1.0,8.5]",
+        "alphaF[-0.06,-0.28,-0.002]",
     ),
     37: params_with_updates(
         tnpParAltBkgFit,
         "meanF[-1.0,-5.0,3.0]",
-        "sigmaF[1.4,0.5,4.0]",
-        "alphaF[-0.02,-0.12,0.02]",
+        "sigmaF[2.2,0.6,5.5]",
+        "alphaF[-0.04,-0.18,-0.002]",
     ),
 })
 
@@ -303,7 +317,7 @@ tnpParAltSigBkgFitByBin.update(params_for_bins(
     tnpParAltSigBkgFit,
     (34, 35, 37),
     'sigmaF[0.9, 0.2, 2.5]',
-    'sigmaF_2[0.8, 0.2, 2.0]',
-    'sosF[0.03, 0.0, 0.18]',
-    'alphaF_2[-0.04, -0.20, 0.]',
+    'sigmaF_2[0.6, 0.2, 1.4]',
+    'sosF[0.02, 0.0, 0.08]',
+    'alphaF_2[-0.08, -0.30, -0.005]',
 ))
