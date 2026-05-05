@@ -261,6 +261,8 @@ tnpParAltSigFitByBin = {
         "gammaP[0.05,0.001,1.0]",
     ),
 }
+tnpParAltSigFitByBin['bin18_el_sc_eta_m1p57Tom0p80_el_et_20p00To35p00'] = tnpParAltSigFitByBin[18]
+tnpParAltSigFitByBin['bin21_el_sc_eta_0p80To1p57_el_et_20p00To35p00'] = tnpParAltSigFitByBin[21]
 
 tnpParAltBkgFitByBin = params_for_bins(
     tnpParAltBkgFit,
@@ -301,3 +303,6 @@ tnpParAltSigBkgFitByBin.update(params_for_bins(
     'sosF[0.001, 0.0, 0.006]',
     'alphaF_2[-0.30, -0.80, -0.10]',
 ))
+tnpParAltSigBkgFitByBin['bin34_el_sc_eta_m1p57Tom0p80_el_et_50p00To100p00'] = tnpParAltSigBkgFitByBin[34]
+tnpParAltSigBkgFitByBin['bin35_el_sc_eta_m0p80To0p00_el_et_50p00To100p00'] = tnpParAltSigBkgFitByBin[35]
+tnpParAltSigBkgFitByBin['bin37_el_sc_eta_0p80To1p57_el_et_50p00To100p00'] = tnpParAltSigBkgFitByBin[37]

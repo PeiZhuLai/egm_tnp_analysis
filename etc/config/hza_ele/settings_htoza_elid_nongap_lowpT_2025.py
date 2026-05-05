@@ -257,6 +257,7 @@ tnpParAltBkgFitByBin = {
         "alphaF[-0.55,-1.50,-0.15]",
     ),
 }
+tnpParAltBkgFitByBin['bin05_el_sc_eta_1p57To2p50_el_et_7p00To15p00'] = tnpParAltBkgFitByBin[5]
 
 
 tnpParAltSigBkgFit = [
