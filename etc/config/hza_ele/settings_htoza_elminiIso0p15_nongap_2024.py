@@ -370,7 +370,7 @@ tnpParAltBkgFitByBin = {
 tnpParAltBkgFitByBin.update(params_for_bins(
     tnpParAltBkgFit,
     (11, 12),
-    "meanF[-0.5,-5.0,3.0]",
-    "sigmaF[2.0,0.5,6.0]",
-    "alphaF[-0.005,-0.10,0.03]",
+    "meanF[-0.8,-5.0,2.0]",
+    "sigmaF[1.6,0.5,4.5]",
+    "alphaF[-0.04,-0.18,-0.004]",
 ))
