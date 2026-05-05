@@ -67,7 +67,7 @@ wait_for_batch() {
 ### Electron miniIso SFs
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_nongap_2024 hza_elminiIso0p1_nongap_2024_sf
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_gap_2024 hza_elminiIso0p1_gap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2024 hza_elminiIso0p15_nongap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2024 hza_elminiIso0p15_nongap_2024_sf
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2024 hza_elminiIso0p15_gap_2024_sf
 
 ### Electron ID and Trigger SFs 2025
