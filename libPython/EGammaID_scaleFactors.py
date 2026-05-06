@@ -150,7 +150,10 @@ def _make_plot_output_path(plot_path, stem):
 
 
 def _is_hza_electron_id_trigger_or_miniiso(plot_path):
-    measurement_key = ("%s %s" % (_measurement_tag(plot_path), os.path.basename(plot_path))).lower()
+    measurement_key = (
+        "%s %s %s"
+        % (_measurement_tag(plot_path), os.path.basename(plot_path), os.path.abspath(plot_path))
+    ).lower()
     return any(
         token in measurement_key
         for token in ("elid", "sielleg", "dielleg", "elminiiso")
@@ -332,7 +335,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
         elif 'eta' in xAxis or 'Eta' in xAxis:
             if nkeys == 1:
                 return (0.53, 0.88, 0.94, 0.92)
-            elif nkeys == 6 and isTargetElectronSF:
+            elif nkeys >= 6 and isTargetElectronSF:
                 return (0.53, 0.76, 0.94, 0.92)
             else:
                 return (0.53, 0.80, 0.94, 0.92)
@@ -346,7 +349,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
 
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
-    leg.SetTextSize(0.030 if is_target_electron_sf and _is_eta_like(xAxis) and len(effDataList) == 6 else 0.035)
+    leg.SetTextSize(0.030 if is_target_electron_sf and _is_eta_like(xAxis) and len(effDataList) >= 6 else 0.035)
 
     # 樣式 legend 也強制使用 NDC 並於 p1 內生成
     legStyle = rt.TLegend(0.35,0.84,0.73,0.92)
