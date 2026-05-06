@@ -149,6 +149,32 @@ def _make_plot_output_path(plot_path, stem):
     return os.path.join(os.path.dirname(plot_path), f"HZa_{stem}_{_measurement_tag(plot_path)}")
 
 
+def _is_hza_electron_id_trigger_or_miniiso(plot_path):
+    measurement_key = ("%s %s" % (_measurement_tag(plot_path), os.path.basename(plot_path))).lower()
+    return any(
+        token in measurement_key
+        for token in ("elid", "sielleg", "dielleg", "elminiiso")
+    )
+
+
+def _is_pt_axis(axis_name):
+    return _normalize_axis_name(axis_name) == "pT"
+
+
+def _smallest_positive_x_edge(effis):
+    smallest = None
+
+    for points in effis.values():
+        for point in points:
+            for edge_name in ("min", "max"):
+                edge = point.get(edge_name)
+                if edge is None or edge <= 0:
+                    continue
+                smallest = edge if smallest is None else min(smallest, edge)
+
+    return smallest
+
+
 def _collect_abs_eta_bins(eff_graph):
     abs_eta_bins = set()
 
@@ -266,6 +292,8 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     H = 800
     yUp = 0.45
     canName = 'toto' + xAxis
+    is_target_electron_sf = _is_hza_electron_id_trigger_or_miniiso(nameout)
+    use_log_x = is_target_electron_sf and _is_pt_axis(xAxis)
 
     c = rt.TCanvas(canName,canName,50,50,H,W)
     c.SetTopMargin(0.055)
@@ -283,11 +311,14 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     p2.SetLeftMargin( c.GetLeftMargin() )
     p1.SetTicks(1, 1)
     p2.SetTicks(1, 1)
+    if use_log_x:
+        p1.SetLogx()
+        p2.SetLogx()
     firstGraph = True
 
     p1.cd()
     # 根據 xAxis 與 effDataList 動態決定 legend 位置後再建構
-    def _chooseLegendCoords(effDataList, xAxis):
+    def _chooseLegendCoords(effDataList, xAxis, isTargetElectronSF):
         nkeys = len(effDataList)
         if 'pT' in xAxis or 'pt' in xAxis:
             if nkeys == 3:
@@ -301,19 +332,21 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
         elif 'eta' in xAxis or 'Eta' in xAxis:
             if nkeys == 1:
                 return (0.53, 0.88, 0.94, 0.92)
+            elif nkeys == 6 and isTargetElectronSF:
+                return (0.53, 0.76, 0.94, 0.92)
             else:
                 return (0.53, 0.80, 0.94, 0.92)
         # fallback
         return (0.51, 0.80, 0.94, 0.92)
 
-    legx1, legy1, legx2, legy2 = _chooseLegendCoords(effDataList, xAxis)
+    legx1, legy1, legx2, legy2 = _chooseLegendCoords(effDataList, xAxis, is_target_electron_sf)
     leg = rt.TLegend(legx1, legy1, legx2, legy2)
     # 偵錯輸出
     print("Legend coords (NDC):", legx1, legy1, legx2, legy2)
 
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
-    leg.SetTextSize(0.035)
+    leg.SetTextSize(0.030 if is_target_electron_sf and _is_eta_like(xAxis) and len(effDataList) == 6 else 0.035)
 
     # 樣式 legend 也強制使用 NDC 並於 p1 內生成
     legStyle = rt.TLegend(0.35,0.84,0.73,0.92)
@@ -339,6 +372,10 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     listOfMC      = []
 
     xMin, xMax = _infer_x_limits(effDataList, xAxis)
+    if use_log_x and xMin <= 0:
+        smallest_positive_edge = _smallest_positive_x_edge(effDataList)
+        if smallest_positive_edge is not None:
+            xMin = 0.8 * smallest_positive_edge
 
     effminmax =  findMinMax( effDataList )
     effiMin = effminmax[0]
