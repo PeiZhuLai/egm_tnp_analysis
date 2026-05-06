@@ -387,7 +387,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     effminmax =  findMinMax( effDataList )
     effiMin = effminmax[0]
     effiMax = effminmax[1]
-    effiMin = 0.10 
+    effiMin = 0.30
     effiMax = 1.65
 
     sfminmax =  findMinMax( sfList )
