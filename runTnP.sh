@@ -8,7 +8,7 @@
 # python tnpEGM_fitter.py $1 --flag $2 --doFit
 # python tnpEGM_fitter.py $1 --flag $2 --sumUp
 
-baseDir="/afs/cern.ch/work/p/pelai/HZa/TnP/CMSSW_11_2_0/src/egm_tnp_analysis"
+baseDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 max_jobs=5
 pids=()
 

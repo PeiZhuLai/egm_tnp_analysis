@@ -297,6 +297,8 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     canName = 'toto' + xAxis
     is_target_electron_sf = _is_hza_electron_id_trigger_or_miniiso(nameout)
     use_log_x = is_target_electron_sf and _is_pt_axis(xAxis)
+    if is_target_electron_sf:
+        print("Plot controls: electron ID/trigger/miniIso=True, xAxis=%s, logx=%s" % (xAxis, use_log_x))
 
     c = rt.TCanvas(canName,canName,50,50,H,W)
     c.SetTopMargin(0.055)
