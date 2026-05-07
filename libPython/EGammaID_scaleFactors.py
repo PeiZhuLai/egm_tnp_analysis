@@ -351,7 +351,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
 
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
-    crowded_eta_legend = is_target_electron_sf and _is_eta_like(xAxis) and len(effDataList) >= 6
+    crowded_eta_legend = is_target_electron_sf and _is_eta_like(xAxis) and (len(effDataList) == 6 or len(effDataList) > 6)
     leg.SetTextSize(0.026 if crowded_eta_legend else 0.035)
 
     # 樣式 legend 也強制使用 NDC 並於 p1 內生成
