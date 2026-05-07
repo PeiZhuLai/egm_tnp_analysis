@@ -340,11 +340,11 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
                 return (0.51, 0.74, 0.94, 0.89)
         elif 'eta' in xAxis or 'Eta' in xAxis:
             if nkeys == 1:
-                return (0.53, 0.88, 0.94, 0.92)
+                return (0.60, 0.86, 0.94, 0.91)
             elif nkeys >= 6 and isTargetElectronSF:
-                return (0.51, 0.74, 0.94, 0.92)
+                return (0.58, 0.62, 0.94, 0.89)
             else:
-                return (0.53, 0.80, 0.94, 0.92)
+                return (0.58, 0.76, 0.94, 0.91)
         # fallback
         return (0.51, 0.80, 0.94, 0.92)
 
@@ -356,7 +356,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
     crowded_eta_legend = is_target_electron_sf and _is_eta_like(xAxis) and len(effDataList) >= 6
-    legend_text_size = 0.030 if crowded_eta_legend else 0.035
+    legend_text_size = 0.026 if crowded_eta_legend else 0.032
     leg.SetTextSize(legend_text_size)
     print(
         "Legend text: xAxis=%s yAxis=%s nkeys=%d target=%s etaLike=%s crowded=%s size=%.3f"
@@ -364,10 +364,10 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     )
 
     # 樣式 legend 也強制使用 NDC 並於 p1 內生成
-    legStyle = rt.TLegend(0.35,0.84,0.73,0.92)
+    legStyle = rt.TLegend(0.36, 0.83, 0.55, 0.91)
     legStyle.SetBorderSize(0)
     legStyle.SetFillStyle(0)
-    legStyle.SetTextSize(0.035)
+    legStyle.SetTextSize(0.032)
     lineData = rt.TLine(0, 0, 1, 0)
     lineData.SetLineColor(rt.kBlack)
     lineData.SetLineWidth(2)
