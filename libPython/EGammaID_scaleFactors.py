@@ -326,14 +326,18 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     def _chooseLegendCoords(effDataList, xAxis, isTargetElectronSF):
         nkeys = len(effDataList)
         if 'pT' in xAxis or 'pt' in xAxis:
-            if nkeys == 3:
-                return (0.51, 0.80, 0.94, 0.92)
+            if nkeys == 7:
+                return (0.51, 0.70, 0.94, 0.89)
+            elif nkeys == 6:
+                return (0.51, 0.70, 0.94, 0.89)
+            elif nkeys == 3:
+                return (0.51, 0.70, 0.94, 0.89)
             elif nkeys == 2:
-                return (0.51, 0.84, 0.94, 0.92)
+                return (0.51, 0.84, 0.94, 0.89)
             elif nkeys == 1:
-                return (0.51, 0.88, 0.94, 0.92)
+                return (0.51, 0.88, 0.94, 0.89)
             else:
-                return (0.51, 0.74, 0.94, 0.92)
+                return (0.51, 0.74, 0.94, 0.89)
         elif 'eta' in xAxis or 'Eta' in xAxis:
             if nkeys == 1:
                 return (0.53, 0.88, 0.94, 0.92)
@@ -352,7 +356,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
     crowded_eta_legend = is_target_electron_sf and _is_eta_like(xAxis) and len(effDataList) >= 6
-    legend_text_size = 0.026 if crowded_eta_legend else 0.035
+    legend_text_size = 0.030 if crowded_eta_legend else 0.035
     leg.SetTextSize(legend_text_size)
     print(
         "Legend text: xAxis=%s yAxis=%s nkeys=%d target=%s etaLike=%s crowded=%s size=%.3f"
