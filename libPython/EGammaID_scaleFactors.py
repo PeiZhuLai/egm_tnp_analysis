@@ -364,10 +364,11 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     )
 
     # 樣式 legend 也強制使用 NDC 並於 p1 內生成
-    legStyle = rt.TLegend(0.36, 0.83, 0.55, 0.91)
+    legStyle = rt.TLegend(0.34, 0.73, 0.52, 0.85)
     legStyle.SetBorderSize(0)
     legStyle.SetFillStyle(0)
-    legStyle.SetTextSize(0.032)
+    legStyle.SetTextSize(0.030)
+    legStyle.SetMargin(0.45)
     lineData = rt.TLine(0, 0, 1, 0)
     lineData.SetLineColor(rt.kBlack)
     lineData.SetLineWidth(2)
