@@ -326,11 +326,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     def _chooseLegendCoords(effDataList, xAxis, isTargetElectronSF):
         nkeys = len(effDataList)
         if 'pT' in xAxis or 'pt' in xAxis:
-            if nkeys == 7:
-                return (0.51, 0.70, 0.94, 0.89)
-            elif nkeys == 6:
-                return (0.51, 0.70, 0.94, 0.89)
-            elif nkeys == 3:
+            if nkeys == 3:
                 return (0.51, 0.70, 0.94, 0.89)
             elif nkeys == 2:
                 return (0.51, 0.84, 0.94, 0.89)
