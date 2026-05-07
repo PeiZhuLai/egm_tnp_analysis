@@ -351,8 +351,13 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
 
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
-    crowded_eta_legend = is_target_electron_sf and _is_eta_like(xAxis) and (len(effDataList) == 6 or len(effDataList) > 6)
-    leg.SetTextSize(0.026 if crowded_eta_legend else 0.035)
+    crowded_eta_legend = is_target_electron_sf and _is_eta_like(xAxis) and len(effDataList) >= 6
+    legend_text_size = 0.026 if crowded_eta_legend else 0.035
+    leg.SetTextSize(legend_text_size)
+    print(
+        "Legend text: xAxis=%s yAxis=%s nkeys=%d target=%s etaLike=%s crowded=%s size=%.3f"
+        % (xAxis, yAxis, len(effDataList), is_target_electron_sf, _is_eta_like(xAxis), crowded_eta_legend, legend_text_size)
+    )
 
     # 樣式 legend 也強制使用 NDC 並於 p1 內生成
     legStyle = rt.TLegend(0.35,0.84,0.73,0.92)
@@ -463,6 +468,9 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
         listOfTGraph2.append( grBinsSF ) 
         listOfMC.append( grBinsEffMC   )
         leg.AddEntry(grBinsEffData, _legend_label(yAxis, key), "PL")
+
+    for entry in leg.GetListOfPrimitives():
+        entry.SetTextSize(legend_text_size)
     
     # 若全部 bin 都被 skip，避免後面存取 list[0] 炸掉
     if len(listOfTGraph1) == 0:
@@ -532,8 +540,10 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     p2.Draw()
     p1.Draw()
 
-    leg.Draw()    
+    p1.cd()
+    leg.Draw()
     legStyle.Draw()  # 新增：畫出線型說明 legend
+    c.cd()
     CMS_lumi.CMS_lumi(c, 5, 10)
 
     c.Print(nameout)
