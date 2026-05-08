@@ -338,7 +338,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
                 return (0.58, 0.52, 0.94, 0.85)
         elif 'eta' in xAxis or 'abseta' in xAxis or 'absEta' in xAxis or 'Eta' in xAxis:
             if nkeys == 1:
-                return (0.58, 0.86, 0.94, 0.85)
+                return (0.58, 0.80, 0.94, 0.85)
             elif nkeys == 2:
                 return (0.58, 0.71, 0.94, 0.85)
             elif nkeys == 3:
