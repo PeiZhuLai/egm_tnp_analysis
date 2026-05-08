@@ -156,7 +156,7 @@ def _is_hza_electron_id_trigger_or_miniiso(plot_path):
     ).lower()
     return any(
         token in measurement_key
-        for token in ("elid", "sielleg", "dielleg", "elminiiso")
+        for token in ("elid", "sielleg", "dielleg", "elminiiso",  "elminiIso")
     )
 
 
@@ -326,23 +326,35 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     def _chooseLegendCoords(effDataList, xAxis, isTargetElectronSF):
         nkeys = len(effDataList)
         if 'pT' in xAxis or 'pt' in xAxis:
-            if nkeys == 3:
-                return (0.51, 0.70, 0.94, 0.89)
+            if nkeys == 4:
+                return (0.58, 0.57, 0.94, 0.85)
+            elif nkeys == 3:
+                return (0.58, 0.64, 0.94, 0.85)
             elif nkeys == 2:
-                return (0.51, 0.84, 0.94, 0.89)
+                return (0.58, 0.71, 0.94, 0.85)
             elif nkeys == 1:
-                return (0.51, 0.88, 0.94, 0.89)
+                return (0.58, 0.78, 0.94, 0.85)
             else:
-                return (0.51, 0.74, 0.94, 0.89)
-        elif 'eta' in xAxis or 'Eta' in xAxis:
+                return (0.58, 0.52, 0.94, 0.85)
+        elif 'eta' in xAxis or 'abseta' in xAxis or 'absEta' in xAxis or 'Eta' in xAxis:
             if nkeys == 1:
-                return (0.60, 0.86, 0.94, 0.91)
-            elif nkeys >= 6 and isTargetElectronSF:
-                return (0.58, 0.62, 0.94, 0.89)
+                return (0.58, 0.86, 0.94, 0.85)
+            elif nkeys == 2:
+                return (0.58, 0.71, 0.94, 0.85)
+            elif nkeys == 3:
+                return (0.58, 0.64, 0.94, 0.85)
+            elif nkeys == 4:
+                return (0.58, 0.57, 0.94, 0.85)
+            elif nkeys == 6:
+                return (0.58, 0.50, 0.94, 0.87)
+            elif nkeys == 6 and isTargetElectronSF:
+                return (0.58, 0.50, 0.94, 0.87)
+            elif nkeys == 7 and isTargetElectronSF:
+                return (0.58, 0.50, 0.94, 0.87)
             else:
-                return (0.58, 0.76, 0.94, 0.91)
+                return (0.58, 0.80, 0.94, 0.85)
         # fallback
-        return (0.51, 0.80, 0.94, 0.92)
+        return (0.51, 0.80, 0.94, 0.85)
 
     legx1, legy1, legx2, legy2 = _chooseLegendCoords(effDataList, xAxis, is_target_electron_sf)
     leg = rt.TLegend(legx1, legy1, legx2, legy2)
@@ -352,18 +364,14 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
     crowded_eta_legend = is_target_electron_sf and _is_eta_like(xAxis) and len(effDataList) >= 6
-    legend_text_size = 0.026 if crowded_eta_legend else 0.032
+    legend_text_size = 0.045 if crowded_eta_legend else 0.055
     leg.SetTextSize(legend_text_size)
-    print(
-        "Legend text: xAxis=%s yAxis=%s nkeys=%d target=%s etaLike=%s crowded=%s size=%.3f"
-        % (xAxis, yAxis, len(effDataList), is_target_electron_sf, _is_eta_like(xAxis), crowded_eta_legend, legend_text_size)
-    )
 
     # 樣式 legend 也強制使用 NDC 並於 p1 內生成
-    legStyle = rt.TLegend(0.34, 0.73, 0.52, 0.85)
+    legStyle = rt.TLegend(0.38, 0.70, 0.64, 0.87)
     legStyle.SetBorderSize(0)
     legStyle.SetFillStyle(0)
-    legStyle.SetTextSize(0.030)
+    legStyle.SetTextSize(0.060)
     legStyle.SetMargin(0.45)
     lineData = rt.TLine(0, 0, 1, 0)
     lineData.SetLineColor(rt.kBlack)
