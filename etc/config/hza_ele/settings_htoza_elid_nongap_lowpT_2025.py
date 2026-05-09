@@ -170,6 +170,36 @@ tnpParNomFitByBin = {
         "sigmaF[3.2,0.8,4.8]",
         *_lowpt_nominal_tail_common,
     ),
+    2: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.6,-3.0,2.0]",
+        "sigmaP[1.5,0.7,3.0]",
+        "acmsP[72.,50.,90.]",
+        "betaP[0.045,0.005,0.10]",
+        "gammaP[0.08,-0.2,0.5]",
+        "peakP[87.0,85.0,90.0]",
+        "meanF[-0.3,-2.5,2.0]",
+        "sigmaF[1.2,0.4,2.8]",
+        "acmsF[88.,65.,105.]",
+        "betaF[0.006,0.001,0.04]",
+        "gammaF[0.06,-0.1,0.5]",
+        "peakF[87.0,85.0,89.0]",
+    ),
+    3: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.6,-3.0,2.0]",
+        "sigmaP[1.4,0.7,3.0]",
+        "acmsP[65.,45.,85.]",
+        "betaP[0.052,0.005,0.10]",
+        "gammaP[0.07,-0.2,0.5]",
+        "peakP[87.0,85.0,90.0]",
+        "meanF[-0.2,-2.5,2.0]",
+        "sigmaF[0.8,0.35,2.5]",
+        "acmsF[48.,35.,70.]",
+        "betaF[0.006,0.001,0.04]",
+        "gammaF[0.05,-0.1,0.5]",
+        "peakF[87.0,85.0,89.0]",
+    ),
 }
 
 # # 15
@@ -254,7 +284,7 @@ tnpParAltBkgFitByBin = {
         "alphaP[-0.05,-0.20,0.00]",
         "meanF[-1.5,-4.0,1.5]",
         "sigmaF[2.2,0.8,3.8]",
-        "alphaF[-0.85,-2.50,-0.25]",
+        "alphaF[-1.20,-3.00,-0.60]",
     ),
 }
 tnpParAltBkgFitByBin['bin05_el_sc_eta_1p57To2p50_el_et_7p00To15p00'] = tnpParAltBkgFitByBin[5]
