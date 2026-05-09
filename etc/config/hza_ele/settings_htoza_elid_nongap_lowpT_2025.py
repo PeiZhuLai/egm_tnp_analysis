@@ -249,12 +249,12 @@ tnpParAltBkgFit = [
 tnpParAltBkgFitByBin = {
     5: params_with_updates(
         tnpParAltBkgFit,
-        "meanP[-2.0,-5.0,5.0]",
-        "sigmaP[1.8,0.5,5.0]",
-        "alphaP[-0.035,-0.12,0.04]",
-        "meanF[-1.9,-5.0,2.0]",
-        "sigmaF[0.55,0.3,2.5]",
-        "alphaF[-0.025,-0.12,0.04]",
+        "meanP[-2.8,-5.0,0.5]",
+        "sigmaP[2.2,0.8,4.5]",
+        "alphaP[-0.05,-0.20,0.00]",
+        "meanF[-1.5,-4.0,1.5]",
+        "sigmaF[2.2,0.8,3.8]",
+        "alphaF[-0.85,-2.50,-0.25]",
     ),
 }
 tnpParAltBkgFitByBin['bin05_el_sc_eta_1p57To2p50_el_et_7p00To15p00'] = tnpParAltBkgFitByBin[5]
