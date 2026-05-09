@@ -1,6 +1,6 @@
 {
   "bin": {
-    "cut": "tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 &&(((el_pt > 7) &&(abs(el_sc_eta) < 2.5) &&(abs(el_dz) < 1.0) &&(abs(el_dxy) < 0.5) &&(el_sc_et > 10) && (    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527) || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601) || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954) )&& ( (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1) || (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) || (passHltEle30WPTightGsf == 1))) || ((el_pt > 7) &&(abs(el_sc_eta) < 2.5) &&(abs(el_dz) < 1.0) &&(abs(el_dxy) < 0.5) &&(el_sc_et < 10) && (    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267) || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138) || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683) )&& ( (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1) || (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) || (passHltEle30WPTightGsf == 1)))) && el_sc_eta >= 0.000000 && el_sc_eta < 0.800000 && el_et >= 100.000000 && el_et < 500.000000",
+    "cut": "tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 &&(((el_pt > 7) &&(abs(el_sc_eta) < 2.5) &&(abs(el_dz) < 1.0) &&(abs(el_dxy) < 0.5) &&(el_sc_et > 10) && (    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527) || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601) || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954) )&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && pair_lead_el_sc_et > 35))) || ((el_pt > 7) &&(abs(el_sc_eta) < 2.5) &&(abs(el_dz) < 1.0) &&(abs(el_dxy) < 0.5) &&(el_sc_et < 10) && (    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267) || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138) || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683) )&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35)))) && el_sc_eta >= 0.000000 && el_sc_eta < 0.800000 && el_et >= 100.000000 && el_et < 500.000000",
     "index": 44,
     "name": "bin44_el_sc_eta_0p00To0p80_el_et_100p00To500p00",
     "title": "; 0.000 < el_sc_eta < 0.800; 100.000 < el_et < 500.000",
@@ -15,25 +15,25 @@
       }
     }
   },
-  "created_at_utc": "2026-05-06T14:31:24.647486+00:00",
+  "created_at_utc": "2026-05-08T16:14:15.354759+00:00",
   "derived": {
-    "efficiency": 0.9496590138938534,
+    "efficiency": 0.9500787009974505,
     "efficiency_error": 0.0,
     "nSigF": {
       "error": 0.0,
       "isConstant": false,
-      "max": 5185.5,
+      "max": 5559.0,
       "min": 0.5,
       "name": "nSigF",
-      "value": 3053.4941363666344
+      "value": 3272.988589380537
     },
     "nSigP": {
       "error": 0.0,
       "isConstant": false,
-      "max": 92128.5,
+      "max": 99589.5,
       "min": 0.5,
       "name": "nSigP",
-      "value": 57602.729997347866
+      "value": 62289.98061968159
     }
   },
   "fit_metadata": {
@@ -51,7 +51,7 @@
   "fit_result": {
     "fail": {
       "covQual": 0,
-      "edm": 9.861968242542281e-05,
+      "edm": 0.00018392113994619022,
       "floatParsFinal": [
         {
           "error": 0.0,
@@ -59,7 +59,7 @@
           "max": 90.0,
           "min": 45.0,
           "name": "acmsF",
-          "value": 89.99970964637677
+          "value": 89.99999237365557
         },
         {
           "error": 0.0,
@@ -67,7 +67,7 @@
           "max": 3.5,
           "min": 1.2,
           "name": "alphaF",
-          "value": 1.6822323477140384
+          "value": 1.563694030220558
         },
         {
           "error": 0.0,
@@ -75,7 +75,7 @@
           "max": 0.08,
           "min": 0.005,
           "name": "betaF",
-          "value": 0.07999935356765982
+          "value": 0.07996097805618209
         },
         {
           "error": 0.0,
@@ -83,7 +83,7 @@
           "max": 1.5,
           "min": 0.002,
           "name": "gammaF",
-          "value": 0.053952998781210855
+          "value": 0.0548283037404197
         },
         {
           "error": 0.0,
@@ -91,15 +91,15 @@
           "max": 5.0,
           "min": -5.0,
           "name": "meanF",
-          "value": 0.07278076461872818
+          "value": 0.11542511061942395
         },
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 5185.5,
+          "max": 5559.0,
           "min": 0.5,
           "name": "nBkgF",
-          "value": 312.805900236695
+          "value": 332.2348521986957
         },
         {
           "error": 0.0,
@@ -107,15 +107,15 @@
           "max": 5.0,
           "min": 0.0,
           "name": "nF",
-          "value": 4.999571131882133
+          "value": 4.9734828281427
         },
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 5185.5,
+          "max": 5559.0,
           "min": 0.5,
           "name": "nSigF",
-          "value": 3053.4941363666344
+          "value": 3272.988589380537
         },
         {
           "error": 0.0,
@@ -131,7 +131,7 @@
           "max": 8.0,
           "min": 0.7,
           "name": "sigmaF",
-          "value": 1.533664588790156
+          "value": 1.561663143470851
         },
         {
           "error": 0.0,
@@ -139,7 +139,7 @@
           "max": 6.0,
           "min": 0.5,
           "name": "sigmaF_2",
-          "value": 1.7134281103647355
+          "value": 1.657613465808094
         },
         {
           "error": 0.0,
@@ -147,7 +147,7 @@
           "max": 5.0,
           "min": 0.5,
           "name": "sosF",
-          "value": 0.6336871053069948
+          "value": 0.6222722349129859
         }
       ],
       "floatParsInit": [
@@ -194,10 +194,10 @@
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 5185.5,
+          "max": 5559.0,
           "min": 0.5,
           "name": "nBkgF",
-          "value": 345.7
+          "value": 370.6
         },
         {
           "error": 0.0,
@@ -210,10 +210,10 @@
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 5185.5,
+          "max": 5559.0,
           "min": 0.5,
           "name": "nSigF",
-          "value": 3111.3
+          "value": 3335.4
         },
         {
           "error": 0.0,
@@ -248,14 +248,14 @@
           "value": 1.0
         }
       ],
-      "minNll": -13669.744685711143,
+      "minNll": -14880.027040092731,
       "numInvalidNLL": 0,
       "status": 302
     },
     "fail_quality": "check",
     "pass": {
       "covQual": 0,
-      "edm": 0.0028626345213162725,
+      "edm": 0.0048544830791850254,
       "floatParsFinal": [
         {
           "error": 0.0,
@@ -263,7 +263,7 @@
           "max": 90.0,
           "min": 45.0,
           "name": "acmsP",
-          "value": 89.99990597673738
+          "value": 89.99998146284905
         },
         {
           "error": 0.0,
@@ -271,7 +271,7 @@
           "max": 3.5,
           "min": 1.2,
           "name": "alphaP",
-          "value": 1.2145939338583371
+          "value": 1.2112600082212044
         },
         {
           "error": 0.0,
@@ -279,7 +279,7 @@
           "max": 0.08,
           "min": 0.005,
           "name": "betaP",
-          "value": 0.07999760152653078
+          "value": 0.07999995450942318
         },
         {
           "error": 0.0,
@@ -287,7 +287,7 @@
           "max": 1.5,
           "min": 0.002,
           "name": "gammaP",
-          "value": 0.0021305252995766143
+          "value": 0.0020020488179071506
         },
         {
           "error": 0.0,
@@ -295,15 +295,15 @@
           "max": 5.0,
           "min": -5.0,
           "name": "meanP",
-          "value": 0.6457542268234162
+          "value": 0.6276011706870506
         },
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 92128.5,
+          "max": 99589.5,
           "min": 0.5,
           "name": "nBkgP",
-          "value": 2335.391232604477
+          "value": 2522.614550554663
         },
         {
           "error": 0.0,
@@ -311,15 +311,15 @@
           "max": 5.0,
           "min": -5.0,
           "name": "nP",
-          "value": 3.0459118214291507
+          "value": 2.987551393583221
         },
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 92128.5,
+          "max": 99589.5,
           "min": 0.5,
           "name": "nSigP",
-          "value": 57602.729997347866
+          "value": 62289.98061968159
         },
         {
           "error": 0.0,
@@ -327,7 +327,7 @@
           "max": 90.0,
           "min": 82.0,
           "name": "peakP",
-          "value": 89.0
+          "value": 88.99999999588762
         },
         {
           "error": 0.0,
@@ -335,7 +335,7 @@
           "max": 6.0,
           "min": 0.7,
           "name": "sigmaP",
-          "value": 1.573238202910751
+          "value": 1.559438275558588
         },
         {
           "error": 0.0,
@@ -343,7 +343,7 @@
           "max": 6.0,
           "min": 0.5,
           "name": "sigmaP_2",
-          "value": 0.500396931110426
+          "value": 0.5000421043271375
         },
         {
           "error": 0.0,
@@ -351,7 +351,7 @@
           "max": 5.0,
           "min": 0.5,
           "name": "sosP",
-          "value": 0.5002019465320127
+          "value": 0.5000133777588017
         }
       ],
       "floatParsInit": [
@@ -398,10 +398,10 @@
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 92128.5,
+          "max": 99589.5,
           "min": 0.5,
           "name": "nBkgP",
-          "value": 6141.9
+          "value": 6639.3
         },
         {
           "error": 0.0,
@@ -414,10 +414,10 @@
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 92128.5,
+          "max": 99589.5,
           "min": 0.5,
           "name": "nSigP",
-          "value": 55277.1
+          "value": 59753.7
         },
         {
           "error": 0.0,
@@ -452,7 +452,7 @@
           "value": 1.0
         }
       ],
-      "minNll": -426374.70278150344,
+      "minNll": -466033.96528903616,
       "numInvalidNLL": 0,
       "status": 302
     },
@@ -462,38 +462,38 @@
   "fit_type": "altSigFit",
   "histograms": {
     "fail": {
-      "entries": 3457.0,
+      "entries": 3706.0,
       "fit_window": {
         "bin1": 11,
         "bin2": 70,
         "max": 120.0,
         "min": 60.0
       },
-      "integral_fit_window": 3366.0,
-      "integral_fit_window_error": 58.01723881744115,
-      "integral_full": 3457.0,
-      "integral_full_error": 58.7962583843564,
+      "integral_fit_window": 3605.0,
+      "integral_fit_window_error": 60.0416522091123,
+      "integral_full": 3706.0,
+      "integral_full_error": 60.876925020897694,
       "maximum_bin_center": 91.5,
-      "maximum_bin_content": 426.0,
-      "mean": 91.97772498402529,
-      "rms": 8.753876615661982
+      "maximum_bin_content": 469.0,
+      "mean": 92.00529228618063,
+      "rms": 8.802462470568168
     },
     "pass": {
-      "entries": 61419.0,
+      "entries": 66393.0,
       "fit_window": {
         "bin1": 11,
         "bin2": 70,
         "max": 120.0,
         "min": 60.0
       },
-      "integral_fit_window": 59937.0,
-      "integral_fit_window_error": 244.8203422920571,
-      "integral_full": 61419.0,
-      "integral_full_error": 247.82856978161337,
+      "integral_fit_window": 64810.0,
+      "integral_fit_window_error": 254.57808232446092,
+      "integral_full": 66393.0,
+      "integral_full_error": 257.66839154230775,
       "maximum_bin_center": 91.5,
-      "maximum_bin_content": 9695.0,
-      "mean": 91.89835513827681,
-      "rms": 8.120630755996855
+      "maximum_bin_content": 10529.0,
+      "mean": 91.8973127242759,
+      "rms": 8.099449127367995
     }
   },
   "sample": {
