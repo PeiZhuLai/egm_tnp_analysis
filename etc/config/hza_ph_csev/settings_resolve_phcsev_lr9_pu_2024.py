@@ -15,7 +15,7 @@ from etc.config.fit_param_utils import params_with_updates
 # flag to be Tested
 flags = {
     # Run3 custom ID aligned to ZaTaggerRun3.select_photons
-    'hza_resolve_phcsev_lr9_2024_sf': (
+    'hza_resolve_phcsev_lr9_pu_2024_sf': (
         # electron veto
         ' (ph_passElectronVeto > 0.5)'
     ),

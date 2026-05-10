@@ -512,25 +512,49 @@ publish_muon() {
     "NUM_HToZa_SignalMuons_DEN_TrackerMuons" \
     "muon_offline_selection_2024"
   publish_muon_one \
+    "Muon Offline Selection 2025" \
+    "NUM_HToZa_SignalMuons_DEN_TrackerMuons" \
+    "muon_offline_selection_2025"
+  publish_muon_one \
     "Muon Single Trigger 2024" \
     "NUM_Mu24leg_DEN_HToZa_SignalMuons" \
     "muon_single_trigger_2024"
+  publish_muon_one \
+    "Muon Single Trigger 2025" \
+    "NUM_Mu24leg_DEN_HToZa_SignalMuons" \
+    "muon_single_trigger_2025"
   publish_muon_one \
     "Muon Double Trigger Upper Leg 2024" \
     "NUM_Mu17leg_DEN_HToZa_SignalMuons" \
     "muon_double_trigger_upper_leg_2024"
   publish_muon_one \
+    "Muon Double Trigger Upper Leg 2025" \
+    "NUM_Mu17leg_DEN_HToZa_SignalMuons" \
+    "muon_double_trigger_upper_leg_2025"
+  publish_muon_one \
     "Muon Double Trigger Lower Leg 2024" \
     "NUM_Mu8leg_DEN_HToZa_SignalMuons" \
     "muon_double_trigger_lower_leg_2024"
+  publish_muon_one \
+    "Muon Double Trigger Lower Leg 2025" \
+    "NUM_Mu8leg_DEN_HToZa_SignalMuons" \
+    "muon_double_trigger_lower_leg_2025"
   publish_muon_one \
     "Muon miniIso < 0.15 2024" \
     "NUM_MuIso0p15_DEN_HToZa_SignalMuons_Trigger" \
     "muon_miniIso0p15_2024"
   publish_muon_one \
+    "Muon miniIso < 0.15 2025" \
+    "NUM_MuIso0p15_DEN_HToZa_SignalMuons_Trigger" \
+    "muon_miniIso0p15_2025"
+  publish_muon_one \
     "Muon miniIso < 0.1 2024" \
     "NUM_MuIso0p1_DEN_HToZa_SignalMuons_Trigger" \
     "muon_miniIso0p1_2024"
+  publish_muon_one \
+    "Muon miniIso < 0.1 2025" \
+    "NUM_MuIso0p1_DEN_HToZa_SignalMuons_Trigger" \
+    "muon_miniIso0p1_2025"
 }
 
 MODE="${1:-electron}"
