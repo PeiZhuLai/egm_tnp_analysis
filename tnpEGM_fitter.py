@@ -5,8 +5,29 @@ import os
 import sys
 import pickle
 import shutil
+import tempfile
+import time
 from multiprocessing import Pool
 import math, json
+
+
+def _is_eos_path(path):
+    return os.path.abspath(path).startswith('/eos/')
+
+
+def _copy_file_with_retries(src, dst, attempts=3):
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    last_error = None
+    for attempt in range(attempts):
+        try:
+            shutil.copyfile(src, dst)
+            return
+        except OSError as err:
+            last_error = err
+            if attempt == attempts - 1:
+                break
+            time.sleep(1 + attempt)
+    raise last_error
 
 parser = argparse.ArgumentParser(description='tnp EGM fitter')
 parser.add_argument('--checkBins'  , action='store_true'  , help = 'check  bining definition')
@@ -453,7 +474,23 @@ if args.sumUp:
     else:
         effFileName = f"{outputDirectory}/egammaEffi.txt"
 
-    fOut = open( effFileName,'w')
+    sfStageDir = None
+    sfStageOutputDirectory = None
+    effFileNameForSFProduction = effFileName
+    if _is_eos_path(effFileName):
+        sfStageDir = tempfile.mkdtemp(prefix='egm_tnp_sf_')
+        sfStageOutputDirectory = os.path.join(
+            sfStageDir,
+            os.path.basename(os.path.normpath(outputDirectory)) or args.flag
+        )
+        os.makedirs(sfStageOutputDirectory, exist_ok=True)
+        effFileNameForSFProduction = os.path.join(
+            sfStageOutputDirectory,
+            os.path.basename(effFileName)
+        )
+        print('[tnpEGM_fitter] staging scale-factor text/plots locally: %s' % sfStageOutputDirectory)
+
+    fOut = open( effFileNameForSFProduction,'w')
     
     # 用來組合 JSON 的暫存
     _jsonRecords = []
@@ -556,6 +593,8 @@ if args.sumUp:
         })
 
     fOut.close()
+    if sfStageDir is not None:
+        _copy_file_with_retries(effFileNameForSFProduction, effFileName)
 
     print('Effis saved in file : ',  effFileName)
     # 同樣加入回退匯入，避免 PyROOT 攔截
@@ -568,7 +607,14 @@ if args.sumUp:
         _spec = _il_util.spec_from_file_location('egm_tnp_analysis.libPython.EGammaID_scaleFactors', _sf_path)
         egm_sf = _il_util.module_from_spec(_spec)
         _spec.loader.exec_module(egm_sf)
-    egm_sf.doEGM_SFs(effFileName,sampleToFit.lumi)
+    egm_sf.doEGM_SFs(effFileNameForSFProduction,sampleToFit.lumi)
+    if sfStageDir is not None:
+        for sfOutputName in os.listdir(sfStageOutputDirectory):
+            sfOutputPath = os.path.join(sfStageOutputDirectory, sfOutputName)
+            if not os.path.isfile(sfOutputPath):
+                continue
+            _copy_file_with_retries(sfOutputPath, os.path.join(outputDirectory, sfOutputName))
+        shutil.rmtree(sfStageDir)
 
     if args.exportJson:
         def _edges_for(axis):
