@@ -156,7 +156,7 @@ def _is_hza_electron_id_trigger_or_miniiso(plot_path):
     ).lower()
     return any(
         token in measurement_key
-        for token in ("elid", "sielleg", "dielleg", "elminiiso",  "elminiIso")
+        for token in ("elid", "sielleg", "dielleg", "elminiiso",  "elminiIso", "phcsev",)
     )
 
 
@@ -326,14 +326,24 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     def _chooseLegendCoords(effDataList, xAxis, isTargetElectronSF):
         nkeys = len(effDataList)
         if 'pT' in xAxis or 'pt' in xAxis:
-            if nkeys == 4:
-                return (0.58, 0.57, 0.94, 0.85)
-            elif nkeys == 3:
-                return (0.58, 0.64, 0.94, 0.85)
+            if nkeys == 1:
+                return (0.58, 0.78, 0.94, 0.85)
             elif nkeys == 2:
                 return (0.58, 0.71, 0.94, 0.85)
-            elif nkeys == 1:
-                return (0.58, 0.78, 0.94, 0.85)
+            elif nkeys == 3:
+                return (0.58, 0.64, 0.94, 0.85)
+            elif nkeys == 4:
+                return (0.58, 0.57, 0.94, 0.85)
+            elif nkeys == 5:
+                return (0.58, 0.50, 0.94, 0.85)
+            elif nkeys == 6:
+                return (0.58, 0.50, 0.94, 0.85)
+            elif nkeys == 6 and isTargetElectronSF:
+                return (0.58, 0.50, 0.94, 0.85)
+            elif nkeys == 7 and isTargetElectronSF:
+                return (0.58, 0.50, 0.94, 0.85)
+            elif nkeys == 8 and isTargetElectronSF:
+                return (0.58, 0.50, 0.94, 0.85)
             else:
                 return (0.58, 0.52, 0.94, 0.85)
         elif 'eta' in xAxis or 'abseta' in xAxis or 'absEta' in xAxis or 'Eta' in xAxis:
@@ -345,6 +355,27 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
                 return (0.58, 0.64, 0.94, 0.85)
             elif nkeys == 4:
                 return (0.58, 0.57, 0.94, 0.85)
+            elif nkeys == 5:
+                return (0.58, 0.50, 0.94, 0.87)
+            elif nkeys == 6:
+                return (0.58, 0.50, 0.94, 0.87)
+            elif nkeys == 6 and isTargetElectronSF:
+                return (0.58, 0.50, 0.94, 0.87)
+            elif nkeys == 7 and isTargetElectronSF:
+                return (0.58, 0.50, 0.94, 0.87)
+            else:
+                return (0.58, 0.80, 0.94, 0.85)
+        elif 'PV' in xAxis or 'vtx' in xAxis or 'nVtx' in xAxis or 'Nvtx' in xAxis or 'pv' in xAxis or 'nvtx' in xAxis:
+            if nkeys == 1:
+                return (0.58, 0.80, 0.94, 0.85)
+            elif nkeys == 2:
+                return (0.58, 0.71, 0.94, 0.85)
+            elif nkeys == 3:
+                return (0.58, 0.64, 0.94, 0.85)
+            elif nkeys == 4:
+                return (0.58, 0.57, 0.94, 0.85)
+            elif nkeys == 5:
+                return (0.58, 0.50, 0.94, 0.87)
             elif nkeys == 6:
                 return (0.58, 0.50, 0.94, 0.87)
             elif nkeys == 6 and isTargetElectronSF:
@@ -354,7 +385,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
             else:
                 return (0.58, 0.80, 0.94, 0.85)
         # fallback
-        return (0.51, 0.80, 0.94, 0.85)
+        return (0.58, 0.80, 0.94, 0.85)
 
     legx1, legy1, legx2, legy2 = _chooseLegendCoords(effDataList, xAxis, is_target_electron_sf)
     leg = rt.TLegend(legx1, legy1, legx2, legy2)
