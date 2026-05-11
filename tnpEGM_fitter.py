@@ -35,6 +35,17 @@ def _uses_nominal_only_sf_systematics(*tokens):
     return "phcsev" in measurement_key
 
 
+def _uses_phcsev_bkg_uncertainty(flag):
+    flag_lower = str(flag or "").lower()
+    return "phcsev" in flag_lower and "_bkg" in flag_lower
+
+
+def _phcsev_signal_flag_for_bkg(flag):
+    if "_bkg_" in flag:
+        return flag.replace("_bkg_", "_", 1)
+    return flag.replace("_bkg", "", 1)
+
+
 parser = argparse.ArgumentParser(description='tnp EGM fitter')
 parser.add_argument('--checkBins'  , action='store_true'  , help = 'check  bining definition')
 parser.add_argument('--createBins' , action='store_true'  , help = 'create bining definition')
@@ -532,6 +543,101 @@ if args.sumUp:
         }
         return var_map.get(name, name)
 
+    def _range_key(ranges):
+        return tuple(
+            (axis, round(float(lo), 6), round(float(hi), 6))
+            for axis, (lo, hi) in sorted(ranges.items())
+        )
+
+    def _read_sf_by_bin(eff_path):
+        sf_by_bin = {}
+        raw_var1 = 'var1'
+        raw_var2 = 'var2'
+
+        with open(eff_path) as eff_file:
+            for line in eff_file:
+                line = line.strip()
+                if not line:
+                    continue
+                if line.startswith('###'):
+                    header_fields = line.lstrip('#').split(':', 1)
+                    if len(header_fields) == 2:
+                        header_name = header_fields[0].strip().lower()
+                        header_value = _json_var_name(header_fields[1].strip())
+                        if header_name == 'var1':
+                            raw_var1 = header_value
+                        elif header_name == 'var2':
+                            raw_var2 = header_value
+                    continue
+
+                fields = line.split()
+                if len(fields) < 8:
+                    continue
+                try:
+                    ranges = {
+                        raw_var1: (float(fields[0]), float(fields[1])),
+                        raw_var2: (float(fields[2]), float(fields[3])),
+                    }
+                    eff_data = float(fields[4])
+                    eff_mc = float(fields[6])
+                except ValueError:
+                    continue
+
+                sf_pass = eff_data / eff_mc if eff_mc > 0 else 1.0
+                eff_data_fail = 1.0 - eff_data
+                eff_mc_fail = 1.0 - eff_mc
+                sf_fail = eff_data_fail / eff_mc_fail if eff_mc_fail > 0 else 1.0
+                sf_by_bin[_range_key(ranges)] = {
+                    'sf_pass': sf_pass,
+                    'sf_fail': sf_fail,
+                }
+
+        return sf_by_bin
+
+    def _apply_phcsev_bkg_uncertainties():
+        if not _uses_phcsev_bkg_uncertainty(args.flag):
+            return
+
+        signal_flag = _phcsev_signal_flag_for_bkg(args.flag)
+        signal_eff_path = os.path.join(
+            tnpConf.baseOutDir,
+            signal_flag,
+            os.path.basename(effFileName),
+        )
+
+        if not os.path.exists(signal_eff_path):
+            print(
+                '[exportJson] WARNING: cannot apply phcsev bkg uncertainty; '
+                'missing signal efficiency file: %s' % signal_eff_path
+            )
+            return
+
+        signal_sf_by_bin = _read_sf_by_bin(signal_eff_path)
+        updated = 0
+        missing = 0
+        for rec in _jsonRecords:
+            signal_sf = signal_sf_by_bin.get(_range_key(rec['ranges']))
+            if signal_sf is None:
+                missing += 1
+                continue
+
+            sf_sig = signal_sf['sf_pass']
+            sf_sig_plus_bkg = rec['sf_pass']
+            if sf_sig > 0:
+                rec['unc_pass'] = abs(sf_sig - sf_sig_plus_bkg) / sf_sig
+
+            sf_fail_sig = signal_sf['sf_fail']
+            sf_fail_sig_plus_bkg = rec['sf_fail']
+            if sf_fail_sig > 0:
+                rec['unc_fail'] = abs(sf_fail_sig - sf_fail_sig_plus_bkg) / sf_fail_sig
+
+            updated += 1
+
+        print(
+            '[exportJson] phcsev bkg uncertainty from %s: updated %d bin(s), missing %d bin(s).'
+            % (signal_eff_path, updated, missing)
+        )
+
     for ib in range(len(tnpBins['bins'])):
         effis = tnpRoot.getAllEffi( info, tnpBins['bins'][ib] )
 
@@ -634,6 +740,8 @@ if args.sumUp:
         shutil.rmtree(sfStageDir)
 
     if args.exportJson:
+        _apply_phcsev_bkg_uncertainties()
+
         def _edges_for(axis):
             lows = sorted({rec['ranges'][axis][0] for rec in _jsonRecords})
             last_high = max(rec['ranges'][axis][1] for rec in _jsonRecords)
