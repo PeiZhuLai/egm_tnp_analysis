@@ -43,7 +43,11 @@ class efficiency:
         self.altEff[self.iAltMCSignal] = effAltMCSignal
         # self.altEff[self.iAltTagSelec] = effAltTagSel
         self.altEff[self.iAltSigBkgModel] = effAltSigBkgModel
-        self.mean=(effAltBkgModel+effAltSigModel+effAltSigBkgModel+effData)/4
+        central_efficiencies = [effData]
+        for alt_eff in (effAltBkgModel, effAltSigModel, effAltSigBkgModel):
+            if alt_eff >= 0:
+                central_efficiencies.append(alt_eff)
+        self.mean = sum(central_efficiencies) / len(central_efficiencies)
 
 
     def __str__(self):
@@ -517,4 +521,3 @@ class efficiencyList:
                                              'val': aValue  , 'err': anError } )
 
         return listOfGraphs
-

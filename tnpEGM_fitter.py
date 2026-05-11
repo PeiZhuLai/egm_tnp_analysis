@@ -29,6 +29,12 @@ def _copy_file_with_retries(src, dst, attempts=3):
             time.sleep(1 + attempt)
     raise last_error
 
+
+def _uses_nominal_only_sf_systematics(*tokens):
+    measurement_key = " ".join(str(token or "") for token in tokens).lower()
+    return "phcsev" in measurement_key
+
+
 parser = argparse.ArgumentParser(description='tnp EGM fitter')
 parser.add_argument('--checkBins'  , action='store_true'  , help = 'check  bining definition')
 parser.add_argument('--createBins' , action='store_true'  , help = 'create bining definition')
@@ -451,7 +457,18 @@ if args.sumUp:
         'tagSel'      : None
         }
 
-    if not tnpConf.samplesDef['mcAlt' ] is None:
+    nominalOnlySFSystematics = _uses_nominal_only_sf_systematics(
+        args.flag,
+        settings_source,
+        outputDirectory,
+    )
+    if nominalOnlySFSystematics:
+        info['dataAltSig'] = None
+        info['dataAltBkg'] = None
+        info['dataAltSigBkg'] = None
+        print('[sumUp] phcsev detected: using only nominal Data/MC for SF uncertainties.')
+
+    if not nominalOnlySFSystematics and not tnpConf.samplesDef['mcAlt' ] is None:
        info['mcAlt'    ] = tnpConf.samplesDef['mcAlt' ].histFile
     # if not tnpConf.samplesDef['tagSel'] is None:
     #     info['tagSel'   ] = tnpConf.samplesDef['tagSel'].histFile
