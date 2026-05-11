@@ -55,7 +55,7 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_MC_NLO_2022postEE')
+    samplesDef['tagSel'].rename('mcAltSel_TT_DY_MC_2022postEE')
     # samplesDef['tagSel'].set_cut('tag_Ele_pt > 35 && abs(tag_sc_eta) < 2.17')
 
 ## set MC weight, simple way (use tree weight) 

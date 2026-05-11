@@ -97,12 +97,12 @@ Run3_2023preBPix_zmmg = {
         }
 Run3_2023postBPix_zmmg = {
         'DY_MC_NLO_2023postBPix' : tnpSample('DY_MC_NLO_2023postBPix', eoszmmg + '/DYJetsToLL/2023postBPix.root', isMC=True, nEvts = 2494),
-        'TT_DY_MC_2023postBPix'  : tnpSample('TT_DY_MC_2023postBPix',  eoszmmg + '/TT_DYJetsToLL_MLM/2023postBPix.root', isMC=True, nEvts = 1640),
+        'TT_DY_MC_2023postBPix'  : tnpSample('TT_DY_MC_2023postBPix',  eoszmmg + '/TT_DYJetsToLL/2023postBPix.root', isMC=True, nEvts = 1640),
         'Data_2023postBPix'      : tnpSample('Data_2023postBPix',      eoszmmg + '/Data_tnp_zmmg/2023postBPix.root', lumi = 9.68),
         }
 Run3_2024_zmmg = {
         'DY_MC_NLO_2024'         : tnpSample('DY_MC_NLO_2024',         eoszmmg + '/DYJetsToLL/2024.root', isMC=True, nEvts = 638995),
-        'TT_DY_MC_2024'          : tnpSample('TT_DY_MC_2024',          eoszmmg + '/TT_DYJetsToLL_MLM/2024.root', isMC=True, nEvts = 716402),
+        'TT_DY_MC_2024'          : tnpSample('TT_DY_MC_2024',          eoszmmg + '/TT_DYJetsToLL/2024.root', isMC=True, nEvts = 716402),
         'Data_2024'              : tnpSample('Data_2024',              eoszmmg + '/Data_tnp_zmmg/2024.root', lumi = 109.82),
         }
 #--------------------------------------------------------------------------------
