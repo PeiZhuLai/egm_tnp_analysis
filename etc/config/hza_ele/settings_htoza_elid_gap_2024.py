@@ -56,9 +56,9 @@ tnpTreeDir = 'tnpEleIDs'
 
 samplesDef = {
         'data'  : tnpSamples.Run3_2024_ele['Data_2024'].clone(),
-        'mcNom' : tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
-        'tagSel': tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
-        'mcAlt': tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
+        'mcNom' : tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
+        'tagSel': tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
+        'mcAlt': tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
     }
 ## can add data sample easily
 # samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024D'] )
@@ -85,7 +85,7 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2024')
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_NLO_2024')
     samplesDef['tagSel'].set_cut('tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0')
 
 ## set MC weight, simple way (use tree weight) 

@@ -798,7 +798,7 @@ publish_muon_one() {
     --summary-include "${wp}_abseta_pt_efficiencyData.png" \
     --summary-include "${wp}_abseta_pt_efficiencyMC.png" \
     --summary-include "${wp}_abseta_pt.png" \
-    --summary-include "${wp}_abseta_pt_combined_syst.png" \
+    --summary-include "${wp}_abseta_pt_combined_syst_stat.png" \
     --summary-include "${wp}_abseta_All_vs_pt.png" \
     --summary-include "${wp}_pt_All_vs_abseta.png" \
     --summary-include "SF_abseta_All_vs_pt.png" \
@@ -810,7 +810,7 @@ publish_muon_one() {
     --summary-order "${wp}_abseta_pt_efficiencyData.png" \
     --summary-order "${wp}_abseta_pt_efficiencyMC.png" \
     --summary-order "${wp}_abseta_pt.png" \
-    --summary-order "${wp}_abseta_pt_combined_syst.png"
+    --summary-order "${wp}_abseta_pt_combined_syst_stat.png"
 }
 
 publish_muon() {
