@@ -379,13 +379,15 @@ def plot_axis_comparisons(
     var2_name: str,
     rows: Sequence[dict],
     x_axis_kind: str,
+    warn_missing: bool = True,
 ) -> None:
     if not rows:
         return
 
     axes = {normalize_axis_name(var1_name): (1, var1_name), normalize_axis_name(var2_name): (2, var2_name)}
     if x_axis_kind not in axes:
-        print("[WARN] Cannot draw SFvs%s for %s; axes are %s and %s" % (x_axis_kind, tag, var1_name, var2_name))
+        if warn_missing:
+            print("[WARN] Cannot draw SFvs%s for %s; axes are %s and %s" % (x_axis_kind, tag, var1_name, var2_name))
         return
 
     plt = _setup_matplotlib()
@@ -557,8 +559,13 @@ def process_one(base_dir: str, output_base_dir: str, r9: str, era: str, make_plo
     write_json(os.path.join(out_dir, "phcsev_summary.json"), metadata, rows)
 
     if make_plots:
-        plot_axis_comparisons(out_dir, out_flag, var1_name, var2_name, rows, "eta")
-        plot_axis_comparisons(out_dir, out_flag, var1_name, var2_name, rows, "nvtx")
+        available_axes = []
+        for axis_name in (var1_name, var2_name):
+            axis_kind = normalize_axis_name(axis_name)
+            if axis_kind not in available_axes:
+                available_axes.append(axis_kind)
+        for axis_kind in available_axes:
+            plot_axis_comparisons(out_dir, out_flag, var1_name, var2_name, rows, axis_kind, warn_missing=False)
         plot_2d_summary(out_dir, out_flag, var1_name, var2_name, rows, "sf_nom", "Nominal scale factor")
         plot_2d_summary(out_dir, out_flag, var1_name, var2_name, rows, "sf_total_err", "Absolute total SF uncertainty")
         plot_2d_summary(out_dir, out_flag, var1_name, var2_name, rows, "sigma_total_rel", "Relative total SF uncertainty")
