@@ -182,8 +182,12 @@ if [[ -n "${SRC_SUMMARY}" && -d "${SRC_SUMMARY}" ]]; then
       "--include=**/HZa_SFvsnVtx_hza_resolve_phcsev_*.png"
       "--include=pelai_SFvsnVtx_hza_resolve_phcsev_*.png"
       "--include=**/pelai_SFvsnVtx_hza_resolve_phcsev_*.png"
+      "--include=HZa_SFvsNvtx_*_hza_resolve_phcsev_*.png"
+      "--include=**/HZa_SFvsNvtx_*_hza_resolve_phcsev_*.png"
       "--include=HZa_SFvspT_*.png"
       "--include=**/HZa_SFvspT_*.png"
+      "--include=HZa_SFvsPt_*_hza_resolve_phcsev_*.png"
+      "--include=**/HZa_SFvsPt_*_hza_resolve_phcsev_*.png"
     )
   fi
   for pat in "${SUMMARY_EXCLUDE_PATTERNS[@]:-}"; do
@@ -328,13 +332,28 @@ files = sorted(
 # while still keeping any SFvsabsEta summary plots.
 has_hza_nvtx = any(
     fnmatch.fnmatch(fpath, "summary/HZa_SFvsnVtx_hza_resolve_phcsev_*")
+    or fnmatch.fnmatch(fpath, "summary/HZa_SFvsNvtx_*_hza_resolve_phcsev_*")
+    for fpath in files
+)
+has_hza_pt_summary = any(
+    fnmatch.fnmatch(fpath, "summary/HZa_SFvsPt_*_hza_resolve_phcsev_*")
     for fpath in files
 )
 has_legacy_pelai_nvtx = any(
     fnmatch.fnmatch(fpath, "summary/pelai_SFvsnVtx_hza_resolve_phcsev_*")
     for fpath in files
 )
-if has_hza_nvtx or has_legacy_pelai_nvtx:
+if has_hza_pt_summary and not order_patterns:
+    order_patterns = [
+        "summary/HZa_SF2D_hza_resolve_phcsev_*_summary_*_sf.*",
+        "summary/HZa_SFvsNvtx_compare_pileup_hza_resolve_phcsev_*_summary_*_sf.*",
+        "summary/HZa_SFvsNvtx_compare_sig_bkg_hza_resolve_phcsev_*_summary_*_sf.*",
+        "summary/HZa_SFvsNvtx_total_uncertainty_hza_resolve_phcsev_*_summary_*_sf.*",
+        "summary/HZa_SFvsPt_compare_pileup_hza_resolve_phcsev_*_summary_*_sf.*",
+        "summary/HZa_SFvsPt_compare_sig_bkg_hza_resolve_phcsev_*_summary_*_sf.*",
+        "summary/HZa_SFvsPt_total_uncertainty_hza_resolve_phcsev_*_summary_*_sf.*",
+    ]
+elif has_hza_nvtx or has_legacy_pelai_nvtx:
     legacy_eta_patterns = (
         "summary/HZa_SFvseta_hza_resolve_phcsev_*",
         "summary/HZa_SFvsEta_hza_resolve_phcsev_*",
