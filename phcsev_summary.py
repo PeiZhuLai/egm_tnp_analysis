@@ -12,8 +12,9 @@ import argparse
 import csv
 import json
 import os
+import sys
 from dataclasses import dataclass
-from typing import Dict, List, Mapping, Sequence, Tuple
+from typing import Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -30,6 +31,21 @@ DEFAULT_ERAS = (
 DEFAULT_R9 = ("hr9", "lr9")
 VARIATIONS = ("nominal", "bkg", "puup", "pudown")
 EPS = 1.0e-12
+ROOT_COLORS_HEX = (
+    "#3f90da",
+    "#ffa90e",
+    "#bd1f01",
+    "#94a4a2",
+    "#832db6",
+    "#a96b59",
+    "#e76300",
+    "#b9ac70",
+    "#717581",
+    "#92dadd",
+    "#1a9850",
+    "#4d4d4d",
+)
+ROOT_MARKERS = (20, 22, 21, 23, 33, 29, 43, 47, 34)
 
 
 @dataclass(frozen=True)
@@ -160,6 +176,17 @@ def axis_file_token(axis_name: str) -> str:
     if normalized == "pt":
         return "Pt"
     return axis_name.strip().replace(" ", "")
+
+
+def root_axis_title(axis_name: str) -> str:
+    normalized = normalize_axis_name(axis_name)
+    if normalized == "eta":
+        return "#eta"
+    if normalized == "nvtx":
+        return "N_{vtx}"
+    if normalized == "pt":
+        return "p_{T} [GeV]"
+    return axis_name.strip()
 
 
 def measurement_flag(r9: str, era: str, variation: str = "nominal") -> str:
@@ -366,10 +393,91 @@ def _setup_matplotlib():
     return plt
 
 
+def _load_root_modules():
+    try:
+        import ROOT as rt  # type: ignore
+    except Exception:
+        return None, None
+
+    repo_dir = os.path.dirname(os.path.abspath(__file__))
+    lib_dir = os.path.join(repo_dir, "libPython")
+    if lib_dir not in sys.path:
+        sys.path.insert(0, lib_dir)
+
+    cms_lumi = None
+    try:
+        import tdrstyle  # type: ignore
+        import CMS_lumi  # type: ignore
+
+        tdrstyle.setTDRStyle()
+        cms_lumi = CMS_lumi
+    except Exception as exc:
+        print("[WARN] ROOT plotting loaded, but CMS style modules are unavailable: %s" % exc)
+
+    rt.gROOT.SetBatch(True)
+    try:
+        rt.gROOT.ProcessLine("gErrorIgnoreLevel = 1001;")
+    except Exception:
+        pass
+    return rt, cms_lumi
+
+
+def _apply_cms_lumi(cms_lumi, canvas, era: str, position: int) -> None:
+    if cms_lumi is None:
+        return
+    cms_lumi.cmsText = "CMS"
+    cms_lumi.writeExtraText = True
+    cms_lumi.extraText = "Preliminary"
+    cms_lumi.lumi = ""
+    cms_lumi.CMS_lumi(canvas, era, position)
+
+
 def _row_axis_values(row: Mapping[str, float], axis_index: int) -> Tuple[float, float, float]:
     low = row[f"var{axis_index}_low"]
     high = row[f"var{axis_index}_high"]
     return low, high, 0.5 * (low + high)
+
+
+def _make_root_graph(rt, rows: Sequence[dict], x_axis_index: int, y_key: str, err_key: Optional[str] = None):
+    from array import array
+
+    x_vals = []
+    y_vals = []
+    x_err_low = []
+    x_err_high = []
+    y_err_low = []
+    y_err_high = []
+    for row in rows:
+        x_low, x_high, x_mid = _row_axis_values(row, x_axis_index)
+        y_val = row[y_key]
+        y_err = row[err_key] if err_key else 0.0
+        x_vals.append(x_mid)
+        y_vals.append(y_val)
+        x_err_low.append(x_mid - x_low)
+        x_err_high.append(x_high - x_mid)
+        y_err_low.append(y_err)
+        y_err_high.append(y_err)
+
+    return rt.TGraphAsymmErrors(
+        len(x_vals),
+        array("d", x_vals),
+        array("d", y_vals),
+        array("d", x_err_low),
+        array("d", x_err_high),
+        array("d", y_err_low),
+        array("d", y_err_high),
+    )
+
+
+def _format_root_overlay_bin_label(axis_name: str, low: float, high: float) -> str:
+    normalized = normalize_axis_name(axis_name)
+    if normalized == "eta":
+        return "%g < |#eta| < %g" % (low, high)
+    if normalized == "pt":
+        return "%g < p_{T} < %g GeV" % (low, high)
+    if normalized == "nvtx":
+        return "%g < N_{vtx} < %g" % (low, high)
+    return "%s in [%g, %g)" % (root_axis_title(axis_name), low, high)
 
 
 def plot_axis_comparisons(
@@ -418,6 +526,19 @@ def plot_axis_comparisons(
         ),
     )
 
+    if plot_axis_comparisons_root(
+        out_dir,
+        tag,
+        era_from_tag(tag),
+        x_axis_index,
+        x_axis_name,
+        other_axis_index,
+        other_axis_name,
+        groups,
+        plots,
+    ):
+        return
+
     for suffix, series, title in plots:
         fig, ax = plt.subplots(figsize=(9.0, 6.5))
         for group_key, group_rows in sorted(groups.items()):
@@ -446,9 +567,141 @@ def plot_axis_comparisons(
         plt.close(fig)
 
 
+def era_from_tag(tag: str) -> str:
+    for era in DEFAULT_ERAS:
+        if era in tag:
+            return era
+    return ""
+
+
+def plot_axis_comparisons_root(
+    out_dir: str,
+    tag: str,
+    era: str,
+    x_axis_index: int,
+    x_axis_name: str,
+    other_axis_index: int,
+    other_axis_name: str,
+    groups: Mapping[Tuple[float, float], List[dict]],
+    plots: Sequence[Tuple[str, Sequence[Tuple[str, str, Optional[str]]], str]],
+) -> bool:
+    rt, cms_lumi = _load_root_modules()
+    if rt is None:
+        return False
+
+    line_styles = (rt.kSolid, rt.kDashed, rt.kDotted, rt.kDashDotted)
+
+    for suffix, series, title in plots:
+        graphs = []
+        legend_entries = []
+        y_min = 1.0e9
+        y_max = -1.0e9
+
+        for gi, (group_key, group_rows) in enumerate(sorted(groups.items())):
+            group_rows = sorted(group_rows, key=lambda row: _row_axis_values(row, x_axis_index)[2])
+            color = rt.TColor.GetColor(ROOT_COLORS_HEX[gi % len(ROOT_COLORS_HEX)])
+            for si, (series_label, y_key, err_key) in enumerate(series):
+                graph = _make_root_graph(rt, group_rows, x_axis_index, y_key, err_key)
+                graph.SetLineColor(color)
+                graph.SetMarkerColor(color)
+                graph.SetMarkerStyle(ROOT_MARKERS[(gi + si) % len(ROOT_MARKERS)])
+                graph.SetMarkerSize(1.1)
+                graph.SetLineStyle(line_styles[si % len(line_styles)])
+                graph.SetLineWidth(3)
+                for point_idx in range(graph.GetN()):
+                    y_val = graph.GetPointY(point_idx)
+                    y_min = min(y_min, y_val - graph.GetErrorYlow(point_idx))
+                    y_max = max(y_max, y_val + graph.GetErrorYhigh(point_idx))
+                graphs.append(graph)
+                legend_entries.append(
+                    (
+                        graph,
+                        "%s, %s"
+                        % (
+                            _format_root_overlay_bin_label(other_axis_name, group_key[0], group_key[1]),
+                            series_label,
+                        ),
+                    )
+                )
+
+        if not graphs:
+            continue
+
+        out_stem = os.path.join(out_dir, "HZa_SFvs%s_%s_%s" % (axis_file_token(x_axis_name), suffix, tag))
+        canvas = rt.TCanvas(out_stem, out_stem, 900, 800)
+        canvas.SetRightMargin(0.05)
+        if normalize_axis_name(x_axis_name) == "pt":
+            canvas.SetLogx()
+
+        mg = rt.TMultiGraph()
+        for graph in graphs:
+            mg.Add(graph, "P")
+
+        mg.Draw("A")
+        mg.GetXaxis().SetTitle(root_axis_title(x_axis_name))
+        mg.GetYaxis().SetTitle("Scale Factor")
+        x_edges = sorted(
+            {row[f"var{x_axis_index}_low"] for group in groups.values() for row in group}.union(
+                {row[f"var{x_axis_index}_high"] for group in groups.values() for row in group}
+            )
+        )
+        if x_edges:
+            mg.GetXaxis().SetLimits(x_edges[0], x_edges[-1])
+            mg.GetXaxis().SetRangeUser(x_edges[0], x_edges[-1])
+        if normalize_axis_name(x_axis_name) == "pt":
+            mg.GetXaxis().SetMoreLogLabels()
+            mg.GetXaxis().SetNoExponent()
+
+        if y_min < 1.0e8:
+            span = max(y_max - y_min, 0.02)
+            margin = max(0.02, 0.30 * span)
+            mg.GetYaxis().SetRangeUser(max(0.0, y_min - margin), y_max + margin)
+        else:
+            mg.GetYaxis().SetRangeUser(0.8, 1.2)
+
+        line = rt.TLine(x_edges[0], 1.0, x_edges[-1], 1.0) if x_edges else None
+        if line is not None:
+            line.SetLineStyle(rt.kDashed)
+            line.SetLineWidth(2)
+            line.Draw()
+
+        legend = rt.TLegend(0.32, 0.62, 0.92, 0.93)
+        legend.SetNColumns(2)
+        legend.SetTextFont(42)
+        legend.SetTextSize(0.025 if len(legend_entries) > 12 else 0.029)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        for graph, label in legend_entries:
+            legend.AddEntry(graph, label, "lp")
+        legend.Draw()
+
+        latex = rt.TLatex()
+        latex.SetNDC()
+        latex.SetTextFont(42)
+        latex.SetTextSize(0.035)
+        latex.DrawLatex(0.18, 0.94, title)
+
+        _apply_cms_lumi(cms_lumi, canvas, era, 11)
+        canvas.Modified()
+        canvas.Update()
+        canvas.Print(out_stem + ".png")
+        canvas.Print(out_stem + ".pdf")
+        canvas.Print(out_stem + ".root")
+
+        root_out = rt.TFile(out_stem + ".root", "UPDATE")
+        for idx, graph in enumerate(graphs):
+            graph.Write("g_%s_%d" % (suffix, idx + 1), rt.TObject.kOverwrite)
+        root_out.Close()
+
+    return True
+
+
 def plot_2d_summary(out_dir: str, tag: str, var1_name: str, var2_name: str, rows: Sequence[dict], value_key: str, title: str) -> None:
     if not rows:
         return
+    if plot_2d_summary_root(out_dir, tag, era_from_tag(tag), var1_name, var2_name, rows, value_key, title):
+        return
+
     plt = _setup_matplotlib()
     x_edges = sorted({row["var1_low"] for row in rows}.union({row["var1_high"] for row in rows}))
     y_edges = sorted({row["var2_low"] for row in rows}.union({row["var2_high"] for row in rows}))
@@ -476,6 +729,81 @@ def plot_2d_summary(out_dir: str, tag: str, var1_name: str, var2_name: str, rows
     fig.tight_layout()
     fig.savefig(os.path.join(out_dir, "HZa_2D_%s_%s.png" % (value_key, tag)), dpi=160)
     plt.close(fig)
+
+
+def plot_2d_summary_root(
+    out_dir: str,
+    tag: str,
+    era: str,
+    var1_name: str,
+    var2_name: str,
+    rows: Sequence[dict],
+    value_key: str,
+    title: str,
+) -> bool:
+    rt, cms_lumi = _load_root_modules()
+    if rt is None:
+        return False
+
+    x_edges = sorted({row["var1_low"] for row in rows}.union({row["var1_high"] for row in rows}))
+    y_edges = sorted({row["var2_low"] for row in rows}.union({row["var2_high"] for row in rows}))
+    x_arr = np.array(x_edges, dtype=float)
+    y_arr = np.array(y_edges, dtype=float)
+    hist_name = "HZa_2D_%s_%s" % (value_key, tag)
+    hist = rt.TH2F(
+        hist_name,
+        "%s;%s;%s" % (title, root_axis_title(var1_name), root_axis_title(var2_name)),
+        len(x_edges) - 1,
+        x_arr,
+        len(y_edges) - 1,
+        y_arr,
+    )
+    for row in rows:
+        xbin = hist.GetXaxis().FindBin(0.5 * (row["var1_low"] + row["var1_high"]))
+        ybin = hist.GetYaxis().FindBin(0.5 * (row["var2_low"] + row["var2_high"]))
+        hist.SetBinContent(xbin, ybin, row[value_key])
+
+    out_stem = os.path.join(out_dir, hist_name)
+    canvas = rt.TCanvas(hist_name, hist_name, 900, 600)
+    canvas.SetRightMargin(0.18)
+    canvas.SetLeftMargin(0.16)
+    canvas.SetTopMargin(0.10)
+    canvas.SetBottomMargin(0.13)
+    rt.gStyle.SetPalette(1)
+    rt.gStyle.SetPaintTextFormat("1.3f")
+    rt.gStyle.SetOptTitle(1)
+    hist.SetMarkerSize(1.8)
+    hist.GetYaxis().SetTitleFont(42)
+    hist.GetYaxis().SetLabelFont(42)
+    hist.GetYaxis().SetTitleSize(0.06)
+    hist.GetYaxis().SetLabelSize(0.05)
+    hist.GetYaxis().SetTitleOffset(1.2)
+    hist.GetXaxis().SetTitleFont(42)
+    hist.GetXaxis().SetLabelFont(42)
+    hist.GetXaxis().SetTitleSize(0.06)
+    hist.GetXaxis().SetLabelSize(0.05)
+    hist.GetXaxis().SetTitleOffset(1.1)
+    hist.GetXaxis().SetLabelOffset(0.01)
+    hist.GetZaxis().SetTitleFont(42)
+    hist.GetZaxis().SetLabelFont(42)
+    hist.GetZaxis().SetTitleSize(0.055)
+    hist.GetZaxis().SetLabelSize(0.05)
+    hist.GetZaxis().SetTitleOffset(0.75)
+    if "err" in value_key or "sigma" in value_key:
+        hist.SetMinimum(0.0)
+    hist.Draw("colz TEXT45")
+
+    _apply_cms_lumi(cms_lumi, canvas, era, 0)
+    canvas.Modified()
+    canvas.Update()
+    canvas.Print(out_stem + ".png")
+    canvas.Print(out_stem + ".pdf")
+    canvas.Print(out_stem + ".root")
+
+    root_out = rt.TFile(out_stem + ".root", "UPDATE")
+    hist.Write(hist_name, rt.TObject.kOverwrite)
+    root_out.Close()
+    return True
 
 
 def write_root(path: str, var1_name: str, var2_name: str, rows: Sequence[dict]) -> bool:
