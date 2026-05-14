@@ -488,14 +488,46 @@ if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
 <meta charset="utf-8">
 <title>HZa SF</title>
 <style>
+  :root {
+    --page-max: 1180px;
+    --list-gap-x: 48px;
+    --list-gap-y: 16px;
+  }
+  body {
+    margin: 0;
+    padding: 32px 24px 48px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #222;
+  }
   ul.auto-list li a {
     font-size: 1.5rem;     /* 可以改成 18px 或更大 */
     font-weight: 500;      /* 稍微加粗，可選 */
   }
-  .center { text-align: center; }
-  .center ul { display: inline-block; text-align: left; }
+  .center {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    text-align: center;
+  }
+  .center ul.auto-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    column-gap: var(--list-gap-x);
+    row-gap: var(--list-gap-y);
+    margin: 24px auto 0;
+    padding-left: 1.5rem;
+    text-align: left;
+  }
   li {
-    margin-bottom: 16px;  /* 控制項目間距，單位可改為 px/em/rem */
+    margin-bottom: 0;
+  }
+  @media (max-width: 760px) {
+    body {
+      padding: 24px 16px 40px;
+    }
+    .center ul.auto-list {
+      grid-template-columns: 1fr;
+      column-gap: 0;
+    }
   }
 </style>
 <div class="center">
@@ -549,6 +581,64 @@ html = home.read_text()
 # 新增：若舊版首頁缺少 auto-list class，自動補上
 if 'class="auto-list"' not in html:
     html = re.sub(r"<ul(\s*)>", r"<ul class=\"auto-list\">", html, count=1)
+
+HOME_STYLE = """  :root {
+    --page-max: 1180px;
+    --list-gap-x: 48px;
+    --list-gap-y: 16px;
+  }
+  body {
+    margin: 0;
+    padding: 32px 24px 48px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #222;
+  }
+  ul.auto-list li a {
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+  .center {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    text-align: center;
+  }
+  .center ul.auto-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    column-gap: var(--list-gap-x);
+    row-gap: var(--list-gap-y);
+    margin: 24px auto 0;
+    padding-left: 1.5rem;
+    text-align: left;
+  }
+  li {
+    margin-bottom: 0;
+  }
+  @media (max-width: 760px) {
+    body {
+      padding: 24px 16px 40px;
+    }
+    .center ul.auto-list {
+      grid-template-columns: 1fr;
+      column-gap: 0;
+    }
+  }"""
+
+def ensure_two_column_home_style(page_html: str) -> str:
+    style_block = f"<style>\n{HOME_STYLE}\n</style>"
+    if "grid-template-columns: repeat(2, minmax(320px, 1fr))" in page_html:
+        return page_html
+    if re.search(r"<style\b[^>]*>.*?</style>", page_html, flags=re.S | re.I):
+        return re.sub(
+            r"<style\b[^>]*>.*?</style>",
+            style_block,
+            page_html,
+            count=1,
+            flags=re.S | re.I,
+        )
+    return re.sub(r"(<title>.*?</title>)", rf"\1\n{style_block}", page_html, count=1, flags=re.S | re.I)
+
+html = ensure_two_column_home_style(html)
 
 def normalize_label(raw: str) -> str:
     text = re.sub(r"<[^>]+>", "", raw)
