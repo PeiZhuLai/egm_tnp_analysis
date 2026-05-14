@@ -233,6 +233,32 @@ tnpParNomFitByBin = {
         "gammaF[0.06,-2,2]",
         "sigmaF[1.5,0.2,4.5]",
     ),
+    3: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.7,-5.0,5.0]",
+        "sigmaP[1.3,0.5,4.0]",
+        "acmsP[75.,45.,95.]",
+        "betaP[0.03,0.001,0.10]",
+        "gammaP[0.05,-2,1.0]",
+        "meanF[-1.3,-5.0,5.0]",
+        "sigmaF[2.6,0.5,4.0]",
+        "acmsF[55.,35.,85.]",
+        "betaF[0.07,0.005,0.12]",
+        "gammaF[0.02,-2,1.0]",
+    ),
+    8: params_with_updates(
+        tnpParNomFit,
+        "meanP[-1.3,-5.0,5.0]",
+        "sigmaP[1.4,0.5,4.0]",
+        "acmsP[75.,45.,95.]",
+        "betaP[0.03,0.001,0.10]",
+        "gammaP[0.03,-2,1.0]",
+        "meanF[-2.2,-5.0,5.0]",
+        "sigmaF[3.2,0.5,5.0]",
+        "acmsF[55.,35.,85.]",
+        "betaF[0.03,0.001,0.10]",
+        "gammaF[0.03,-2,1.0]",
+    ),
 }
 
 # # 15

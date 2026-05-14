@@ -6,6 +6,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_with_updates
 
 #############################################################
 ########## General settings
@@ -222,6 +223,60 @@ tnpParNomFit = [
     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[60.,35.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, 0.02, 2]","peakF[87.0,82.0,90.0]",
     ]
+tnpParNomFitByBin = {
+    0: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.3,-5.0,5.0]",
+        "sigmaP[1.0,0.4,3.0]",
+        "acmsP[55.,35.,85.]",
+        "betaP[0.02,0.001,0.10]",
+        "gammaP[0.03,-2,1.0]",
+        "meanF[-0.3,-4.0,4.0]",
+        "sigmaF[1.6,0.4,3.0]",
+        "acmsF[60.,30.,85.]",
+        "betaF[0.03,0.001,0.10]",
+        "gammaF[0.04,0.005,1.0]",
+    ),
+    1: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.8,-5.0,5.0]",
+        "sigmaP[1.5,0.4,3.5]",
+        "acmsP[55.,35.,85.]",
+        "betaP[0.06,0.005,0.12]",
+        "gammaP[0.03,-2,1.0]",
+        "meanF[-1.1,-4.0,4.0]",
+        "sigmaF[1.8,0.4,3.0]",
+        "acmsF[45.,25.,75.]",
+        "betaF[0.03,0.001,0.10]",
+        "gammaF[0.04,0.005,1.0]",
+    ),
+    6: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.5,-5.0,5.0]",
+        "sigmaP[1.8,0.5,4.0]",
+        "acmsP[55.,35.,85.]",
+        "betaP[0.03,0.001,0.10]",
+        "gammaP[0.03,-2,1.0]",
+        "meanF[-0.5,-4.0,4.0]",
+        "sigmaF[1.8,0.4,3.0]",
+        "acmsF[65.,35.,95.]",
+        "betaF[0.03,0.001,0.10]",
+        "gammaF[0.04,0.005,1.0]",
+    ),
+    7: params_with_updates(
+        tnpParNomFit,
+        "meanP[0.0,-5.0,5.0]",
+        "sigmaP[0.8,0.4,2.5]",
+        "acmsP[55.,35.,85.]",
+        "betaP[0.06,0.005,0.12]",
+        "gammaP[0.02,-2,1.0]",
+        "meanF[-0.3,-4.0,4.0]",
+        "sigmaF[1.6,0.4,3.0]",
+        "acmsF[45.,25.,75.]",
+        "betaF[0.06,0.005,0.12]",
+        "gammaF[0.03,0.005,1.0]",
+    ),
+}
 
 # # 0
 # tnpParNomFit = [
@@ -247,6 +302,19 @@ tnpParAltSigFit = [
     "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
     "acmsF[60.,40.,70.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.01, 1]","peakF[89.0,82.0,90.0]",
     ]
+tnpParAltSigFitByBin = {
+    1: params_with_updates(
+        tnpParAltSigFit,
+        "meanF[-1.0,-5.0,5.0]",
+        "sigmaF[4.5,2.0,9.0]",
+        "sigmaF_2[1.5,0.7,6.0]",
+        "sosF[1.2,0.2,5.0]",
+        "nF[0.5,0.0,5.0]",
+        "acmsF[65.,35.,85.]",
+        "betaF[0.03,0.001,0.08]",
+        "gammaF[0.04,0.001,1.0]",
+    ),
+}
 
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
