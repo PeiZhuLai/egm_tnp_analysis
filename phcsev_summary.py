@@ -604,9 +604,9 @@ def _make_root_graph(rt, rows: Sequence[dict], x_axis_index: int, y_key: str, er
 def _format_root_overlay_bin_label(axis_name: str, low: float, high: float) -> str:
     normalized = normalize_axis_name(axis_name)
     if normalized == "eta":
-        return "%g < |#eta| < %g" % (low, high)
+        return "%g <|#eta|< %g" % (low, high)
     if normalized == "pt":
-        return "%g < p_{T} < %g GeV" % (low, high)
+        return "%g <p_{T}< %g GeV" % (low, high)
     if normalized == "nvtx":
         return "%g <N_{vtx}< %g" % (low, high)
     return "%s in [%g, %g)" % (root_axis_title(axis_name), low, high)
@@ -798,7 +798,7 @@ def plot_axis_comparisons_root(
         if y_min < 1.0e8:
             span = max(y_max - y_min, 0.02)
             margin = max(0.02, 0.2 * span)
-            mg.GetYaxis().SetRangeUser(max(0.0, y_min - margin), y_max + margin*2.8)
+            mg.GetYaxis().SetRangeUser(max(0.0, y_min - margin), y_max + margin*4.5)
         else:
             mg.GetYaxis().SetRangeUser(0.8, 1.2)
 
