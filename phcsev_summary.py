@@ -618,18 +618,18 @@ def plot_axis_comparisons(
     plots = (
         (
             "compare_sig_bkg",
-            (("signal fit", "sf_sig", None), ("signal+background fit", "sf_sig_bkg", None)),
-            "SF comparison: signal vs signal+background",
+            (("sig", "sf_sig", None), ("sig+bkg", "sf_sig_bkg", None)),
+            None,
         ),
         (
             "compare_pileup",
             (("PU down", "sf_down", None), ("nominal", "sf_nom", None), ("PU up", "sf_up", None)),
-            "SF comparison: PU variations",
+            None,
         ),
         (
             "total_uncertainty",
-            (("nominal total uncertainty", "sf_nom", "sf_total_err"),),
-            "SF with total uncertainty",
+            (("total", "sf_nom", "sf_total_err"),),
+            None,
         ),
     )
 
