@@ -156,6 +156,25 @@ def normalize_axis_name(axis_name: str) -> str:
     return lowered
 
 
+def export_json_axis_name(axis_name: str) -> str:
+    name = str(axis_name).strip()
+    var_map = {
+        "el_pt": "pt",
+        "el_et": "pt",
+        "el_sc_et": "pt",
+        "probe_Ele_pt": "pt",
+        "probe_pt": "pt",
+        "ph_et": "pt",
+        "ph_pt": "pt",
+        "el_eta": "eta",
+        "el_sc_eta": "eta",
+        "probe_sc_eta": "eta",
+        "ph_sc_eta": "eta",
+        "ph_eta": "eta",
+    }
+    return var_map.get(name, name)
+
+
 def axis_title(axis_name: str) -> str:
     normalized = normalize_axis_name(axis_name)
     if normalized == "eta":
@@ -287,6 +306,10 @@ def build_summary_records(
 
     for key in common_keys:
         nom = nominal[key]
+        sf_fail_nom = float(_safe_divide(1.0 - nom.eff_data, 1.0 - nom.eff_mc, default=0.0))
+        sf_fail_bkg = float(_safe_divide(1.0 - bkg[key].eff_data, 1.0 - bkg[key].eff_mc, default=0.0))
+        sf_fail_up = float(_safe_divide(1.0 - puup[key].eff_data, 1.0 - puup[key].eff_mc, default=0.0))
+        sf_fail_down = float(_safe_divide(1.0 - pudown[key].eff_data, 1.0 - pudown[key].eff_mc, default=0.0))
         unc = compute_sf_uncertainty(
             nom.eff_data,
             nom.eff_data_err,
@@ -297,6 +320,17 @@ def build_summary_records(
             nom.sf,
             puup[key].sf,
             pudown[key].sf,
+        )
+        unc_fail = compute_sf_uncertainty(
+            1.0 - nom.eff_data,
+            nom.eff_data_err,
+            1.0 - nom.eff_mc,
+            nom.eff_mc_err,
+            sf_fail_nom,
+            sf_fail_bkg,
+            sf_fail_nom,
+            sf_fail_up,
+            sf_fail_down,
         )
         rows.append(
             {
@@ -319,6 +353,9 @@ def build_summary_records(
                 "sigma_pileup_rel": unc["sigma_pileup_rel"],
                 "sigma_total_rel": unc["sigma_total_rel"],
                 "sf_total_err": unc["sf_total_err"],
+                "sf_fail": unc_fail["sf_nom"],
+                "sf_fail_err": unc_fail["sf_total_err"],
+                "sigma_fail_total_rel": unc_fail["sigma_total_rel"],
             }
         )
 
@@ -377,6 +414,76 @@ def write_txt(path: str, var1_name: str, var2_name: str, rows: Sequence[dict]) -
 def write_json(path: str, metadata: Mapping[str, object], rows: Sequence[dict]) -> None:
     with open(path, "w") as handle:
         json.dump({"metadata": metadata, "bins": list(rows)}, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+
+
+def _edges_for_rows(rows: Sequence[dict], axis_name: str, var_prefix: str) -> List[float]:
+    lows = sorted({row[f"{var_prefix}_low"] for row in rows})
+    last_high = max(row[f"{var_prefix}_high"] for row in rows)
+    return lows + ([last_high] if lows[-1] != last_high else [])
+
+
+def _multibinning_content(rows: Sequence[dict], axis_names: Sequence[str], value_name: str) -> Tuple[List[List[float]], List[float]]:
+    import itertools
+
+    axis_prefixes = {"var1": "var1", "var2": "var2"}
+    edges_by_axis = {
+        "var1": _edges_for_rows(rows, axis_names[0], "var1"),
+        "var2": _edges_for_rows(rows, axis_names[1], "var2"),
+    }
+    values_by_bin = {}
+    for row in rows:
+        idx = (
+            edges_by_axis["var1"].index(row["var1_low"]),
+            edges_by_axis["var2"].index(row["var2_low"]),
+        )
+        values_by_bin[idx] = row[value_name]
+
+    shape = [range(len(edges_by_axis["var1"]) - 1), range(len(edges_by_axis["var2"]) - 1)]
+    content = [values_by_bin[tuple(idx)] for idx in itertools.product(*shape)]
+    return [edges_by_axis[axis_prefixes["var1"]], edges_by_axis[axis_prefixes["var2"]]], content
+
+
+def write_export_json(path: str, var1_name: str, var2_name: str, rows: Sequence[dict]) -> None:
+    """Write the correctionlib schema-v2 JSON produced by fitter --exportJson."""
+
+    axis_names = [export_json_axis_name(var1_name), export_json_axis_name(var2_name)]
+
+    def _correction(name: str, content_key: str, output_description: str) -> dict:
+        edges, content = _multibinning_content(rows, axis_names, content_key)
+        return {
+            "name": name,
+            "version": 1,
+            "inputs": [
+                {"name": axis, "type": "real", "description": axis}
+                for axis in axis_names
+            ],
+            "output": {"name": "sf", "type": "real", "description": output_description},
+            "data": {
+                "nodetype": "multibinning",
+                "inputs": axis_names,
+                "edges": edges,
+                "content": content,
+                "flow": "clamp",
+            },
+        }
+
+    out_json = {
+        "schema_version": 2,
+        "description": "auto-generated photon CSEV scale factors with total uncertainty",
+        "corrections": [
+            _correction("sf_pass", "sf_nom", "data/MC scale factor (pass)"),
+            _correction("unc_pass", "sf_total_err", "total uncertainty (pass)"),
+            _correction("sf_fail", "sf_fail", "data/MC scale factor (fail)"),
+            _correction("unc_fail", "sf_fail_err", "total uncertainty (fail)"),
+            _correction("unc_pass_rel", "sigma_total_rel", "relative total uncertainty (pass)"),
+            _correction("unc_pass_nominal_rel", "sigma_nom_rel", "relative nominal statistical uncertainty (pass)"),
+            _correction("unc_pass_bkg_rel", "sigma_bkg_rel", "relative background uncertainty (pass)"),
+            _correction("unc_pass_pileup_rel", "sigma_pileup_rel", "relative pileup uncertainty (pass)"),
+        ],
+    }
+    with open(path, "w") as handle:
+        json.dump(out_json, handle, indent=2)
         handle.write("\n")
 
 
@@ -686,12 +793,6 @@ def plot_axis_comparisons_root(
         canvas.Update()
         canvas.Print(out_stem + ".png")
         canvas.Print(out_stem + ".pdf")
-        canvas.Print(out_stem + ".root")
-
-        root_out = rt.TFile(out_stem + ".root", "UPDATE")
-        for idx, graph in enumerate(graphs):
-            graph.Write("g_%s_%d" % (suffix, idx + 1), rt.TObject.kOverwrite)
-        root_out.Close()
 
     return True
 
@@ -731,25 +832,11 @@ def plot_2d_summary(out_dir: str, tag: str, var1_name: str, var2_name: str, rows
     plt.close(fig)
 
 
-def plot_2d_summary_root(
-    out_dir: str,
-    tag: str,
-    era: str,
-    var1_name: str,
-    var2_name: str,
-    rows: Sequence[dict],
-    value_key: str,
-    title: str,
-) -> bool:
-    rt, cms_lumi = _load_root_modules()
-    if rt is None:
-        return False
-
+def make_root_2d_hist(rt, hist_name: str, var1_name: str, var2_name: str, rows: Sequence[dict], value_key: str, title: str):
     x_edges = sorted({row["var1_low"] for row in rows}.union({row["var1_high"] for row in rows}))
     y_edges = sorted({row["var2_low"] for row in rows}.union({row["var2_high"] for row in rows}))
     x_arr = np.array(x_edges, dtype=float)
     y_arr = np.array(y_edges, dtype=float)
-    hist_name = "HZa_2D_%s_%s" % (value_key, tag)
     hist = rt.TH2F(
         hist_name,
         "%s;%s;%s" % (title, root_axis_title(var1_name), root_axis_title(var2_name)),
@@ -762,16 +849,11 @@ def plot_2d_summary_root(
         xbin = hist.GetXaxis().FindBin(0.5 * (row["var1_low"] + row["var1_high"]))
         ybin = hist.GetYaxis().FindBin(0.5 * (row["var2_low"] + row["var2_high"]))
         hist.SetBinContent(xbin, ybin, row[value_key])
+    style_root_2d_hist(hist)
+    return hist
 
-    out_stem = os.path.join(out_dir, hist_name)
-    canvas = rt.TCanvas(hist_name, hist_name, 900, 600)
-    canvas.SetRightMargin(0.18)
-    canvas.SetLeftMargin(0.16)
-    canvas.SetTopMargin(0.10)
-    canvas.SetBottomMargin(0.13)
-    rt.gStyle.SetPalette(1)
-    rt.gStyle.SetPaintTextFormat("1.3f")
-    rt.gStyle.SetOptTitle(1)
+
+def style_root_2d_hist(hist) -> None:
     hist.SetMarkerSize(1.8)
     hist.GetYaxis().SetTitleFont(42)
     hist.GetYaxis().SetLabelFont(42)
@@ -789,6 +871,148 @@ def plot_2d_summary_root(
     hist.GetZaxis().SetTitleSize(0.055)
     hist.GetZaxis().SetLabelSize(0.05)
     hist.GetZaxis().SetTitleOffset(0.75)
+
+
+def plot_2d_pair_summary(
+    out_dir: str,
+    tag: str,
+    var1_name: str,
+    var2_name: str,
+    rows: Sequence[dict],
+) -> None:
+    if not rows:
+        return
+    if plot_2d_pair_summary_root(out_dir, tag, era_from_tag(tag), var1_name, var2_name, rows):
+        return
+
+    plt = _setup_matplotlib()
+    x_edges = sorted({row["var1_low"] for row in rows}.union({row["var1_high"] for row in rows}))
+    y_edges = sorted({row["var2_low"] for row in rows}.union({row["var2_high"] for row in rows}))
+
+    def _matrix(value_key: str):
+        z = np.full((len(y_edges) - 1, len(x_edges) - 1), np.nan)
+        x_lookup = {edge: idx for idx, edge in enumerate(x_edges[:-1])}
+        y_lookup = {edge: idx for idx, edge in enumerate(y_edges[:-1])}
+        for row in rows:
+            z[y_lookup[row["var2_low"]], x_lookup[row["var1_low"]]] = row[value_key]
+        return z
+
+    fig, axes = plt.subplots(1, 2, figsize=(9.0, 6.0))
+    for ax, value_key, title in (
+        (axes[0], "sf_nom", "e/gamma scale factors"),
+        (axes[1], "sf_total_err", "e/gamma uncertainties"),
+    ):
+        mesh = ax.pcolormesh(np.array(x_edges), np.array(y_edges), _matrix(value_key), shading="flat")
+        fig.colorbar(mesh, ax=ax)
+        ax.set_xlabel(axis_title(var1_name))
+        ax.set_ylabel(axis_title(var2_name))
+        ax.set_title(title)
+    fig.tight_layout()
+    fig.savefig(os.path.join(out_dir, "HZa_SF2D_%s.png" % tag), dpi=160)
+    plt.close(fig)
+
+
+def plot_2d_pair_summary_root(
+    out_dir: str,
+    tag: str,
+    era: str,
+    var1_name: str,
+    var2_name: str,
+    rows: Sequence[dict],
+) -> bool:
+    rt, cms_lumi = _load_root_modules()
+    if rt is None:
+        return False
+
+    rt.gStyle.SetPalette(1)
+    rt.gStyle.SetPaintTextFormat("1.3f")
+    rt.gStyle.SetOptTitle(1)
+
+    hist_sf = make_root_2d_hist(
+        rt,
+        "h2_scaleFactorsEGamma_%s" % tag,
+        var1_name,
+        var2_name,
+        rows,
+        "sf_nom",
+        "e/#gamma scale factors",
+    )
+    hist_err = make_root_2d_hist(
+        rt,
+        "h2_uncertaintiesEGamma_%s" % tag,
+        var1_name,
+        var2_name,
+        rows,
+        "sf_total_err",
+        "e/#gamma uncertainties",
+    )
+
+    dmin = 1.0 - hist_sf.GetMinimum()
+    dmax = hist_sf.GetMaximum() - 1.0
+    dall = max(dmin, dmax)
+    hist_sf.SetMinimum(1.0 - dall)
+    hist_sf.SetMaximum(1.0 + dall)
+    hist_err.SetMinimum(0.0)
+    hist_err.SetMaximum(min(hist_err.GetMaximum(), 0.2))
+
+    out_stem = os.path.join(out_dir, "HZa_SF2D_%s" % tag)
+    canvas = rt.TCanvas("canScaleFactor_%s" % tag, "canScaleFactor", 900, 600)
+    canvas.Divide(2, 1)
+    canvas.GetPad(1).SetRightMargin(0.18)
+    canvas.GetPad(1).SetLeftMargin(0.16)
+    canvas.GetPad(1).SetTopMargin(0.10)
+    canvas.GetPad(1).SetBottomMargin(0.13)
+    canvas.GetPad(2).SetRightMargin(0.18)
+    canvas.GetPad(2).SetLeftMargin(0.16)
+    canvas.GetPad(2).SetTopMargin(0.10)
+    canvas.GetPad(2).SetBottomMargin(0.13)
+    canvas.cd(1)
+    hist_sf.DrawCopy("colz TEXT45")
+    canvas.cd(2)
+    hist_err.DrawCopy("colz TEXT45")
+
+    _apply_cms_lumi(cms_lumi, canvas, era, 0)
+    canvas.Modified()
+    canvas.Update()
+    canvas.Print(out_stem + ".png")
+    canvas.Print(out_stem + ".pdf")
+    return True
+
+
+def plot_2d_summary_root(
+    out_dir: str,
+    tag: str,
+    era: str,
+    var1_name: str,
+    var2_name: str,
+    rows: Sequence[dict],
+    value_key: str,
+    title: str,
+) -> bool:
+    rt, cms_lumi = _load_root_modules()
+    if rt is None:
+        return False
+
+    hist_name = "HZa_2D_%s_%s" % (value_key, tag)
+    hist = make_root_2d_hist(
+        rt,
+        hist_name,
+        var1_name,
+        var2_name,
+        rows,
+        value_key,
+        title,
+    )
+
+    out_stem = os.path.join(out_dir, hist_name)
+    canvas = rt.TCanvas(hist_name, hist_name, 900, 600)
+    canvas.SetRightMargin(0.18)
+    canvas.SetLeftMargin(0.16)
+    canvas.SetTopMargin(0.10)
+    canvas.SetBottomMargin(0.13)
+    rt.gStyle.SetPalette(1)
+    rt.gStyle.SetPaintTextFormat("1.3f")
+    rt.gStyle.SetOptTitle(1)
     if "err" in value_key or "sigma" in value_key:
         hist.SetMinimum(0.0)
     hist.Draw("colz TEXT45")
@@ -798,11 +1022,6 @@ def plot_2d_summary_root(
     canvas.Update()
     canvas.Print(out_stem + ".png")
     canvas.Print(out_stem + ".pdf")
-    canvas.Print(out_stem + ".root")
-
-    root_out = rt.TFile(out_stem + ".root", "UPDATE")
-    hist.Write(hist_name, rt.TObject.kOverwrite)
-    root_out.Close()
     return True
 
 
@@ -885,6 +1104,7 @@ def process_one(base_dir: str, output_base_dir: str, r9: str, era: str, make_plo
     write_csv(os.path.join(out_dir, "phcsev_summary.csv"), rows)
     write_txt(os.path.join(out_dir, "egammaEffi_summary.txt"), var1_name, var2_name, rows)
     write_json(os.path.join(out_dir, "phcsev_summary.json"), metadata, rows)
+    write_export_json(os.path.join(out_dir, "%s.json" % out_flag), var1_name, var2_name, rows)
 
     if make_plots:
         available_axes = []
@@ -894,6 +1114,7 @@ def process_one(base_dir: str, output_base_dir: str, r9: str, era: str, make_plo
                 available_axes.append(axis_kind)
         for axis_kind in available_axes:
             plot_axis_comparisons(out_dir, out_flag, var1_name, var2_name, rows, axis_kind, warn_missing=False)
+        plot_2d_pair_summary(out_dir, out_flag, var1_name, var2_name, rows)
         plot_2d_summary(out_dir, out_flag, var1_name, var2_name, rows, "sf_nom", "Nominal scale factor")
         plot_2d_summary(out_dir, out_flag, var1_name, var2_name, rows, "sf_total_err", "Absolute total SF uncertainty")
         plot_2d_summary(out_dir, out_flag, var1_name, var2_name, rows, "sigma_total_rel", "Relative total SF uncertainty")
@@ -912,7 +1133,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eras", nargs="+", default=list(DEFAULT_ERAS), help="Eras to process.")
     parser.add_argument("--r9", nargs="+", default=list(DEFAULT_R9), choices=list(DEFAULT_R9), help="R9 categories to process.")
     parser.add_argument("--no-plots", action="store_true", help="Write tables only.")
-    parser.add_argument("--no-root", action="store_true", help="Do not attempt PyROOT output.")
+    parser.add_argument("--no-root", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--write-root", action="store_true", help="Also write the summary ROOT histogram file.")
     parser.add_argument("--allow-missing", action="store_true", help="Skip missing input groups instead of failing.")
     return parser.parse_args()
 
@@ -932,7 +1154,7 @@ def main() -> int:
                     r9,
                     era,
                     make_plots=not args.no_plots,
-                    make_root=not args.no_root,
+                    make_root=args.write_root,
                 )
                 if out_dir:
                     written.append(out_dir)
