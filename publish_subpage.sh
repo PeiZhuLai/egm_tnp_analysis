@@ -489,7 +489,7 @@ if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
 <title>HZa SF</title>
 <style>
   :root {
-    --page-max: 1180px;
+    --page-max: 1480px;
     --list-gap-x: 48px;
     --list-gap-y: 16px;
   }
@@ -583,7 +583,7 @@ if 'class="auto-list"' not in html:
     html = re.sub(r"<ul(\s*)>", r"<ul class=\"auto-list\">", html, count=1)
 
 HOME_STYLE = """  :root {
-    --page-max: 1180px;
+    --page-max: 1480px;
     --list-gap-x: 48px;
     --list-gap-y: 16px;
   }
