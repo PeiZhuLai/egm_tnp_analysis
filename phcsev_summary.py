@@ -696,7 +696,8 @@ def plot_axis_comparisons(
         ax.set_ylabel("Scale factor")
         ax.set_title(title)
         ax.grid(True, alpha=0.25)
-        ax.legend(fontsize=7, ncol=1)
+        legend_fontsize = 6 if suffix == "compare_pileup" and normalize_axis_name(x_axis_name) == "nvtx" else 7
+        ax.legend(fontsize=legend_fontsize, ncol=1)
         fig.tight_layout()
         if needs_extra_x_title_space:
             fig.subplots_adjust(bottom=0.16)
@@ -814,7 +815,10 @@ def plot_axis_comparisons_root(
             legend = rt.TLegend(0.32, 0.62, 0.92, 0.93)
         legend.SetNColumns(1 if len(legend_entries) < 7 else 2)
         legend.SetTextFont(42)
-        legend.SetTextSize(0.025 if len(legend_entries) > 12 else 0.029)
+        if suffix == "compare_pileup" and normalize_axis_name(x_axis_name) == "nvtx":
+            legend.SetTextSize(0.022)
+        else:
+            legend.SetTextSize(0.025 if len(legend_entries) > 12 else 0.029)
         legend.SetBorderSize(0)
         legend.SetFillStyle(0)
         for graph, label in legend_entries:
