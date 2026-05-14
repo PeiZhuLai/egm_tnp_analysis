@@ -46,7 +46,7 @@ ROOT_COLORS_HEX = (
     "#4d4d4d",
 )
 ROOT_MARKERS = (20, 22, 21, 23, 33, 29, 43, 47, 34)
-CMS_LABEL_RELPOSX = 0.090
+CMS_LABEL_RELPOSX = 0.12
 
 
 @dataclass(frozen=True)
@@ -608,7 +608,7 @@ def _format_root_overlay_bin_label(axis_name: str, low: float, high: float) -> s
     if normalized == "pt":
         return "%g < p_{T} < %g GeV" % (low, high)
     if normalized == "nvtx":
-        return "%g < N_{vtx} < %g" % (low, high)
+        return "%g <N_{vtx}< %g" % (low, high)
     return "%s in [%g, %g)" % (root_axis_title(axis_name), low, high)
 
 
@@ -644,17 +644,17 @@ def plot_axis_comparisons(
         (
             "compare_sig_bkg",
             (("sig", "sf_sig", None), ("sig+bkg", "sf_sig_bkg", None)),
-            None,
+            "",
         ),
         (
             "compare_pileup",
-            (("PU down", "sf_down", None), ("nominal", "sf_nom", None), ("PU up", "sf_up", None)),
-            None,
+            (("puDown", "sf_down", None), ("nominal", "sf_nom", None), ("puUp", "sf_up", None)),
+            "",
         ),
         (
             "total_uncertainty",
-            (("total", "sf_nom", "sf_total_err"),),
-            None,
+            (("", "sf_nom", "sf_total_err"),),
+            "",
         ),
     )
 
@@ -672,6 +672,7 @@ def plot_axis_comparisons(
         return
 
     for suffix, series, title in plots:
+        needs_extra_x_title_space = normalize_axis_name(x_axis_name) == "pt"
         fig, ax = plt.subplots(figsize=(9.0, 6.5))
         for group_key, group_rows in sorted(groups.items()):
             group_rows = sorted(group_rows, key=lambda row: _row_axis_values(row, x_axis_index)[2])
@@ -688,12 +689,17 @@ def plot_axis_comparisons(
                 ax.errorbar(x, y, xerr=xerr, yerr=yerr, marker="o", linestyle="-", capsize=2.0, label=full_label)
 
         ax.axhline(1.0, color="black", linestyle="--", linewidth=1.0)
-        ax.set_xlabel(axis_title(x_axis_name))
+        if needs_extra_x_title_space:
+            ax.set_xlabel(axis_title(x_axis_name), labelpad=14)
+        else:
+            ax.set_xlabel(axis_title(x_axis_name))
         ax.set_ylabel("Scale factor")
         ax.set_title(title)
         ax.grid(True, alpha=0.25)
         ax.legend(fontsize=7, ncol=1)
         fig.tight_layout()
+        if needs_extra_x_title_space:
+            fig.subplots_adjust(bottom=0.16)
         out_path = os.path.join(out_dir, "HZa_SFvs%s_%s_%s.png" % (axis_file_token(x_axis_name), suffix, tag))
         fig.savefig(out_path, dpi=160)
         plt.close(fig)
@@ -739,7 +745,7 @@ def plot_axis_comparisons_root(
                 graph.SetMarkerStyle(ROOT_MARKERS[(gi + si) % len(ROOT_MARKERS)])
                 graph.SetMarkerSize(1.1)
                 graph.SetLineStyle(line_styles[si % len(line_styles)])
-                graph.SetLineWidth(3)
+                graph.SetLineWidth(4)
                 for point_idx in range(graph.GetN()):
                     y_val = graph.GetPointY(point_idx)
                     y_min = min(y_min, y_val - graph.GetErrorYlow(point_idx))
@@ -760,8 +766,11 @@ def plot_axis_comparisons_root(
             continue
 
         out_stem = os.path.join(out_dir, "HZa_SFvs%s_%s_%s" % (axis_file_token(x_axis_name), suffix, tag))
+        needs_extra_x_title_space = normalize_axis_name(x_axis_name) == "pt"
         canvas = rt.TCanvas(out_stem, out_stem, 900, 800)
         canvas.SetRightMargin(0.05)
+        if needs_extra_x_title_space:
+            canvas.SetBottomMargin(0.16)
         if normalize_axis_name(x_axis_name) == "pt":
             canvas.SetLogx()
 
@@ -771,6 +780,8 @@ def plot_axis_comparisons_root(
 
         mg.Draw("A")
         mg.GetXaxis().SetTitle(root_axis_title(x_axis_name))
+        if needs_extra_x_title_space:
+            mg.GetXaxis().SetTitleOffset(1.2)
         mg.GetYaxis().SetTitle("Scale Factor")
         x_edges = sorted(
             {row[f"var{x_axis_index}_low"] for group in groups.values() for row in group}.union(
@@ -786,19 +797,22 @@ def plot_axis_comparisons_root(
 
         if y_min < 1.0e8:
             span = max(y_max - y_min, 0.02)
-            margin = max(0.02, 0.30 * span)
-            mg.GetYaxis().SetRangeUser(max(0.0, y_min - margin), y_max + margin)
+            margin = max(0.02, 0.2 * span)
+            mg.GetYaxis().SetRangeUser(max(0.0, y_min - margin), y_max + margin*2.8)
         else:
             mg.GetYaxis().SetRangeUser(0.8, 1.2)
 
         line = rt.TLine(x_edges[0], 1.0, x_edges[-1], 1.0) if x_edges else None
         if line is not None:
             line.SetLineStyle(rt.kDashed)
-            line.SetLineWidth(2)
+            line.SetLineWidth(4)
             line.Draw()
 
-        legend = rt.TLegend(0.32, 0.62, 0.92, 0.93)
-        legend.SetNColumns(2)
+        if len(legend_entries) < 3:
+            legend = rt.TLegend(0.32, 0.72, 0.92, 0.93)
+        else:
+            legend = rt.TLegend(0.32, 0.62, 0.92, 0.93)
+        legend.SetNColumns(1 if len(legend_entries) < 7 else 2)
         legend.SetTextFont(42)
         legend.SetTextSize(0.025 if len(legend_entries) > 12 else 0.029)
         legend.SetBorderSize(0)
@@ -852,10 +866,10 @@ def plot_2d_summary(out_dir: str, tag: str, var1_name: str, var2_name: str, rows
             va="center",
             fontsize=7,
         )
-    ax.set_xlabel(axis_title(var1_name))
+    ax.set_xlabel(axis_title(var1_name), labelpad=15)
     ax.set_ylabel(axis_title(var2_name))
     ax.set_title(title)
-    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.15)
     fig.savefig(os.path.join(out_dir, "HZa_2D_%s_%s.png" % (value_key, tag)), dpi=160)
     plt.close(fig)
 
@@ -999,7 +1013,18 @@ def plot_2d_pair_summary_root(
     canvas.cd(2)
     hist_err.DrawCopy("colz TEXT45")
 
-    _apply_cms_lumi(cms_lumi, canvas, era, 0)
+    # For specific summary tags, manually draw CMS label shifted to the right
+    if "hza_resolve_phcsev" in tag:
+        latex = rt.TLatex()
+        latex.SetNDC()
+        latex.SetTextFont(61)
+        latex.SetTextSize(0.06)
+        latex.DrawLatex(0.45, 0.95, "CMS")
+        latex.SetTextFont(52)
+        latex.SetTextSize(0.045)
+        latex.DrawLatex(0.59, 0.95, "Preliminary")
+    else:
+        draw_cms_lumi_shifted(cms_lumi, canvas, era, 0, rel_pos_x=CMS_LABEL_RELPOSX)
     canvas.Modified()
     canvas.Update()
     canvas.Print(out_stem + ".png")
@@ -1040,10 +1065,18 @@ def plot_2d_summary_root(
     canvas.SetBottomMargin(0.13)
     rt.gStyle.SetPalette(1)
     rt.gStyle.SetPaintTextFormat("1.3f")
-    rt.gStyle.SetOptTitle(1)
+    rt.gStyle.SetOptTitle(0)
     if "err" in value_key or "sigma" in value_key:
         hist.SetMinimum(0.0)
     hist.Draw("colz TEXT45")
+
+    # Draw title at top right corner
+    latex = rt.TLatex()
+    latex.SetNDC()
+    latex.SetTextFont(42)
+    latex.SetTextSize(0.04)
+    latex.SetTextAlign(31)  # Right align
+    latex.DrawLatex(0.97, 0.95, title)
 
     _apply_cms_lumi(cms_lumi, canvas, era, 0)
     canvas.Modified()

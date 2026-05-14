@@ -480,10 +480,10 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
 
         grBinsSF     .SetMarkerColor( graphColors[igr] )
         grBinsSF     .SetLineColor(   graphColors[igr] )
-        grBinsSF     .SetLineWidth(3)
+        grBinsSF     .SetLineWidth(4)
         grBinsEffData.SetMarkerColor( graphColors[igr] )
         grBinsEffData.SetLineColor(   graphColors[igr] )
-        grBinsEffData.SetLineWidth(3)
+        grBinsEffData.SetLineWidth(4)
                 
         grBinsEffData.GetHistogram().SetMinimum(effiMin)
         grBinsEffData.GetHistogram().SetMaximum(effiMax)
@@ -547,7 +547,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
         p2.cd()            
         listOfTGraph2[use_igr].SetLineColor(graphColors[use_igr])
         listOfTGraph2[use_igr].SetMarkerColor(graphColors[use_igr])
-        listOfTGraph2[use_igr].SetLineWidth(3)
+        listOfTGraph2[use_igr].SetLineWidth(4)
         listOfTGraph2[use_igr].GetHistogram().SetMinimum(sfMin)
         listOfTGraph2[use_igr].GetHistogram().SetMaximum(sfMax)
         listOfTGraph2[use_igr].GetHistogram().GetYaxis().SetTitleFont(42)
