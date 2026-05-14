@@ -46,6 +46,7 @@ ROOT_COLORS_HEX = (
     "#4d4d4d",
 )
 ROOT_MARKERS = (20, 22, 21, 23, 33, 29, 43, 47, 34)
+CMS_LABEL_RELPOSX = 0.090
 
 
 @dataclass(frozen=True)
@@ -529,14 +530,38 @@ def _load_root_modules():
     return rt, cms_lumi
 
 
-def _apply_cms_lumi(cms_lumi, canvas, era: str, position: int) -> None:
+def draw_cms_lumi_shifted(cms_lumi, canvas, era: str, position: int, rel_pos_x: float = CMS_LABEL_RELPOSX) -> None:
+    """Draw the CMS Preliminary label with a local horizontal offset.
+
+    CMS_lumi.py stores label placement in module globals.  Keep the adjustment
+    local to phcsev_summary by restoring the original values immediately after
+    drawing.
+    """
+
     if cms_lumi is None:
         return
+    saved = {
+        "cmsText": getattr(cms_lumi, "cmsText", None),
+        "writeExtraText": getattr(cms_lumi, "writeExtraText", None),
+        "extraText": getattr(cms_lumi, "extraText", None),
+        "lumi": getattr(cms_lumi, "lumi", None),
+        "relPosX": getattr(cms_lumi, "relPosX", None),
+    }
     cms_lumi.cmsText = "CMS"
     cms_lumi.writeExtraText = True
     cms_lumi.extraText = "Preliminary"
     cms_lumi.lumi = ""
-    cms_lumi.CMS_lumi(canvas, era, position)
+    cms_lumi.relPosX = rel_pos_x
+    try:
+        cms_lumi.CMS_lumi(canvas, era, position)
+    finally:
+        for name, value in saved.items():
+            if value is not None:
+                setattr(cms_lumi, name, value)
+
+
+def _apply_cms_lumi(cms_lumi, canvas, era: str, position: int) -> None:
+    draw_cms_lumi_shifted(cms_lumi, canvas, era, position)
 
 
 def _row_axis_values(row: Mapping[str, float], axis_index: int) -> Tuple[float, float, float]:
@@ -782,11 +807,14 @@ def plot_axis_comparisons_root(
             legend.AddEntry(graph, label, "lp")
         legend.Draw()
 
-        latex = rt.TLatex()
-        latex.SetNDC()
-        latex.SetTextFont(42)
-        latex.SetTextSize(0.035)
-        latex.DrawLatex(0.18, 0.94, title)
+        try:
+            latex = rt.TLatex()
+            latex.SetNDC()
+            latex.SetTextFont(42)
+            latex.SetTextSize(0.035)
+            latex.DrawLatex(0.18, 0.94, str(title))
+        except TypeError:
+            pass
 
         _apply_cms_lumi(cms_lumi, canvas, era, 11)
         canvas.Modified()
