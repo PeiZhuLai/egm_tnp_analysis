@@ -779,7 +779,9 @@ if args.sumUp:
         export_mode = getattr(tnpConf, 'exportJsonFormat', None)
         if export_mode is None:
             flag_lower = args.flag.lower()
-            export_mode = 'efficiency' if ('trigger' in flag_lower or 'trig' in flag_lower) else 'sf'
+            export_mode = 'efficiency' if (
+                'trigger' in flag_lower or 'trig' in flag_lower or 'miniiso' in flag_lower
+            ) else 'sf'
 
         if export_mode == 'efficiency' and set(['pt', 'eta']).issubset(set(axis_names)):
             axis_names = ['pt', 'eta'] + [axis for axis in axis_names if axis not in ('pt', 'eta')]
