@@ -356,9 +356,9 @@ tnpParAltBkgFitByBin = {
     ),
     3: params_with_updates(
         tnpParAltBkgFit,
-        "meanF[-2.0,-5.0,4.0]",
-        "sigmaF[2.5,0.6,4.5]",
-        "alphaF[-0.05,-5.,2.]",
+        "meanF[-0.5,-2.0,2.0]",
+        "sigmaF[1.2,0.6,2.4]",
+        "alphaF[-0.08,-0.30,-0.02]",
     ),
 }
 
