@@ -108,10 +108,10 @@ wait_for_batch() {
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf
 ### Electron miniIso SFs
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_nongap_2024 hza_elminiIso0p1_nongap_2024_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_gap_2024 hza_elminiIso0p1_gap_2024_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2024 hza_elminiIso0p15_nongap_2024_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2024 hza_elminiIso0p15_gap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_nongap_2024 hza_elminiIso0p1_nongap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_gap_2024 hza_elminiIso0p1_gap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2024 hza_elminiIso0p15_nongap_2024_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2024 hza_elminiIso0p15_gap_2024_sf
 
 ## Electron ID and Trigger SFs 2025
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2025 hza_elid_gap_2025_sf
@@ -128,7 +128,7 @@ wait_for_batch() {
 run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_nongap_2025 hza_elminiIso0p1_nongap_2025_sf
 run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_gap_2025 hza_elminiIso0p1_gap_2025_sf
 run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2025 hza_elminiIso0p15_nongap_2025_sf
-# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2025 hza_elminiIso0p15_gap_2025_sf
+run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2025 hza_elminiIso0p15_gap_2025_sf
 ###------------------------------------------------------------------------------------------------------------
 ### Tunning 
 
