@@ -406,11 +406,11 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     legStyle.SetMargin(0.45)
     lineData = rt.TLine(0, 0, 1, 0)
     lineData.SetLineColor(rt.kBlack)
-    lineData.SetLineWidth(2)
+    lineData.SetLineWidth(3)
     lineData.SetLineStyle(rt.kSolid)
     lineMC = rt.TLine(0, 0, 1, 0)
     lineMC.SetLineColor(rt.kBlack)
-    lineMC.SetLineWidth(2)
+    lineMC.SetLineWidth(3)
     lineMC.SetLineStyle(rt.kDashed)
     legStyle.AddEntry(lineData, "Data", "L")
     legStyle.AddEntry(lineMC, "MC", "L")
@@ -476,7 +476,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
             grBinsEffMC.SetLineStyle( rt.kDashed )
             grBinsEffMC.SetLineColor( graphColors[igr] )
             grBinsEffMC.SetMarkerSize( 0 )
-            grBinsEffMC.SetLineWidth( 2 )
+            grBinsEffMC.SetLineWidth( 3 )
 
         grBinsSF     .SetMarkerColor( graphColors[igr] )
         grBinsSF     .SetLineColor(   graphColors[igr] )
@@ -527,7 +527,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
             
         listOfTGraph1[use_igr].SetLineColor(graphColors[use_igr])
         listOfTGraph1[use_igr].SetMarkerColor(graphColors[use_igr])
-        listOfTGraph1[use_igr].SetLineWidth(3)
+        listOfTGraph1[use_igr].SetLineWidth(4)
         if not listOfMC[use_igr] is None:
             listOfMC[use_igr].SetLineColor(graphColors[use_igr])
 
@@ -571,7 +571,7 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
 
     lineAtOne = rt.TLine(xMin,1,xMax,1)
     lineAtOne.SetLineStyle(rt.kDashed)
-    lineAtOne.SetLineWidth(2)
+    lineAtOne.SetLineWidth(3)
     
     p2.cd()
     lineAtOne.Draw()
