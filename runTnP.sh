@@ -108,10 +108,10 @@ wait_for_batch() {
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2024 hza_sielleg30trigger_nongap_2024_sf
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2024 hza_sielleg30trigger_gap_2024_sf
 ### Electron miniIso SFs
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_nongap_2024 hza_elminiIso0p1_nongap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_gap_2024 hza_elminiIso0p1_gap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2024 hza_elminiIso0p15_nongap_2024_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2024 hza_elminiIso0p15_gap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_nongap_2024 hza_elminiIso0p1_nongap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_gap_2024 hza_elminiIso0p1_gap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2024 hza_elminiIso0p15_nongap_2024_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2024 hza_elminiIso0p15_gap_2024_sf
 
 ## Electron ID and Trigger SFs 2025
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elid_gap_2025 hza_elid_gap_2025_sf
@@ -125,10 +125,10 @@ run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_202
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_nongap_2025 hza_sielleg30trigger_nongap_2025_sf
 # run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_sielleg30trigger_gap_2025 hza_sielleg30trigger_gap_2025_sf
 ## Electron miniIso SFs 2025
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_nongap_2025 hza_elminiIso0p1_nongap_2025_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_gap_2025 hza_elminiIso0p1_gap_2025_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2025 hza_elminiIso0p15_nongap_2025_sf
-run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2025 hza_elminiIso0p15_gap_2025_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_nongap_2025 hza_elminiIso0p1_nongap_2025_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p1_gap_2025 hza_elminiIso0p1_gap_2025_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_2025 hza_elminiIso0p15_nongap_2025_sf
+# run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_2025 hza_elminiIso0p15_gap_2025_sf
 ###------------------------------------------------------------------------------------------------------------
 ### Tunning 
 
@@ -136,15 +136,15 @@ run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_gap_202
 ## Custom Photon ID
 ##-------- High pT --------
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022preEE hza_resolve_phid_2022preEE_sf
-run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022postEE hza_resolve_phid_2022postEE_sf
+# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022postEE hza_resolve_phid_2022postEE_sf
 run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023preBPix hza_resolve_phid_2023preBPix_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023postBPix hza_resolve_phid_2023postBPix_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023postBPixHole hza_resolve_phid_2023postBPixHole_sf
-run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2024 hza_resolve_phid_2024_sf
+# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2024 hza_resolve_phid_2024_sf
 
 # ##-------- Low pT --------
-run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022preEE hza_resolve_phid_lowpt_2022preEE_sf
-run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022postEE hza_resolve_phid_lowpt_2022postEE_sf
+# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022preEE hza_resolve_phid_lowpt_2022preEE_sf
+# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022postEE hza_resolve_phid_lowpt_2022postEE_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023preBPix hza_resolve_phid_lowpt_2023preBPix_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023postBPix hza_resolve_phid_lowpt_2023postBPix_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023postBPixHole hza_resolve_phid_lowpt_2023postBPixHole_sf
