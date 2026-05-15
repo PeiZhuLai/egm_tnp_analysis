@@ -136,19 +136,19 @@ run_job egm_tnp_analysis.etc.config.hza_ele.settings_htoza_elminiIso0p15_nongap_
 ## Custom Photon ID
 ##-------- High pT --------
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022preEE hza_resolve_phid_2022preEE_sf
-# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022postEE hza_resolve_phid_2022postEE_sf
-# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023preBPix hza_resolve_phid_2023preBPix_sf
+run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2022postEE hza_resolve_phid_2022postEE_sf
+run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023preBPix hza_resolve_phid_2023preBPix_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023postBPix hza_resolve_phid_2023postBPix_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2023postBPixHole hza_resolve_phid_2023postBPixHole_sf
-# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2024 hza_resolve_phid_2024_sf
+run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_2024 hza_resolve_phid_2024_sf
 
 # ##-------- Low pT --------
-# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022preEE hza_resolve_phid_lowpt_2022preEE_sf
-# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022postEE hza_resolve_phid_lowpt_2022postEE_sf
+run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022preEE hza_resolve_phid_lowpt_2022preEE_sf
+run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2022postEE hza_resolve_phid_lowpt_2022postEE_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023preBPix hza_resolve_phid_lowpt_2023preBPix_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023postBPix hza_resolve_phid_lowpt_2023postBPix_sf
 # run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2023postBPixHole hza_resolve_phid_lowpt_2023postBPixHole_sf
-# run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2024 hza_resolve_phid_lowpt_2024_sf
+run_job egm_tnp_analysis.etc.config.isoMyCorr.settings_resolve_phid_lowpt_2024 hza_resolve_phid_lowpt_2024_sf
 ###------------------------------------------------------------------------------------------------------------
 # Tunning
 
