@@ -9,7 +9,7 @@ set -euo pipefail
 #   - 自動建立子頁面結構
 #   - 同步 fits/ 和 summary/ 檔案（PNG + PDF）
 #   - 自動產生 index.html
-#   - 將 summary/ 內圖片與 PDF 生成圖牆
+#   - 將 summary/ 內圖片生成圖牆（PDF 只同步，不在 HTML 顯示）
 #   - 設定公開權限
 #
 # 環境變數：
@@ -33,7 +33,8 @@ set -euo pipefail
 #   --summary-exclude <glob>    指定 summary 要排除的檔名樣式（可重複）
 #   --summary-order <glob>      指定 summary 頁顯示順序（可重複；先比對先顯示）
 #   --copy-pdf                  同步來源中的 PDF 到網頁目錄（預設已啟用）
-#   --hide-pdf-in-html          HTML 只顯示 PNG（即使目錄中有 PDF）
+#   --hide-pdf-in-html          HTML 只顯示 PNG（預設；即使目錄中有 PDF）
+#   --show-pdf-in-html          HTML 也顯示 PDF 連結
 #
 # 範例：
 # ./publish_subpage.sh \
@@ -58,7 +59,7 @@ SUMMARY_EXCLUDE_PATTERNS=()
 SUMMARY_ORDER_PATTERNS=()
 DID_FITS_SYNC=0
 COPY_PDF=1
-HIDE_PDF_IN_HTML=0
+HIDE_PDF_IN_HTML=1
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -76,6 +77,7 @@ while [[ $# -gt 0 ]]; do
     --summary-order) SUMMARY_ORDER_PATTERNS+=("$2"); shift 2;;
     --copy-pdf)      COPY_PDF=1; shift;;
     --hide-pdf-in-html) HIDE_PDF_IN_HTML=1; shift;;
+    --show-pdf-in-html) HIDE_PDF_IN_HTML=0; shift;;
     -h|--help)
       sed -n '1,80p' "$0"; exit 0;;
     *)
