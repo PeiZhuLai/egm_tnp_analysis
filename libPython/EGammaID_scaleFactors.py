@@ -198,6 +198,37 @@ def _is_gap_eta_bin(eta_bin, tol=0.01):
     return abs(low - 1.4442) <= tol and abs(high - 1.566) <= tol
 
 
+def _is_gap_measurement(plot_path):
+    measurement_key = ("%s %s %s" % (
+        _measurement_tag(plot_path),
+        os.path.basename(plot_path),
+        os.path.abspath(plot_path),
+    )).lower()
+    return "_gap_" in measurement_key and "_nongap_" not in measurement_key
+
+
+def _is_central_gap_eta_result(point, tol=0.01):
+    low = min(float(point["min"]), float(point["max"]))
+    high = max(float(point["min"]), float(point["max"]))
+    return low >= (-1.4442 - tol) and high <= (1.4442 + tol)
+
+
+def _drop_central_gap_eta_results(graphs):
+    if not graphs:
+        return graphs
+
+    filtered_graphs = {}
+    for key, points in graphs.items():
+        filtered_points = [
+            point for point in points
+            if not _is_central_gap_eta_result(point)
+        ]
+        if filtered_points:
+            filtered_graphs[key] = filtered_points
+
+    return filtered_graphs
+
+
 def _drop_gap_eta_graphs(graphs):
     if not graphs:
         return graphs
@@ -790,9 +821,18 @@ def doEGM_SFs(filein, lumi, axis = ['pT','eta'] ):
     # EffiGraph1D( effGraph.pt_1DGraph_list_customEtaBining(customEtaBining,False) , 
     #         effGraph.pt_1DGraph_list_customEtaBining(customEtaBining,True)   , False, pdfout )
     # EffiGraph1D( effGraph.eta_1DGraph_list(False), effGraph.eta_1DGraph_list(True), True , pdfout )
-    listOfSF1D = EffiGraph1D( effGraph.eta_1DGraph_list( typeGR =  0 ) , # eff Data
-                              effGraph.eta_1DGraph_list( typeGR = -1 ) , # eff MC
-                              effGraph.eta_1DGraph_list( typeGR = +1 ) , # SF
+    eta_eff_data = effGraph.eta_1DGraph_list(typeGR=0)
+    eta_eff_mc = effGraph.eta_1DGraph_list(typeGR=-1)
+    eta_sf = effGraph.eta_1DGraph_list(typeGR=+1)
+
+    if _is_gap_measurement(filein):
+        eta_eff_data = _drop_central_gap_eta_results(eta_eff_data)
+        eta_eff_mc = _drop_central_gap_eta_results(eta_eff_mc)
+        eta_sf = _drop_central_gap_eta_results(eta_sf)
+
+    listOfSF1D = EffiGraph1D( eta_eff_data , # eff Data
+                              eta_eff_mc   , # eff MC
+                              eta_sf       , # SF
                               pdfout, 
                               xAxis = axis[1], yAxis = axis[0] ) or []
 
