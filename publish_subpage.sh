@@ -7,7 +7,7 @@ set -euo pipefail
 # 用途：在 /eos/user/p/pelai/www/HZa/sfs 下生成「子頁面」
 # 功能：
 #   - 自動建立子頁面結構
-#   - （可選）同步 fits/ 和 summary/ 檔案（僅 PNG）
+#   - 同步 fits/ 和 summary/ 檔案（PNG + PDF）
 #   - 自動產生 index.html
 #   - 將 summary/ 內圖片與 PDF 生成圖牆
 #   - 設定公開權限
@@ -32,7 +32,7 @@ set -euo pipefail
 #   --summary-include <glob>    指定 summary 要同步的檔名樣式（可重複）
 #   --summary-exclude <glob>    指定 summary 要排除的檔名樣式（可重複）
 #   --summary-order <glob>      指定 summary 頁顯示順序（可重複；先比對先顯示）
-#   --copy-pdf                  同步來源中的 PDF 到網頁目錄
+#   --copy-pdf                  同步來源中的 PDF 到網頁目錄（預設已啟用）
 #   --hide-pdf-in-html          HTML 只顯示 PNG（即使目錄中有 PDF）
 #
 # 範例：
@@ -57,7 +57,7 @@ SUMMARY_INCLUDE_PATTERNS=()
 SUMMARY_EXCLUDE_PATTERNS=()
 SUMMARY_ORDER_PATTERNS=()
 DID_FITS_SYNC=0
-COPY_PDF=0
+COPY_PDF=1
 HIDE_PDF_IN_HTML=0
 
 while [[ $# -gt 0 ]]; do
@@ -105,8 +105,8 @@ mkdir -p "$FITSD" "$SUMMD"
 if [[ "${#SRC_FITS_PREFIXED[@]}" -gt 0 ]]; then
   DID_FITS_SYNC=1
   echo ">>> 同步 fits/ 來源（檔名前綴模式）"
-  # 前綴模式下先清理舊的 PNG，避免與舊版（未加前綴）檔名混用
-  find "${FITSD}" -type f -iname '*.png' -delete
+  # 前綴模式下先清理舊的 PNG/PDF，避免與舊版（未加前綴）檔名混用
+  find "${FITSD}" -type f \( -iname '*.png' -o -iname '*.pdf' \) -delete
   for spec in "${SRC_FITS_PREFIXED[@]:-}"; do
     prefix="${spec%%:*}"
     src="${spec#*:}"
@@ -139,7 +139,7 @@ if [[ "${#SRC_FITS_PREFIXED[@]}" -gt 0 ]]; then
   done
 elif [[ -n "${SRC_FITS}" && -d "${SRC_FITS}" ]]; then
   DID_FITS_SYNC=1
-  echo ">>> 同步 fits/ 來源（僅 PNG）：${SRC_FITS}"
+  echo ">>> 同步 fits/ 來源（PNG/PDF）：${SRC_FITS}"
   fits_rsync_args=(
     -avL
     "--include=*/"
@@ -157,7 +157,7 @@ elif [[ -n "${SRC_FITS}" ]]; then
 fi
 
 if [[ -n "${SRC_SUMMARY}" && -d "${SRC_SUMMARY}" ]]; then
-  echo ">>> 同步 summary/ 來源（僅 PNG）：${SRC_SUMMARY}"
+  echo ">>> 同步 summary/ 來源（PNG/PDF）：${SRC_SUMMARY}"
   summary_rsync_args=(
     -avL
     --delete
