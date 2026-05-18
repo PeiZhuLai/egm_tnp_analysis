@@ -96,6 +96,15 @@ if [[ -z "${WEB_ROOT:-}" ]]; then
   exit 1
 fi
 
+# Legacy muon publishing used /HZa/sfs_muon/run2024/<page>.  Keep existing
+# publish.sh calls working, but publish muon pages into the shared /HZa/sfs
+# tree and move each page one directory up to /HZa/sfs/<page>.
+if [[ "${WEB_ROOT%/}" == */sfs_muon || "${DEST_REL%/}" == run2024/* ]]; then
+  WEB_ROOT="/eos/home-p/pelai/www/HZa/sfs"
+  HOME_URL="/HZa/sfs/"
+  DEST_REL="${DEST_REL#run2024/}"
+fi
+
 DEST_DIR="${WEB_ROOT%/}/${DEST_REL%/}"
 FITSD="${DEST_DIR}/fits"
 SUMMD="${DEST_DIR}/summary"
