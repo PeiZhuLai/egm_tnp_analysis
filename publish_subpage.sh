@@ -96,6 +96,41 @@ if [[ -z "${WEB_ROOT:-}" ]]; then
   exit 1
 fi
 
+rewrite_muon_source_era() {
+  local era="$1"
+  local from_era
+  case "${era}" in
+    2024) from_era="2025" ;;
+    2025) from_era="2024" ;;
+    *) return 0 ;;
+  esac
+
+  local from_segment="/Run${from_era}/"
+  local to_segment="/Run${era}/"
+  SRC_FITS="${SRC_FITS//${from_segment}/${to_segment}}"
+  SRC_SUMMARY="${SRC_SUMMARY//${from_segment}/${to_segment}}"
+
+  local rewritten=()
+  local spec prefix src
+  for spec in "${SRC_FITS_PREFIXED[@]:-}"; do
+    prefix="${spec%%:*}"
+    src="${spec#*:}"
+    if [[ "${src}" == "${spec}" ]]; then
+      rewritten+=("${spec}")
+      continue
+    fi
+    src="${src//${from_segment}/${to_segment}}"
+    rewritten+=("${prefix}:${src}")
+  done
+  SRC_FITS_PREFIXED=("${rewritten[@]}")
+}
+
+if [[ "${DEST_REL%/}" == *muon*_2024 || "${DEST_REL%/}" == run2024/*_2024 ]]; then
+  rewrite_muon_source_era "2024"
+elif [[ "${DEST_REL%/}" == *muon*_2025 || "${DEST_REL%/}" == run2024/*_2025 ]]; then
+  rewrite_muon_source_era "2025"
+fi
+
 # Legacy muon publishing used /HZa/sfs_muon/run2024/<page>.  Keep existing
 # publish.sh calls working, but publish muon pages into the shared /HZa/sfs
 # tree and move each page one directory up to /HZa/sfs/<page>.
