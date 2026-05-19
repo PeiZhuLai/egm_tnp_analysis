@@ -1028,7 +1028,7 @@ def plot_2d_pair_summary_root(
         latex.SetNDC()
         latex.SetTextFont(61)
         latex.SetTextSize(0.06)
-        latex.DrawLatex(0.45, 0.95, "CMS")
+        latex.DrawLatex(0.35, 0.95, "CMS")
         latex.SetTextFont(52)
         latex.SetTextSize(0.045)
         latex.DrawLatex(0.59, 0.95, "Preliminary")
