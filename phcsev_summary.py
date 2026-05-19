@@ -599,17 +599,16 @@ def draw_cms_lumi_shifted(
     try:
         cms_lumi.CMS_lumi(canvas, era, position)
         x_pos, y_pos, align = _cms_label_position(cms_lumi, canvas, position, cms_rel_pos_x)
-        latex = canvas.GetListOfPrimitives().FindObject("phcsev_cms_label")
-        if latex is None:
-            import ROOT as rt  # type: ignore
+        import ROOT as rt  # type: ignore
 
-            latex = rt.TLatex()
-            latex.SetName("phcsev_cms_label")
-            latex.SetNDC()
+        latex = rt.TLatex()
+        latex.SetNDC()
         latex.SetTextFont(getattr(cms_lumi, "cmsTextFont", 61))
         latex.SetTextSize(getattr(cms_lumi, "cmsTextSize", 0.75) * canvas.GetTopMargin())
         latex.SetTextAlign(align)
-        latex.DrawLatex(x_pos, y_pos, "CMS")
+        drawn = latex.DrawLatex(x_pos, y_pos, "CMS")
+        if drawn is not None:
+            drawn.SetName("phcsev_cms_label")
     finally:
         for name, value in saved.items():
             if value is not None:
