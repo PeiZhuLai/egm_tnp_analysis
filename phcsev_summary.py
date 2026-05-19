@@ -656,6 +656,11 @@ def plot_axis_comparisons(
             (("", "sf_nom", "sf_total_err"),),
             "",
         ),
+        (
+            "nominal",
+            (("nominal", "sf_nom", "sf_nom_err"),),
+            "",
+        ),
     )
 
     if plot_axis_comparisons_root(
