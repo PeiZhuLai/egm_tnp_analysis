@@ -47,6 +47,7 @@ ROOT_COLORS_HEX = (
 )
 ROOT_MARKERS = (20, 22, 21, 23, 33, 29, 43, 47, 34)
 CMS_LABEL_RELPOSX = 0.12
+CMS_TEXT_RELPOSX = 0.085
 
 
 @dataclass(frozen=True)
@@ -530,8 +531,51 @@ def _load_root_modules():
     return rt, cms_lumi
 
 
-def draw_cms_lumi_shifted(cms_lumi, canvas, era: str, position: int, rel_pos_x: float = CMS_LABEL_RELPOSX) -> None:
-    """Draw the CMS Preliminary label with a local horizontal offset.
+def _cms_label_position(cms_lumi, canvas, position: int, rel_pos_x: float) -> Tuple[float, float, int]:
+    align_y = 3
+    align_x = 2
+    if position // 10 == 0:
+        align_x = 1
+    if position == 0:
+        align_y = 1
+    if position // 10 == 1:
+        align_x = 1
+    if position // 10 == 2:
+        align_x = 2
+    if position // 10 == 3:
+        align_x = 3
+    align = 10 * align_x + align_y
+
+    left = canvas.GetLeftMargin()
+    top = canvas.GetTopMargin()
+    right = canvas.GetRightMargin()
+    bottom = canvas.GetBottomMargin()
+    out_of_frame = position // 10 == 0
+
+    if position % 10 <= 1:
+        x_pos = left + rel_pos_x * (1.0 - left - right)
+    elif position % 10 == 2:
+        x_pos = left + 0.5 * (1.0 - left - right)
+    else:
+        x_pos = 1.0 - right - rel_pos_x * (1.0 - left - right)
+
+    if out_of_frame and position == 0:
+        y_pos = 1.0 - top + getattr(cms_lumi, "lumiTextOffset", 0.2) * top
+    else:
+        y_pos = 1.0 - top - getattr(cms_lumi, "relPosY", 0.035) * (1.0 - top - bottom)
+
+    return x_pos, y_pos, align
+
+
+def draw_cms_lumi_shifted(
+    cms_lumi,
+    canvas,
+    era: str,
+    position: int,
+    rel_pos_x: float = CMS_LABEL_RELPOSX,
+    cms_rel_pos_x: float = CMS_TEXT_RELPOSX,
+) -> None:
+    """Draw CMS left of the Preliminary label without editing CMS_lumi.py.
 
     CMS_lumi.py stores label placement in module globals.  Keep the adjustment
     local to phcsev_summary by restoring the original values immediately after
@@ -547,13 +591,25 @@ def draw_cms_lumi_shifted(cms_lumi, canvas, era: str, position: int, rel_pos_x: 
         "lumi": getattr(cms_lumi, "lumi", None),
         "relPosX": getattr(cms_lumi, "relPosX", None),
     }
-    cms_lumi.cmsText = "CMS"
+    cms_lumi.cmsText = ""
     cms_lumi.writeExtraText = True
     cms_lumi.extraText = "Preliminary"
     cms_lumi.lumi = ""
     cms_lumi.relPosX = rel_pos_x
     try:
         cms_lumi.CMS_lumi(canvas, era, position)
+        x_pos, y_pos, align = _cms_label_position(cms_lumi, canvas, position, cms_rel_pos_x)
+        latex = canvas.GetListOfPrimitives().FindObject("phcsev_cms_label")
+        if latex is None:
+            import ROOT as rt  # type: ignore
+
+            latex = rt.TLatex()
+            latex.SetName("phcsev_cms_label")
+            latex.SetNDC()
+        latex.SetTextFont(getattr(cms_lumi, "cmsTextFont", 61))
+        latex.SetTextSize(getattr(cms_lumi, "cmsTextSize", 0.75) * canvas.GetTopMargin())
+        latex.SetTextAlign(align)
+        latex.DrawLatex(x_pos, y_pos, "CMS")
     finally:
         for name, value in saved.items():
             if value is not None:
