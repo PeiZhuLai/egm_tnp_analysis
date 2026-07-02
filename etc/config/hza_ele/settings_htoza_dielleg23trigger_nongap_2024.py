@@ -43,7 +43,7 @@ probe_preselection_cut = (
 
 # flag to be Tested
 flags = {
-    'hza_dielleg23trigger_nongap_2024_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1)',
+    'hza_dielleg23trigger_nongap_2024_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1 && el_hltE23E12leg1_dR < 0.3)',
 }
 
 # /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
@@ -120,7 +120,7 @@ biningDef = [
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg1_dR < 0.3 && el_hltE23E12leg2_dR < 0.3 &&' + probe_preselection_cut
+cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg2_dR < 0.3 &&' + probe_preselection_cut
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 
@@ -148,21 +148,24 @@ tnpParNomFit = [
     "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+# Failing-leg CMSShape bkg too large: pull the turn-on (acmsF) below the Z peak
+# so the background is a smooth falling shape under the resonance instead of a
+# hump at ~85, and free betaF/gammaF.
+_failbkg_nom = ("acmsF[62.,45.,72.]", "betaF[0.04,0.002,0.15]", "gammaF[0.10,-0.5,1.5]")
+# Passing-leg signal stuck narrow at its 0.9 init -> undershoots the (broad, endcap)
+# data Z peak/shoulders. Widen sigmaP, graded by eta (broader in the endcap).
+_passwiden_ec = ("meanP[0.0,-2.0,2.0]", "sigmaP[2.0,1.2,4.0]")   # endcap eta bins
+_passwiden_mid = ("meanP[0.0,-2.0,2.0]", "sigmaP[1.6,1.0,3.5]")  # transition bins
+_passwiden_bl = ("meanP[0.0,-2.0,2.0]", "sigmaP[1.0,0.7,2.5]")   # barrel: sharp peak, light widen only
 tnpParNomFitByBin = {
-    22: params_with_updates(
-        tnpParNomFit,
-        "meanP[-0.2,-5.0,5.0]",
-        "sigmaP[1.4,0.5,4.0]",
-        "acmsP[92.,65.,120.]",
-        "betaP[0.05,0.002,0.12]",
-        "gammaP[0.08,-0.2,1.2]",
-        "peakP[89.0,84.0,93.0]",
-        "meanF[-0.4,-5.0,5.0]",
-        "sigmaF[2.0,0.5,5.5]",
-        "acmsF[75.,45.,100.]",
-        "betaF[0.05,0.002,0.12]",
-        "gammaF[0.05,-0.2,0.8]",
-    ),
+    17: params_with_updates(tnpParNomFit, *_passwiden_ec),
+    18: params_with_updates(tnpParNomFit, *_passwiden_mid),
+    20: params_with_updates(tnpParNomFit, *_failbkg_nom, *_passwiden_bl),
+    21: params_with_updates(tnpParNomFit, *_passwiden_mid),
+    22: params_with_updates(tnpParNomFit, *_failbkg_nom, *_passwiden_ec),
+    23: params_with_updates(tnpParNomFit, *_failbkg_nom),
+    31: params_with_updates(tnpParNomFit, *_failbkg_nom),
+    39: params_with_updates(tnpParNomFit, *_failbkg_nom),
 }
 
 # # 15
@@ -188,7 +191,29 @@ tnpParAltSigFit = [
     "acmsP[65.,45.,90.]","betaP[0.04,0.005,0.08]","gammaP[0.08, 0.002, 1.5]","peakP[89.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.04,0.005,0.08]","gammaF[0.08, 0.002, 1.5]","peakF[89.0,82.0,90.0]",
     ]
-     
+
+# Failing-leg bkg too large in altSig: same fix as nominal (lower acmsF turn-on,
+# free betaF). gammaF range already wide in altSig.
+_failbkg_altsig = ("acmsF[62.,45.,72.]", "betaF[0.04,0.005,0.15]", "gammaF[0.10,0.002,1.5]")
+tnpParAltSigFitByBin = {
+    16: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    18: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    19: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    20: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    21: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    22: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    23: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+}
+# bin18: passing CB floated left (meanP~-2.75) and undershoots the data Z peak.
+# Pin meanP near the Z AND widen the core (narrow cores over-peak the broad data Z).
+tnpParAltSigFitByBin[18] = params_with_updates(
+    tnpParAltSigFitByBin[18],
+    "meanP[0.0,-1.5,1.5]",
+    "sigmaP[3.0,1.8,5.5]",
+    "sigmaP_2[2.2,1.0,5.0]",
+    "sosP[0.8,0.0,3.0]",
+)
+
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",

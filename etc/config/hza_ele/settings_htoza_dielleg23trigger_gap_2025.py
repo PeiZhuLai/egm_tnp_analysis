@@ -42,7 +42,7 @@ probe_preselection_cut = (
 
 # flag to be Tested
 flags = {
-    'hza_dielleg23trigger_gap_2025_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1)',
+    'hza_dielleg23trigger_gap_2025_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1 && el_hltE23E12leg1_dR < 0.3)',
 }
 
 # /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
@@ -119,7 +119,7 @@ biningDef = [
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg1_dR < 0.3 && el_hltE23E12leg2_dR < 0.3 &&' + probe_preselection_cut
+cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg2_dR < 0.3 &&' + probe_preselection_cut
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 

@@ -42,7 +42,7 @@ probe_preselection_cut = (
 
 # flag to be Tested
 flags = {
-    'hza_dielleg12trigger_nongap_2025_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1)',
+    'hza_dielleg12trigger_nongap_2025_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3)',
 }
 
 # /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
@@ -119,7 +119,7 @@ biningDef = [
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg1_dR < 0.3 && el_hltE23E12leg2_dR < 0.3 &&' + probe_preselection_cut
+cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 &&' + probe_preselection_cut
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 
@@ -147,6 +147,9 @@ tnpParNomFit = [
     "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+# NOTE: bin12 (et 13-16) is background-dominated with empty failing leg -> eff~1;
+# shrinking its background collapses the signal and wrongly lowers eff, so it is left
+# at default (see doc/HZa/tnp_ele_fit_tuning_2026-06-28.md).
 
 # # 15
 # tnpParNomFit = [

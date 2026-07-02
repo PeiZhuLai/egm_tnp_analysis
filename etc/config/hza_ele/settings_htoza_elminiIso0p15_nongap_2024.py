@@ -29,7 +29,7 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
     ' )'
-    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && pair_lead_el_sc_et > 35))'
+    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
     ') || ('
     + baseline_cut +
     '(el_sc_et < 10) && ('
@@ -211,6 +211,23 @@ tnpParAltSigBkgFitByBin.update(params_for_bins(
     'nF[1.0, 0.0, 2.5]',
     'alphaF_2[-0.015, -0.12, 0.02]',
 ))
+# bin20 (et 20-35, FAILING altSigBkg): the failing leg is bimodal (a low-mass
+# brems/FSR shoulder near m~78 plus the Z core at ~91). With the shared 19/20/21
+# recipe the CB tail alphaF rails at its lower bound 1.0 (it wants a longer tail to
+# reach the shoulder) and the fit blows up (edm~5e10). Give bin20 a dedicated
+# recipe: lower the alphaF floor so the CB tail can extend, widen nF and the second
+# Gaussian to absorb the shoulder, give meanF a little freedom, and constrain the
+# exp-bkg slope. (bins 19/21 keep the shared recipe.)
+tnpParAltSigBkgFitByBin[20] = params_with_updates(
+    tnpParAltSigBkgFit,
+    'meanF[-0.3, -3.0, 2.0]',
+    'sigmaF[0.4, 0.1, 2.0]',
+    'sigmaF_2[1.3, 0.3, 3.5]',
+    'sosF[0.18, 0.0, 0.6]',
+    'alphaF[1.8, 0.6, 4.0]',
+    'nF[1.2, 0.0, 3.5]',
+    'alphaF_2[-0.02, -0.1, 0.0]',
+)
 
 # ## 06
 # tnpParAltSigBkgFit = [
@@ -267,6 +284,15 @@ tnpParNomFitByBin[37] = params_with_updates(
     "betaF[0.04,0.001,0.08]",
     "gammaF[0.06,-0.2,0.8]",
 )
+# bins 16/18/23: passing-leg Z peak undershot (meanP stuck at 0 -> red spike slightly
+# left of and below the data peak, overshooting the left shoulder). Give meanP a
+# negative init and widen sigmaP so the signal locks onto the data peak position.
+tnpParNomFitByBin.update(params_for_bins(
+    tnpParNomFit,
+    (16, 18, 23),
+    "meanP[-1.0,-4.0,1.0]",
+    "sigmaP[1.8,0.6,4.0]",
+))
 
 tnpParAltSigFitByBin = {}
 tnpParAltSigFitByBin.update(params_for_bins(
@@ -354,6 +380,50 @@ tnpParAltSigFitByBin[21] = params_with_updates(
     "sigmaP[3.4,0.8,8.0]",
     "sigmaP_2[1.6,0.4,6.5]",
     "sosP[1.1,0.0,5.5]",
+    # failing leg over-broad: sigmaF railed at 7 and smeared over the 78 shoulder.
+    # Cap it lower so the signal focuses on the 88 peak.
+    "sigmaF[3.0,1.0,5.0]",
+    "sigmaF_2[1.2,0.4,4.0]",
+    "sosF[0.7,0.0,3.0]",
+)
+# bin18: both legs over-peaked (CB core stuck too narrow at its init -> red spike
+# overshoots the broader data Z peak). Widen the core inits/floors so the model
+# peak height matches data; free the soft-core fraction.
+tnpParAltSigFitByBin[18] = params_with_updates(
+    tnpParAltSigFitByBin[18],
+    "sigmaP[2.8,1.6,5.5]",
+    "sigmaP_2[1.8,0.9,5.0]",
+    "sosP[0.8,0.0,3.0]",
+    "sigmaF[3.0,1.2,5.0]",
+    "sigmaF_2[1.4,0.6,4.0]",
+    "sosF[0.7,0.0,3.0]",
+)
+# bin17: passing CB core stuck too narrow at init -> red over-peaks the data Z peak.
+# Same widen-core fix as bin18.
+tnpParAltSigFitByBin[17] = params_with_updates(
+    tnpParAltSigFitByBin[17],
+    "sigmaP[2.8,1.6,5.5]",
+    "sigmaP_2[1.8,0.9,5.0]",
+    "sosP[0.8,0.0,3.0]",
+)
+# bin20: failing leg has a 78-GeV shoulder + 88-GeV peak; the single narrow signal
+# misses the shoulder. Add a wide secondary component (large sigmaF_2) as a pedestal
+# under the peak so the 78 region is covered, keeping a narrow core for the 88 peak.
+tnpParAltSigFitByBin[20] = params_with_updates(
+    tnpParAltSigFitByBin[20],
+    "meanF[-0.8,-2.5,1.0]",
+    "sigmaF[2.0,1.0,3.5]",
+    "sigmaF_2[4.5,2.0,7.0]",
+    "sosF[0.8,0.0,3.0]",
+)
+# bin21: failing signal was left-shifted (meanF~-2.1) and too broad on the rising
+# edge. Pull meanF back toward the peak and split into a narrow core + wide pedestal.
+tnpParAltSigFitByBin[21] = params_with_updates(
+    tnpParAltSigFitByBin[21],
+    "meanF[-0.8,-2.2,0.8]",
+    "sigmaF[2.2,1.0,3.5]",
+    "sigmaF_2[4.5,2.0,7.0]",
+    "sosF[0.8,0.0,3.0]",
 )
 
 tnpParAltBkgFitByBin = {

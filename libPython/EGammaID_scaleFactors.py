@@ -160,6 +160,14 @@ def _is_hza_electron_id_trigger_or_miniiso(plot_path):
     )
 
 
+def _is_hza_trigger_measurement(plot_path):
+    measurement_key = (
+        "%s %s %s"
+        % (_measurement_tag(plot_path), os.path.basename(plot_path), os.path.abspath(plot_path))
+    ).lower()
+    return any(token in measurement_key for token in ("sielleg", "dielleg"))
+
+
 def _is_pt_axis(axis_name):
     return _normalize_axis_name(axis_name) == "pT"
 
@@ -464,6 +472,10 @@ def EffiGraph1D(effDataList, effMCList, sfList ,nameout, xAxis = 'pT', yAxis = '
     effiMax = effminmax[1]
     effiMin = 0.30
     effiMax = 1.65
+    # HZa electron trigger SFvspT plots: widen the Efficiency y-axis (request).
+    if _is_hza_trigger_measurement(nameout) and _is_pt_axis(xAxis):
+        effiMin = 0.05
+        effiMax = 1.85
 
     sfminmax =  findMinMax( sfList )
     sfMin = sfminmax[0]

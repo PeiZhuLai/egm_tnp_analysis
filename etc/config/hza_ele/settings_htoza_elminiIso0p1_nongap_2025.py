@@ -29,7 +29,7 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
     ' )'
-    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && pair_lead_el_sc_et > 35))'
+    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
     ') || ('
     + baseline_cut +
     '(el_sc_et < 10) && ('
@@ -229,7 +229,25 @@ tnpParNomFitByBin = params_for_bins(
     "peakP[87.0,82.0,90.0]",
 )
 
+# bin32 (et 50-100, eta -2.5..-2.0 forward endcap, altSig): PASSING fit poorly
+# converged (edm~8e6) and the signal overshoots the peak because the bkg CMSShape
+# turn-on acmsP rails at its upper bound 90 -> it is forced into the Z region
+# instead of modelling only the high-mass DY continuum above the Z. Raise the
+# acmsP upper bound (as for bin11) so the bkg turn-on sits above the Z, and give
+# the signal double-Gaussian/CB enough freedom. Pass leg only.
 tnpParAltSigFitByBin = {
+    32: params_with_updates(
+        tnpParAltSigFit,
+        "sigmaP[2.1,0.7,5.0]",
+        "sigmaP_2[1.5,0.4,4.0]",
+        "alphaP[1.4,0.8,3.5]",
+        "nP[0.8,-1.0,4.0]",
+        "sosP[1.3,0.2,4.0]",
+        "acmsP[100.,80.,125.]",
+        "betaP[0.06,0.01,0.10]",
+        "gammaP[0.25,0.02,1.0]",
+        "peakP[89.0,84.0,92.0]",
+    ),
     11: params_with_updates(
         tnpParAltSigFit,
         "meanP[-1.0,-5.0,4.0]",
@@ -264,9 +282,15 @@ tnpParAltBkgFitByBin = params_for_bins(
     "alphaF[-0.01,-0.06,0.03]",
 )
 
+# bin22 (et 20-35, eta 1.57-2.0 endcap, altSigBkg): PASSING fit poorly converged
+# (edm~7e6) because the exponential-bkg slope alphaP_2 is unconstrained (range
+# -1..0, ended -0.002 +/- 0.7 = flat direction) and the double-Gaussian core/tail
+# ranges are too loose, so the red overshoots the peak and misses the low-mass
+# shoulder. Reuse the same well-behaved recipe as bins 1/2/3/5/6: tighten alphaP_2
+# and widen the second Gaussian.
 tnpParAltSigBkgFitByBin.update(params_for_bins(
     tnpParAltSigBkgFit,
-    (1, 2, 3, 5, 6),
+    (1, 2, 3, 5, 6, 22),
     'sigmaP[0.8, 0.2, 2.5]',
     'sigmaP_2[1.2, 0.1, 3.0]',
     'sosP[0.30, 0.0, 1.2]',

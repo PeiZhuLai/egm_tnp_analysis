@@ -27,22 +27,18 @@ probe_preselection_cut = (
     '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527)'
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
-    ' )'
-    ' && el_hltE30single_dR < 0.3'
-    ') || ('
+    ' )'    ') || ('
     + baseline_cut +
     '(el_sc_et < 10) && ('
     '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267)'
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
-    ' )'
-    ' && el_hltE30single_dR < 0.3'
-    '))'
+    ' )'    '))'
 )
 
 # flag to be Tested
 flags = {
-    'hza_sielleg30trigger_nongap_2024_sf': '(passHltEle30WPTightGsf == 1)',
+    'hza_sielleg30trigger_nongap_2024_sf': '(passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3)',
 }
 
 # /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
@@ -119,7 +115,7 @@ biningDef = [
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE30single_dR < 0.3 &&' + probe_preselection_cut
+cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 &&' + probe_preselection_cut
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 
@@ -147,6 +143,21 @@ tnpParNomFit = [
     "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+
+# Failing-leg signal peak undershoot (endcap): the MC-template (x) Gaussian core is
+# slightly left-shifted/over-smeared vs data. Give meanF a positive init and widen
+# its smearing range so the signal can match the sharper data Z peak.
+_peak_nom = ("meanF[-1.4,-3.5,1.0]", "sigmaF[1.5,0.3,3.0]")
+tnpParNomFitByBin = {
+    b: params_with_updates(tnpParNomFit, *_peak_nom) for b in (1, 2, 3, 4, 5, 6, 7)
+}
+# bins 2/3/5: with meanF=-1.4 the failing signal is too wide / slightly left-shifted
+# (bin03 undershoots the sharp peak; bin02/05 over-shoot the left shoulder). The fit
+# sticks at its init for these high-stat legs, so set a less-negative meanF and a
+# narrower sigmaF init that matches the sharp data Z peak (~ the passing-leg resolution).
+_peak_nom_sharp = ("meanF[-0.4,-3.0,1.0]", "sigmaF[1.1,0.3,2.5]")
+for _b in (2, 3, 5):
+    tnpParNomFitByBin[_b] = params_with_updates(tnpParNomFit, *_peak_nom_sharp)
 
 # # 15
 # tnpParNomFit = [

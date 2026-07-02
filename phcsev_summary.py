@@ -537,11 +537,11 @@ def _apply_cms_lumi(cms_lumi, canvas, era: str, position: int) -> None:
 
     latex.SetTextFont(61)
     latex.SetTextSize(0.040)
-    latex.DrawLatex(0.18, 0.88, "CMS")
+    latex.DrawLatex(0.19, 0.93, "CMS")
 
     latex.SetTextFont(52)
     latex.SetTextSize(0.030)
-    latex.DrawLatex(0.18, 0.84, "Preliminary")
+    latex.DrawLatex(0.19, 0.89, "Preliminary")
 
 
 def _row_axis_values(row: Mapping[str, float], axis_index: int) -> Tuple[float, float, float]:

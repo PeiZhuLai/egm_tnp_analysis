@@ -70,7 +70,7 @@ WP=$2
 # python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altBkg
 # ### ----------- 5 MC Fit altSigBkg -----------------------
 # python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --doFit --altSigBkg
-###----------- Get Results -----------------------
+# ###----------- Get Results -----------------------
 python3 -m egm_tnp_analysis.tnpEGM_fitter "$SETTINGS_MOD" --flag "$WP" --sumUp --exportJson
 
 ### ----------------------------------------------------

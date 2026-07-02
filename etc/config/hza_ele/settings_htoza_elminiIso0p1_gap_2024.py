@@ -28,7 +28,7 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
     ' )'
-    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && pair_lead_el_sc_et > 35))'
+    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
     ') || ('
     + baseline_cut +
     '(el_sc_et < 10) && ('
@@ -36,7 +36,7 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
     ' )'
-    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && pair_lead_el_sc_et > 35))'
+    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
     '))'
 )
 # '&& el_hltE23E12leg2_dR < 0.3'
@@ -172,7 +172,21 @@ tnpParAltSigFit = [
     "acmsP[65.,45.,90.]","betaP[0.04,0.005,0.08]","gammaP[0.08, 0.002, 1.5]","peakP[89.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.04,0.005,0.08]","gammaF[0.08, 0.002, 1.5]","peakF[89.0,82.0,90.0]",
     ]
-     
+
+# bin01 (et 7-35, altSig): PASSING fit totally stalls (status 303, edm~4e5, all
+# signal CB params frozen at init) because the pass-leg bkg CMSShape turn-on acmsP
+# rails at its upper bound 90 (the Z peak). Pin the pass bkg turn-on shape
+# (acmsP/betaP/peakP) so the signal double-Gaussian can float and fit the peak.
+# Failing leg untouched (its bkg genuinely turns on near the Z).
+tnpParAltSigFitByBin = {
+    1: params_with_updates(
+        tnpParAltSigFit,
+        "acmsP[60.0]",
+        "betaP[0.04]",
+        "peakP[87.0]",
+    ),
+}
+
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",

@@ -28,7 +28,7 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
     ' )'
-    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && pair_lead_el_sc_et > 35))'
+    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
     ') || ('
     + baseline_cut +
     '(el_sc_et < 10) && ('
@@ -147,6 +147,25 @@ tnpParNomFit = [
     "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+
+# bin01/02 (et 7-35, barrel, high-stat passing Z, eff<1): the PASSING fit stalls
+# (edm~3e4, status -1, signal params frozen) because the pass-leg bkg CMSShape
+# turn-on acmsP rails at upper bound 90 (the Z peak). The FAILING legs already fit
+# well, so only the pass leg is pinned: fix the pass bkg turn-on shape
+# (acmsP/betaP/peakP) to constants and let meanP/sigmaP float -> converges.
+# Failing params untouched. (bin01 eta -1.44..0, bin02 eta 0..1.44.)
+_lowet_pin_bkg = (
+    "meanP[0.0,-3.0,3.0]",
+    "sigmaP[1.5,0.5,4.0]",
+    "acmsP[60.0]",
+    "betaP[0.05]",
+    "gammaP[0.05,0.0,0.5]",
+    "peakP[87.0]",
+)
+tnpParNomFitByBin = {
+    1: params_with_updates(tnpParNomFit, *_lowet_pin_bkg),
+    2: params_with_updates(tnpParNomFit, *_lowet_pin_bkg),
+}
 
 # # 15
 # tnpParNomFit = [

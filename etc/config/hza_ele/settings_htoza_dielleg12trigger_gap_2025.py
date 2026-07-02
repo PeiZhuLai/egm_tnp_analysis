@@ -42,7 +42,7 @@ probe_preselection_cut = (
 
 # flag to be Tested
 flags = {
-    'hza_dielleg12trigger_gap_2025_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1)',
+    'hza_dielleg12trigger_gap_2025_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3)',
 }
 
 # /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
@@ -119,7 +119,7 @@ biningDef = [
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg1_dR < 0.3 && el_hltE23E12leg2_dR < 0.3 &&' + probe_preselection_cut
+cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 &&' + probe_preselection_cut
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 
@@ -147,7 +147,22 @@ tnpParNomFit = [
     "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+# bin13/14 (et 20-30, barrel, eff~1 clean Z, empty failing leg): huge-statistics
+# passing fit stalls (edm~8e3, status -1, signal params frozen) because the bkg
+# CMSShape turn-on acmsP rails at its upper bound (the Z peak). Fix: pin the bkg
+# turn-on shape (acmsP/betaP/peakP) to constants and let meanP/sigmaP float to the
+# data resolution -> converges (edm~1e-3, covQual=3).
+_highpt_pin_bkg = (
+    "meanP[0.0,-2.0,2.0]",
+    "sigmaP[1.3,0.5,3.0]",
+    "acmsP[60.0]",
+    "betaP[0.05]",
+    "gammaP[0.05,0.0,0.5]",
+    "peakP[87.0]",
+)
 tnpParNomFitByBin = {
+    13: params_with_updates(tnpParNomFit, *_highpt_pin_bkg),
+    14: params_with_updates(tnpParNomFit, *_highpt_pin_bkg),
     5: params_with_updates(
         tnpParNomFit,
         "meanP[-30.0,-45.0,-8.0]",
@@ -188,6 +203,10 @@ tnpParAltSigFit = [
     "acmsP[65.,45.,90.]","betaP[0.04,0.005,0.08]","gammaP[0.08, 0.002, 1.5]","peakP[89.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.04,0.005,0.08]","gammaF[0.08, 0.002, 1.5]","peakF[89.0,82.0,90.0]",
     ]
+# NOTE: low-pT (et 13-20) passing bins 5/9/10 are background-dominated with a
+# near-empty failing leg (eff~1). Shrinking the background collapses the passing
+# signal and wrongly drags eff down, so they are left at default. Only the existing
+# bin6 override is kept.
 tnpParAltSigFitByBin = {
     6: params_with_updates(
         tnpParAltSigFit,
@@ -203,7 +222,7 @@ tnpParAltSigFitByBin = {
         "peakP[68.0,58.0,78.0]",
     ),
 }
-     
+
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",

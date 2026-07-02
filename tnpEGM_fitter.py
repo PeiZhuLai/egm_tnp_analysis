@@ -677,7 +677,18 @@ if args.sumUp:
             _var2_name = _var2_name.strip()
             _var2_name = _json_var_name(_var2_name)
         # 效率與不確定度
-        eff_data, unc_data = effis['dataNominal'][0], effis['dataNominal'][1]
+        # JSON 的中心 data 效率必須與圖 (libPython/efficiencyUtils.py:efficiency.mean)
+        # 完全一致：取 nominal + altBkg + altSig + altSigBkg 四個 data fit 效率的平均，
+        # 而非只用 nominal。這樣 sf_pass = mean(data)/nominal(mc) 就會等於 EGM2D/SFvseta
+        # 圖上畫的 SF。缺席的 alt fit 由 getAllEffi 回傳 -1，需與 efficiencyUtils 相同地
+        # 排除（>=0 才納入）；nominal 一律納入。
+        _data_effs = [effis['dataNominal'][0]]
+        for _alt_key in ('dataAltBkg', 'dataAltSig', 'dataAltSigBkg'):
+            _alt_eff = effis[_alt_key][0]
+            if _alt_eff >= 0:
+                _data_effs.append(_alt_eff)
+        eff_data = sum(_data_effs) / len(_data_effs)
+        unc_data = effis['dataNominal'][1]
         eff_mc  , unc_mc   = effis['mcNominal'  ][0], effis['mcNominal'  ][1]
         # 保護除以零
         if eff_mc <= 0: 

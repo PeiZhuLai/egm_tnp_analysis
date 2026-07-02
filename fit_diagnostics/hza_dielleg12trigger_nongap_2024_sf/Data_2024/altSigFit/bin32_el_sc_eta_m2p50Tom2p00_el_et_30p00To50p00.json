@@ -1,6 +1,6 @@
 {
   "bin": {
-    "cut": "tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg1_dR < 0.3 && el_hltE23E12leg2_dR < 0.3 &&(((el_pt > 7) &&(abs(el_sc_eta) < 2.5) &&(abs(el_dz) < 1.0) &&(abs(el_dxy) < 0.5) &&(el_sc_et > 10) && (    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527) || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601) || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954) )&& el_hltE23E12leg1_dR < 0.3) || ((el_pt > 7) &&(abs(el_sc_eta) < 2.5) &&(abs(el_dz) < 1.0) &&(abs(el_dxy) < 0.5) &&(el_sc_et < 10) && (    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267) || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138) || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683) )&& el_hltE23E12leg1_dR < 0.3)) && el_sc_eta >= -2.500000 && el_sc_eta < -2.000000 && el_et >= 30.000000 && el_et < 50.000000",
+    "cut": "tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 &&(((el_pt > 7) &&(abs(el_sc_eta) < 2.5) &&(abs(el_dz) < 1.0) &&(abs(el_dxy) < 0.5) &&(el_sc_et > 10) && (    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527) || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601) || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954) )&& el_hltE23E12leg1_dR < 0.3) || ((el_pt > 7) &&(abs(el_sc_eta) < 2.5) &&(abs(el_dz) < 1.0) &&(abs(el_dxy) < 0.5) &&(el_sc_et < 10) && (    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267) || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138) || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683) )&& el_hltE23E12leg1_dR < 0.3)) && el_sc_eta >= -2.500000 && el_sc_eta < -2.000000 && el_et >= 30.000000 && el_et < 50.000000",
     "index": 32,
     "name": "bin32_el_sc_eta_m2p50Tom2p00_el_et_30p00To50p00",
     "title": "; -2.500 < el_sc_eta < -2.000; 30.000 < el_et < 50.000",
@@ -15,9 +15,9 @@
       }
     }
   },
-  "created_at_utc": "2026-05-12T05:49:25.268974+00:00",
+  "created_at_utc": "2026-06-29T12:37:30.679392+00:00",
   "derived": {
-    "efficiency": 0.9999995716668727,
+    "efficiency": 0.9999995964108926,
     "efficiency_error": 0.0,
     "nSigF": {
       "error": 0.0,
@@ -33,7 +33,7 @@
       "max": 1893424.5,
       "min": 0.5,
       "name": "nSigP",
-      "value": 1167315.236581749
+      "value": 1238883.2828771558
     }
   },
   "fit_metadata": {
@@ -44,7 +44,12 @@
       "max": 120.0,
       "min": 60.0
     },
-    "preserved_params_from_mc": [],
+    "preserved_params_from_mc": [
+      "meanP",
+      "sigmaP",
+      "sigmaP_2",
+      "sosP"
+    ],
     "truth_fail_template_uses_pass_hist": false,
     "truth_template_source": "etc/inputs/ZeeGenLevel.root"
   },
@@ -255,7 +260,7 @@
     "fail_quality": "check",
     "pass": {
       "covQual": 0,
-      "edm": 18654949088.804295,
+      "edm": 0.0007254837498242168,
       "floatParsFinal": [
         {
           "error": 0.0,
@@ -263,7 +268,7 @@
           "max": 90.0,
           "min": 45.0,
           "name": "acmsP",
-          "value": 89.99995690897086
+          "value": 89.99999981593643
         },
         {
           "error": 0.0,
@@ -271,7 +276,7 @@
           "max": 3.5,
           "min": 1.2,
           "name": "alphaP",
-          "value": 2.4988402649500125
+          "value": 2.490498391758319
         },
         {
           "error": 0.0,
@@ -279,7 +284,7 @@
           "max": 0.08,
           "min": 0.005,
           "name": "betaP",
-          "value": 0.06449206823529159
+          "value": 0.07999999453981935
         },
         {
           "error": 0.0,
@@ -287,15 +292,15 @@
           "max": 1.5,
           "min": 0.002,
           "name": "gammaP",
-          "value": 0.04000037329536615
+          "value": 0.034283981519638546
         },
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 5.0,
-          "min": -5.0,
+          "max": 3.0,
+          "min": -3.0,
           "name": "meanP",
-          "value": -1.6931393023056667
+          "value": -1.551324162136098
         },
         {
           "error": 0.0,
@@ -303,7 +308,7 @@
           "max": 1893424.5,
           "min": 0.5,
           "name": "nBkgP",
-          "value": 24515.5159924772
+          "value": 17285.089251170044
         },
         {
           "error": 0.0,
@@ -311,7 +316,7 @@
           "max": 5.0,
           "min": -5.0,
           "name": "nP",
-          "value": 1.2584245363272215
+          "value": 4.99999995838283
         },
         {
           "error": 0.0,
@@ -319,7 +324,7 @@
           "max": 1893424.5,
           "min": 0.5,
           "name": "nSigP",
-          "value": 1167315.236581749
+          "value": 1238883.2828771558
         },
         {
           "error": 0.0,
@@ -333,25 +338,25 @@
           "error": 0.0,
           "isConstant": false,
           "max": 6.0,
-          "min": 0.7,
+          "min": 1.5,
           "name": "sigmaP",
-          "value": 1.2442787391921075
-        },
-        {
-          "error": 0.0,
-          "isConstant": false,
-          "max": 6.0,
-          "min": 0.5,
-          "name": "sigmaP_2",
-          "value": 1.0625524360717846
+          "value": 2.51870397217247
         },
         {
           "error": 0.0,
           "isConstant": false,
           "max": 5.0,
-          "min": 0.5,
+          "min": 0.8,
+          "name": "sigmaP_2",
+          "value": 2.5497971501593115
+        },
+        {
+          "error": 0.0,
+          "isConstant": false,
+          "max": 4.0,
+          "min": 0.0,
           "name": "sosP",
-          "value": 1.0038046113697652
+          "value": 1.5613861759478105
         }
       ],
       "floatParsInit": [
@@ -390,10 +395,10 @@
         {
           "error": 0.0,
           "isConstant": false,
-          "max": 5.0,
-          "min": -5.0,
+          "max": 3.0,
+          "min": -3.0,
           "name": "meanP",
-          "value": -0.0
+          "value": 0.0
         },
         {
           "error": 0.0,
@@ -431,30 +436,30 @@
           "error": 0.0,
           "isConstant": false,
           "max": 6.0,
-          "min": 0.7,
+          "min": 1.5,
           "name": "sigmaP",
-          "value": 1.0
-        },
-        {
-          "error": 0.0,
-          "isConstant": false,
-          "max": 6.0,
-          "min": 0.5,
-          "name": "sigmaP_2",
-          "value": 1.5
+          "value": 3.0
         },
         {
           "error": 0.0,
           "isConstant": false,
           "max": 5.0,
-          "min": 0.5,
+          "min": 0.8,
+          "name": "sigmaP_2",
+          "value": 2.0
+        },
+        {
+          "error": 0.0,
+          "isConstant": false,
+          "max": 4.0,
+          "min": 0.0,
           "name": "sosP",
           "value": 1.0
         }
       ],
-      "minNll": -12519576.15781977,
+      "minNll": -12602086.54928064,
       "numInvalidNLL": 0,
-      "status": 303
+      "status": 302
     },
     "pass_quality": "check",
     "root_read_error": null
@@ -508,30 +513,6 @@
   "workspace": {
     "effective_parsed": [
       {
-        "max": 5.0,
-        "min": -5.0,
-        "name": "meanP",
-        "raw": "meanP[-0.0,-5.0,5.0]",
-        "tokens": [
-          "-0.0",
-          "-5.0",
-          "5.0"
-        ],
-        "value": -0.0
-      },
-      {
-        "max": 6.0,
-        "min": 0.7,
-        "name": "sigmaP",
-        "raw": "sigmaP[1,0.7,6.0]",
-        "tokens": [
-          "1",
-          "0.7",
-          "6.0"
-        ],
-        "value": 1.0
-      },
-      {
         "max": 3.5,
         "min": 1.2,
         "name": "alphaP",
@@ -554,30 +535,6 @@
           "5"
         ],
         "value": 3.0
-      },
-      {
-        "max": 6.0,
-        "min": 0.5,
-        "name": "sigmaP_2",
-        "raw": "sigmaP_2[1.5,0.5,6.0]",
-        "tokens": [
-          "1.5",
-          "0.5",
-          "6.0"
-        ],
-        "value": 1.5
-      },
-      {
-        "max": 5.0,
-        "min": 0.5,
-        "name": "sosP",
-        "raw": "sosP[1,0.5,5.0]",
-        "tokens": [
-          "1",
-          "0.5",
-          "5.0"
-        ],
-        "value": 1.0
       },
       {
         "max": 5.0,
@@ -746,15 +703,59 @@
           "90.0"
         ],
         "value": 89.0
+      },
+      {
+        "max": 3.0,
+        "min": -3.0,
+        "name": "meanP",
+        "raw": "meanP[0.0,-3.0,3.0]",
+        "tokens": [
+          "0.0",
+          "-3.0",
+          "3.0"
+        ],
+        "value": 0.0
+      },
+      {
+        "max": 6.0,
+        "min": 1.5,
+        "name": "sigmaP",
+        "raw": "sigmaP[3.0,1.5,6.0]",
+        "tokens": [
+          "3.0",
+          "1.5",
+          "6.0"
+        ],
+        "value": 3.0
+      },
+      {
+        "max": 5.0,
+        "min": 0.8,
+        "name": "sigmaP_2",
+        "raw": "sigmaP_2[2.0,0.8,5.0]",
+        "tokens": [
+          "2.0",
+          "0.8",
+          "5.0"
+        ],
+        "value": 2.0
+      },
+      {
+        "max": 4.0,
+        "min": 0.0,
+        "name": "sosP",
+        "raw": "sosP[1.0,0.0,4.0]",
+        "tokens": [
+          "1.0",
+          "0.0",
+          "4.0"
+        ],
+        "value": 1.0
       }
     ],
     "effective_raw": [
-      "meanP[-0.0,-5.0,5.0]",
-      "sigmaP[1,0.7,6.0]",
       "alphaP[2.0,1.2,3.5]",
       "nP[3,-5,5]",
-      "sigmaP_2[1.5,0.5,6.0]",
-      "sosP[1,0.5,5.0]",
       "meanF[-0.0,-5.0,5.0]",
       "sigmaF[2,0.7,8.0]",
       "alphaF[2.0,1.2,3.5]",
@@ -768,7 +769,11 @@
       "acmsF[65.,45.,90.]",
       "betaF[0.04,0.005,0.08]",
       "gammaF[0.08, 0.002, 1.5]",
-      "peakF[89.0,82.0,90.0]"
+      "peakF[89.0,82.0,90.0]",
+      "meanP[0.0,-3.0,3.0]",
+      "sigmaP[3.0,1.5,6.0]",
+      "sigmaP_2[2.0,0.8,5.0]",
+      "sosP[1.0,0.0,4.0]"
     ],
     "functions": [
       "tailLeft[1]",
@@ -780,30 +785,6 @@
     "overrides": [],
     "requested_parsed": [
       {
-        "max": 5.0,
-        "min": -5.0,
-        "name": "meanP",
-        "raw": "meanP[-0.0,-5.0,5.0]",
-        "tokens": [
-          "-0.0",
-          "-5.0",
-          "5.0"
-        ],
-        "value": -0.0
-      },
-      {
-        "max": 6.0,
-        "min": 0.7,
-        "name": "sigmaP",
-        "raw": "sigmaP[1,0.7,6.0]",
-        "tokens": [
-          "1",
-          "0.7",
-          "6.0"
-        ],
-        "value": 1.0
-      },
-      {
         "max": 3.5,
         "min": 1.2,
         "name": "alphaP",
@@ -826,30 +807,6 @@
           "5"
         ],
         "value": 3.0
-      },
-      {
-        "max": 6.0,
-        "min": 0.5,
-        "name": "sigmaP_2",
-        "raw": "sigmaP_2[1.5,0.5,6.0]",
-        "tokens": [
-          "1.5",
-          "0.5",
-          "6.0"
-        ],
-        "value": 1.5
-      },
-      {
-        "max": 5.0,
-        "min": 0.5,
-        "name": "sosP",
-        "raw": "sosP[1,0.5,5.0]",
-        "tokens": [
-          "1",
-          "0.5",
-          "5.0"
-        ],
-        "value": 1.0
       },
       {
         "max": 5.0,
@@ -1018,15 +975,59 @@
           "90.0"
         ],
         "value": 89.0
+      },
+      {
+        "max": 3.0,
+        "min": -3.0,
+        "name": "meanP",
+        "raw": "meanP[0.0,-3.0,3.0]",
+        "tokens": [
+          "0.0",
+          "-3.0",
+          "3.0"
+        ],
+        "value": 0.0
+      },
+      {
+        "max": 6.0,
+        "min": 1.5,
+        "name": "sigmaP",
+        "raw": "sigmaP[3.0,1.5,6.0]",
+        "tokens": [
+          "3.0",
+          "1.5",
+          "6.0"
+        ],
+        "value": 3.0
+      },
+      {
+        "max": 5.0,
+        "min": 0.8,
+        "name": "sigmaP_2",
+        "raw": "sigmaP_2[2.0,0.8,5.0]",
+        "tokens": [
+          "2.0",
+          "0.8",
+          "5.0"
+        ],
+        "value": 2.0
+      },
+      {
+        "max": 4.0,
+        "min": 0.0,
+        "name": "sosP",
+        "raw": "sosP[1.0,0.0,4.0]",
+        "tokens": [
+          "1.0",
+          "0.0",
+          "4.0"
+        ],
+        "value": 1.0
       }
     ],
     "requested_raw": [
-      "meanP[-0.0,-5.0,5.0]",
-      "sigmaP[1,0.7,6.0]",
       "alphaP[2.0,1.2,3.5]",
       "nP[3,-5,5]",
-      "sigmaP_2[1.5,0.5,6.0]",
-      "sosP[1,0.5,5.0]",
       "meanF[-0.0,-5.0,5.0]",
       "sigmaF[2,0.7,8.0]",
       "alphaF[2.0,1.2,3.5]",
@@ -1040,7 +1041,11 @@
       "acmsF[65.,45.,90.]",
       "betaF[0.04,0.005,0.08]",
       "gammaF[0.08, 0.002, 1.5]",
-      "peakF[89.0,82.0,90.0]"
+      "peakF[89.0,82.0,90.0]",
+      "meanP[0.0,-3.0,3.0]",
+      "sigmaP[3.0,1.5,6.0]",
+      "sigmaP_2[2.0,0.8,5.0]",
+      "sosP[1.0,0.0,4.0]"
     ]
   }
 }

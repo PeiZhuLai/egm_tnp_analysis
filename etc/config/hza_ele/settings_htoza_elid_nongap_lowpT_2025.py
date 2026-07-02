@@ -258,12 +258,18 @@ tnpParAltSigFitByBin = {
         "alphaP[2.0,0.8,4.5]",
         "nP[0.8,0.0,8.0]",
         "sosP[1.5,0.0,4.0]",
-        "meanF[-0.8,-3.0,1.0]",
-        "sigmaF[3.5,1.0,5.0]",
-        "sigmaF_2[0.6,0.3,1.5]",
+        # failing Z bump is narrow: sigmaF was railing at its 1.0 floor and sigmaF_2 at
+        # its 1.5 ceiling. Loosen both so the core/second components sit off the bounds.
+        "meanF[-0.5,-2.5,1.0]",
+        "sigmaF[1.4,0.5,3.5]",
+        "sigmaF_2[1.5,0.5,4.0]",
         "alphaF[1.6,1.0,3.0]",
         "nF[0.4,0.0,3.0]",
-        "sosF[0.3,0.0,1.0]",
+        "sosF[0.4,0.0,1.5]",
+        # NOTE: tried raising acmsF to lift the bkg at m=60, but a higher CMSShape
+        # turn-on moves the bkg peak to ~95 and collapses the sig/bkg split (eff
+        # 0.48->0.15). The low bkg at 60 is driven by the signal CB low-side tail, not
+        # acmsF, so this is left at the (stable) original turn-on.
         "acmsF[45.,30.,60.]",
         "betaF[0.01,0.001,0.05]",
         "gammaF[0.02,0.001,0.30]",
@@ -305,6 +311,17 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 tnpParAltSigBkgFitByBin = {
+    # bin00: failing-leg signal core railed right (meanF~+4.9) and over-narrow, with
+    # the bkg exponential turning up at high mass. Pin meanF near the Z, widen the
+    # core, and forbid the exponential upturn (alphaF_2 max 0).
+    0: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[0.0, -2.0, 2.0]',
+        'sigmaF[0.7, 0.2, 2.0]',
+        'sigmaF_2[1.5, 0.3, 3.0]',
+        'sosF[0.3, 0.0, 1.0]',
+        'alphaF_2[-0.02, -1, 0.]',
+    ),
     5: params_with_updates(
         tnpParAltSigBkgFit,
         'sigmaP[0.35, 0.1, 1.5]',

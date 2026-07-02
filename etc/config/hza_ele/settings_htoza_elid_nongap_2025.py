@@ -219,8 +219,11 @@ tnpParNomFitByBin = {
     ),
     9: params_with_updates(
         tnpParNomFit,
-        "meanF[-2.2,-5.0,1.0]",
-        "sigmaF[2.4,0.8,3.6]",
+        # failing signal floated too wide (sigmaF~3.3) and too far left (meanF~-3.2),
+        # overshooting the rising edge and peaking left of the data. Tighten the
+        # smearing and keep meanF nearer the Z so the peak lands at ~89.
+        "meanF[-1.0,-2.6,1.0]",
+        "sigmaF[2.0,0.8,2.7]",
         *_nongap_nominal_fail_turn68,
     ),
     10: params_with_updates(
@@ -539,6 +542,33 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 tnpParAltSigBkgFitByBin = {
+    # bins 24/31 (et 50-100 endcap): high-pT resolution larger than the default
+    # sigmaP cap (2.0), so the passing CB core rails at 2.0 and over-peaks the data.
+    # Raise the core caps. (Only the passing leg was flagged; leave the failing/bkg
+    # at default so the high-mass plateau stays covered.)
+    24: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[2.5, 0.8, 4.5]',
+        'sigmaP_2[2.0, 0.6, 4.5]',
+        'sosP[0.8, 0.0, 3.0]',
+    ),
+    31: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[2.5, 0.8, 4.5]',
+        'sigmaP_2[2.0, 0.6, 4.5]',
+        'sosP[0.8, 0.0, 3.0]',
+    ),
+    # bin02: failing-leg signal core railed right (meanF~+3.8) and bkg exponential
+    # turned up at high mass. Same recipe as bin04: pin meanF near Z, widen core,
+    # forbid the exponential upturn.
+    2: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[-0.5, -3.0, 1.5]',
+        'sigmaF[0.8, 0.2, 2.5]',
+        'sigmaF_2[1.0, 0.1, 3.0]',
+        'sosF[0.2, 0.0, 1.0]',
+        'alphaF_2[-0.04, -0.15, 0.]',
+    ),
     4: params_with_updates(
         tnpParAltSigBkgFit,
         'sigmaP[0.5, 0.1, 1.5]',

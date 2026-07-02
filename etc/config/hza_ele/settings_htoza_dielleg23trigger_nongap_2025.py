@@ -43,7 +43,7 @@ probe_preselection_cut = (
 
 # flag to be Tested
 flags = {
-    'hza_dielleg23trigger_nongap_2025_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1)',
+    'hza_dielleg23trigger_nongap_2025_sf': '(passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1 && el_hltE23E12leg1_dR < 0.3)',
 }
 
 # /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
@@ -120,7 +120,7 @@ biningDef = [
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg1_dR < 0.3 && el_hltE23E12leg2_dR < 0.3 &&' + probe_preselection_cut
+cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg2_dR < 0.3 &&' + probe_preselection_cut
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 
@@ -148,6 +148,9 @@ tnpParNomFit = [
     "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
     ]
+# Failing-leg CMSShape bkg too large: pull turn-on (acmsF) below the Z peak so the
+# background is a smooth falling shape under the resonance, and free betaF/gammaF.
+_failbkg_nom = ("acmsF[62.,45.,72.]", "betaF[0.04,0.002,0.15]", "gammaF[0.10,-0.5,1.5]")
 tnpParNomFitByBin = {
     18: params_with_updates(
         tnpParNomFit,
@@ -163,21 +166,16 @@ tnpParNomFitByBin = {
         "betaF[0.06,0.002,0.14]",
         "gammaF[0.05,-0.2,0.8]",
     ),
-    21: params_with_updates(
-        tnpParNomFit,
-        "meanP[-0.2,-5.0,5.0]",
-        "sigmaP[1.4,0.5,4.0]",
-        "acmsP[92.,65.,120.]",
-        "betaP[0.05,0.002,0.12]",
-        "gammaP[0.08,-0.2,1.2]",
-        "peakP[89.0,84.0,93.0]",
-        "meanF[-0.8,-5.0,5.0]",
-        "sigmaF[2.4,0.5,6.0]",
-        "acmsF[82.,45.,110.]",
-        "betaF[0.06,0.002,0.14]",
-        "gammaF[0.05,-0.2,0.8]",
-    ),
+    17: params_with_updates(tnpParNomFit, *_failbkg_nom),
+    21: params_with_updates(tnpParNomFit, *_failbkg_nom),
 }
+# bin21: passing signal stuck narrow at init (sigmaP=0.9) -> over-peaks the data and
+# misses the shoulders. Widen sigmaP (failing already handled by _failbkg_nom above).
+tnpParNomFitByBin[21] = params_with_updates(
+    tnpParNomFitByBin[21],
+    "meanP[0.0,-2.0,2.0]",
+    "sigmaP[1.8,1.2,4.0]",
+)
 
 # # 15
 # tnpParNomFit = [
@@ -202,6 +200,8 @@ tnpParAltSigFit = [
     "acmsP[65.,45.,90.]","betaP[0.04,0.005,0.08]","gammaP[0.08, 0.002, 1.5]","peakP[89.0,82.0,90.0]",
     "acmsF[65.,45.,90.]","betaF[0.04,0.005,0.08]","gammaF[0.08, 0.002, 1.5]","peakF[89.0,82.0,90.0]",
     ]
+# Failing-leg bkg too large in altSig: lower acmsF turn-on, free betaF.
+_failbkg_altsig = ("acmsF[62.,45.,72.]", "betaF[0.04,0.005,0.15]", "gammaF[0.10,0.002,1.5]")
 tnpParAltSigFitByBin = {
     20: params_with_updates(
         tnpParAltSigFit,
@@ -222,8 +222,24 @@ tnpParAltSigFitByBin = {
         "gammaF[0.06,0.002,1.0]",
         "peakF[86.0,80.0,92.0]",
     ),
+    17: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    18: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    19: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    21: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    22: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    23: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
 }
-     
+# bins 19/21: passing CB core ran away wide (sigmaP railed at 6) and under-peaked the
+# sharp data Z. Cap sigmaP lower and pin meanP near the Z so a sharper core is found.
+for _b in (19, 21):
+    tnpParAltSigFitByBin[_b] = params_with_updates(
+        tnpParAltSigFitByBin[_b],
+        "meanP[0.0,-2.0,2.0]",
+        "sigmaP[2.0,0.8,4.0]",
+        "sigmaP_2[1.0,0.4,3.0]",
+        "sosP[0.6,0.0,3.0]",
+    )
+
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
@@ -250,6 +266,14 @@ tnpParAltSigBkgFitByBin = {
     6: params_with_updates(
         tnpParAltSigBkgFit,
         'alphaF_2[-0.014, -1, 0.]',
+    ),
+    # bin39 (et 50-100 endcap): high-pT resolution exceeds the default sigmaP cap
+    # (2.0), so the passing CB core rails at 2.0 and over-peaks the data. Raise caps.
+    39: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[2.5, 0.8, 4.5]',
+        'sigmaP_2[2.0, 0.6, 4.5]',
+        'sosP[0.8, 0.0, 3.0]',
     ),
 }
 

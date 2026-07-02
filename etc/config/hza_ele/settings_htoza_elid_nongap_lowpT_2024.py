@@ -170,6 +170,17 @@ tnpParNomFitByBin = {
         "sigmaF[3.2,0.8,4.8]",
         *_lowpt_nominal_tail_common,
     ),
+    # bin02: default fit fell into a bad min (meanF~+3.2, sigmaF railed at 5 -> the
+    # failing-leg Z bump over-wide and right-shifted). Use the same low-pT recipe as
+    # bins 0/5: meanF pulled negative, sigmaF capped, low acmsF turn-on.
+    2: params_with_updates(
+        tnpParNomFit,
+        "meanP[-1.5,-5.0,5.0]",
+        "sigmaP[1.6,0.5,3.0]",
+        "meanF[-1.0,-4.0,1.5]",
+        "sigmaF[2.6,1.6,4.0]",
+        *_lowpt_nominal_tail_common,
+    ),
 }
 
 # # 15
