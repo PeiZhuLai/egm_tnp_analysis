@@ -28,7 +28,6 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
     ' )'
-    '&& el_hltE23E12leg1_dR < 0.3'
     ') || ('
     + baseline_cut +
     '(el_sc_et < 10) && ('
@@ -36,7 +35,6 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
     ' )'
-    '&& el_hltE23E12leg1_dR < 0.3'
     '))'
 )
 
@@ -58,9 +56,9 @@ tnpTreeDir = 'tnpEleTrig'
 
 samplesDef = {
         'data'  : tnpSamples.Run3_2025_ele['Data_2025'].clone(),
-        'mcNom' : tnpSamples.Run3_2025_ele['DY_MC_NLO_2025'].clone(),
-        'tagSel': tnpSamples.Run3_2025_ele['DY_MC_NLO_2025'].clone(),
-        'mcAlt': tnpSamples.Run3_2025_ele['DY_MC_LO_2025'].clone(),
+        'mcNom' : tnpSamples.Run3_2025_ele['DY_MC_LO_2025'].clone(),
+        'tagSel': tnpSamples.Run3_2025_ele['DY_MC_LO_2025'].clone(),
+        'mcAlt': tnpSamples.Run3_2025_ele['DY_MC_NLO_2025'].clone(),
     }
 ## can add data sample easily
 # samplesDef['data'].add_sample( tnpSamples.Run3_2025['Data_2025D'] )
@@ -87,7 +85,7 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_MC_NLO_2025')
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2025')
     samplesDef['tagSel'].set_cut('tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0')
 
 ## set MC weight, simple way (use tree weight) 
@@ -97,15 +95,15 @@ if not samplesDef['tagSel'] is None:
 # if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 
 ## set MC weight, can use several pileup rw for different data taking 
-mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_madgraph_pho.pu.puTree.root'
-mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_amcatnloext_pho.pu.puTree.root'
-weightName = 'weights_data_Run2023C.totWeight'
+# mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_madgraph_pho.pu.puTree.root'
+# mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_amcatnloext_pho.pu.puTree.root'
+weightName = 'totWeight'   ## HZa: in-tree totWeight = weight(gen)*PUweight (was stale 2023 friend)
 if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
-if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree(mcNom_puFile)
-if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree(mcAlt_puFile)
-if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFile)
+# if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree(mcNom_puFile)
+# if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree(mcAlt_puFile)
+# if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFile)
 
 #############################################################
 ########## bining definition  [can be nD bining]
@@ -163,20 +161,14 @@ _highpt_pin_bkg = (
 tnpParNomFitByBin = {
     13: params_with_updates(tnpParNomFit, *_highpt_pin_bkg),
     14: params_with_updates(tnpParNomFit, *_highpt_pin_bkg),
+    # 2026-07-12: 前一版強制 meanP~-30/peakP~68(誤當 shifted/bkg-dominated),但 data 有清楚
+    # Z 峰在 90 -> 讓 signal 坐回 Z 峰、適度加寬(低 et 解析度)。
     5: params_with_updates(
         tnpParNomFit,
-        "meanP[-30.0,-45.0,-8.0]",
-        "sigmaP[8.0,3.0,18.0]",
-        "meanF[-30.0,-45.0,-8.0]",
-        "sigmaF[8.0,3.0,18.0]",
-        "acmsP[58.,45.,72.]",
-        "betaP[0.006,0.001,0.025]",
-        "gammaP[0.02,-0.05,0.30]",
-        "peakP[68.0,58.0,78.0]",
-        "acmsF[58.,45.,72.]",
-        "betaF[0.006,0.001,0.025]",
-        "gammaF[0.02,-0.05,0.30]",
-        "peakF[68.0,58.0,78.0]",
+        "meanP[0.0,-3.0,3.0]",
+        "sigmaP[2.5,1.0,5.0]",
+        "meanF[0.0,-3.0,3.0]",
+        "sigmaF[2.8,1.0,5.5]",
     ),
 }
 
@@ -220,6 +212,14 @@ tnpParAltSigFitByBin = {
         "betaP[0.006,0.001,0.025]",
         "gammaP[0.02,0.001,0.30]",
         "peakP[68.0,58.0,78.0]",
+    ),
+    # 2026-07-12: bin5 data 有真 Z 峰(非 bkg-dominated),default altSig passing 差 -> signal 坐 Z 峰、加寬。
+    5: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[0.0,-3.0,3.0]",
+        "sigmaP[2.5,1.0,5.5]",
+        "sigmaP_2[1.8,0.6,5.0]",
+        "sosP[1.0,0.0,4.0]",
     ),
 }
 

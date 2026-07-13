@@ -299,6 +299,7 @@ def reweight( sample, puType = 0,useCustomW=False  ):
 #### can reweight vs nVtx but better to reweight v truePU
     puMCnVtx = []
     puMCrho = []
+    puMCtrue = []   ## HZa: MC truePU reference built from the MC tree itself (puMC dict has no Run3 scenario)
     if   puType == 1 :
         hmc   = rt.TH1F('hMC_nPV'  ,'MC nPV'  , 75,-0.5,74.5)
         tmc.Draw('event_nPV>>hMC_nPV','','goff')
@@ -314,6 +315,14 @@ def reweight( sample, puType = 0,useCustomW=False  ):
         for ib in range(1,hmc.GetNbinsX()+1):
             puMCrho.append( hmc.GetBinContent(ib) )
         print 'len rhoMC = ',len(puMCrho)
+
+    elif puType == 0 :
+        hmc   = rt.TH1F('hMC_truePU','MC truePU', 100, 0, 100)
+        tmc.Draw('truePU>>hMC_truePU','','goff')
+        hmc.Scale(1/hmc.Integral())
+        for ib in range(1,hmc.GetNbinsX()+1):
+            puMCtrue.append( hmc.GetBinContent(ib) )
+        print 'len truePUmc = ',len(puMCtrue)
     
 
     puDataDist = {}
@@ -339,13 +348,17 @@ def reweight( sample, puType = 0,useCustomW=False  ):
         fpu.Close()
         weights[pu] = []
 
-    mcEvts = tree2array( tmc, branches = ['weight','truePU','event_nPV','rho'] )
+    ## HZa: these ele-trig trees have no event_nPV/rho; puType=0 only needs weight,truePU
+    mcBranches = ['weight','truePU']
+    if   puType == 1 : mcBranches = ['weight','event_nPV']
+    elif puType == 2 : mcBranches = ['weight','rho']
+    mcEvts = tree2array( tmc, branches = mcBranches )
 
 
     pumc = puMC[puMCscenario]
     if   puType == 1:  pumc = puMCnVtx
     elif puType == 2:  pumc = puMCrho
-    else            :  pumc = puMC[puMCscenario]
+    else            :  pumc = puMCtrue   ## HZa: was puMC[puMCscenario] (no Run3 scenario)
 
     puMax = len(pumc)
     print '-> nEvtsTot ', len(mcEvts)

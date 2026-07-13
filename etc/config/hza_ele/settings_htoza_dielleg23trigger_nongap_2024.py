@@ -29,7 +29,6 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
     ' )'
-    '&& el_hltE23E12leg2_dR < 0.3'
     ') || ('
     + baseline_cut +
     '(el_sc_et < 10) && ('
@@ -37,7 +36,6 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
     ' )'
-    '&& el_hltE23E12leg2_dR < 0.3'
     '))'
 )
 
@@ -59,9 +57,9 @@ tnpTreeDir = 'tnpEleTrig'
 
 samplesDef = {
         'data'  : tnpSamples.Run3_2024_ele['Data_2024'].clone(),
-        'mcNom' : tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
-        'tagSel': tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
-        'mcAlt': tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
+        'mcNom' : tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
+        'tagSel': tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
+        'mcAlt': tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
     }
 ## can add data sample easily
 # samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024D'] )
@@ -88,7 +86,7 @@ if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
 if not samplesDef['tagSel'] is None:
-    samplesDef['tagSel'].rename('mcAltSel_DY_MC_NLO_2024')
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2024')
     samplesDef['tagSel'].set_cut('tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0')
 
 ## set MC weight, simple way (use tree weight) 
@@ -98,15 +96,15 @@ if not samplesDef['tagSel'] is None:
 # if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 
 ## set MC weight, can use several pileup rw for different data taking 
-mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_madgraph_pho.pu.puTree.root'
-mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_amcatnloext_pho.pu.puTree.root'
-weightName = 'weights_data_Run2023C.totWeight'
+# mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_madgraph_pho.pu.puTree.root'
+# mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_amcatnloext_pho.pu.puTree.root'
+weightName = 'totWeight'   ## HZa: in-tree totWeight = weight(gen)*PUweight (was stale 2023 friend)
 if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
 if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
 if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
-if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree(mcNom_puFile)
-if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree(mcAlt_puFile)
-if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFile)
+# if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree(mcNom_puFile)
+# if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree(mcAlt_puFile)
+# if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFile)
 
 #############################################################
 ########## bining definition  [can be nD bining]
@@ -120,7 +118,7 @@ biningDef = [
 ########## Cuts definition for all samples
 #############################################################
 ### cut
-cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 && el_hltE23E12leg2_dR < 0.3 &&' + probe_preselection_cut
+cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 &&' + probe_preselection_cut
 
 # can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
 additionalCuts = { 
