@@ -29,7 +29,7 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
     ' )'
-    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
+    '&& ( (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) || (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1 && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
     ') || ('
     + baseline_cut +
     '(el_sc_et < 10) && ('
@@ -37,7 +37,7 @@ probe_preselection_cut = (
     ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
     ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
     ' )'
-    '&& ( ((passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) && (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1) && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
+    '&& ( (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) || (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1 && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
     '))'
 )
 
