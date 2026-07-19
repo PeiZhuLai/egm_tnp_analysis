@@ -228,6 +228,20 @@ tnpParNomFitByBin = params_for_bins(
     "gammaP[0.04,-0.1,0.8]",
     "peakP[87.0,82.0,90.0]",
 )
+# bins 18-21 (et 20-35 central) PASSING: base pass bkg CMSShape turn-on acmsP rails
+# at upper bound 90 (Z peak) → bkg eats the signal peak (nBkgP 過大). Pin pass bkg
+# turn-on (acmsP/betaP/peakP 常數) 讓 signal 取峰,只放 meanP/sigmaP。(failing 留 base;
+# failing 低質量 shoulder 屬 template 限制不深調。)
+tnpParNomFitByBin.update(params_for_bins(
+    tnpParNomFit,
+    (18, 19, 20, 21),
+    "meanP[0.0,-2.5,2.5]",
+    "sigmaP[1.3,0.5,3.5]",
+    "acmsP[60.0]",
+    "betaP[0.05]",
+    "gammaP[0.05,0.0,0.5]",
+    "peakP[87.0]",
+))
 
 tnpParAltSigFitByBin = {
     18: params_with_updates(
@@ -283,6 +297,18 @@ tnpParAltSigFitByBin = {
         "gammaP[0.05,0.001,1.0]",
     ),
 }
+# bin16 (endcap eta -2.5~-2.0, et 20-35) PASSING: base DSCB core 太窄(sigmaP railed 1.0),
+# 紅峰太尖太高、data 兩側 85-89 在紅之上。放寬 core sigmaP/sigmaP_2 + 鬆開 alphaP(原 railed 1.2)。
+tnpParAltSigFitByBin[16] = params_with_updates(
+    tnpParAltSigFit,
+    # 強制寬 Gaussian core(抬 floor 防塌 1.0)+CB 轉折推遠(alphaP 大=更 Gaussian、非尖峰+尾)
+    # +縮 sosP,治 status 303 的病態尖峰解。
+    "sigmaP[2.6,1.8,5.5]",
+    "sigmaP_2[3.6,2.2,8.0]",
+    "sosP[0.6,0.0,2.0]",
+    "alphaP[2.6,1.9,3.5]",
+    "nP[2.0,0.5,6.0]",
+)
 tnpParAltSigFitByBin['bin18_el_sc_eta_m1p57Tom0p80_el_et_20p00To35p00'] = tnpParAltSigFitByBin[18]
 tnpParAltSigFitByBin['bin21_el_sc_eta_0p80To1p57_el_et_20p00To35p00'] = tnpParAltSigFitByBin[21]
 
@@ -337,3 +363,75 @@ tnpParAltSigBkgFitByBin.update(params_for_bins(
 tnpParAltSigBkgFitByBin['bin34_el_sc_eta_m1p57Tom0p80_el_et_50p00To100p00'] = tnpParAltSigBkgFitByBin[34]
 tnpParAltSigBkgFitByBin['bin35_el_sc_eta_m0p80To0p00_el_et_50p00To100p00'] = tnpParAltSigBkgFitByBin[35]
 tnpParAltSigBkgFitByBin['bin37_el_sc_eta_0p80To1p57_el_et_50p00To100p00'] = tnpParAltSigBkgFitByBin[37]
+
+
+# --- altSig --addGaus 變體 (2026-07-14) ---
+# altSig 解析 DSCB 平滑、undershoots failing 的真實 78 shoulder(FSR/DY prompt ee 失隔離)。
+# 加第二 Gaussian(sigGaussFail, meanGF~77)補上; pdfFail=sigFracF*DSCB+(1-sigFracF)*Gauss,
+# 兩者都算 nSigF(signal),物理上正確(那批確是 Z->ee 電子失隔離)。保留各 bin 現有調參。
+_gaus_pars = ["meanGF[77.0,73.0,81.0]", "sigmaGF[4.0,2.0,8.0]"]
+tnpParAltSigFit_addGaus = tnpParAltSigFit + _gaus_pars
+tnpParAltSigFit_addGausByBin = {k: (list(v) + _gaus_pars) for k, v in tnpParAltSigFitByBin.items()}
+
+
+# --- altSigBkg --addGaus 變體 (2026-07-15) ---
+# altSigBkg 的 signal 也是解析 DSCB(RooCBExGaussShapeTNP) → 同 altSig,加第二 Gaussian
+# (sigGaussFail, meanGF~77)補 failing 的真實 FSR/DY shoulder。保留各 bin 現有調參。
+tnpParAltSigBkgFit_addGaus = tnpParAltSigBkgFit + _gaus_pars
+tnpParAltSigBkgFit_addGausByBin = {k: (list(v) + _gaus_pars) for k, v in tnpParAltSigBkgFitByBin.items()}
+
+
+# --- bimodal 高統計 bin(18-21, et20-35 中央)專屬 addGaus recipe (2026-07-15) ---
+# failing 是「尖峰+shoulder」雙峰。generic addGaus 沿用寬 DSCB core → blob、miss 尖峰。
+# 改: 收窄 DSCB core(sharp peak) + Gaussian 只吃 shoulder。.get() 版=bin 不在 ByBin 用 base。
+_bimodal_core = ("meanF[0.0,-3.0,3.0]", "sigmaF[1.0,0.5,2.2]", "sigmaF_2[1.4,0.5,3.5]", "sosF[0.3,0.0,1.6]", "alphaF[3.0,2.3,3.5]", "nF[1.0,0.0,3.0]")
+_gaus_shoulder = ["meanGF[77.0,73.0,81.0]", "sigmaGF[3.2,2.0,4.5]"]
+for _b in (18, 19, 20, 21):
+    tnpParAltSigFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigFitByBin.get(_b, tnpParAltSigFit)), *_bimodal_core) + _gaus_shoulder
+    tnpParAltSigBkgFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigBkgFitByBin.get(_b, tnpParAltSigBkgFit)), *_bimodal_core) + _gaus_shoulder
+
+
+# --- high-ET 中央 bin(et50-100: 34-37, et100-500: 42-45)窄核 recipe (2026-07-15) ---
+# base altSig(sigmaF up to 8)→ 高 ET 尖峰 failing 被 fit 太寬。收窄 core;無 shoulder Gaussian 自動關。
+_highet_core = ("meanF[0.0,-2.5,2.5]", "sigmaF[1.0,0.5,2.5]", "sigmaF_2[1.4,0.5,3.5]", "sosF[0.3,0.0,1.6]")
+for _b in (16, 17, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47):
+    tnpParAltSigFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigFitByBin.get(_b, tnpParAltSigFit)), *_highet_core) + _gaus_pars
+    tnpParAltSigBkgFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigBkgFitByBin.get(_b, tnpParAltSigBkgFit)), *_highet_core) + _gaus_pars
+
+# bin09 (endcap η-2.00~-1.57, et15-20) passing: CMSShape acmsP rail 90(吃 Z 峰)→signal DSCB
+# 被迫 overshoot 峰高(Joseph flag passing)。pin acmsP/betaP/peakP 讓 bkg turn-on 遠離 Z 峰。(2026-07-16)
+tnpParAltSigFit_addGausByBin[9] = params_with_updates(tnpParAltSigFit, "acmsP[60.0]", "betaP[0.04]", "peakP[87.0]", "meanP[-1.0,-3.0,1.5]", "sigmaP[2.0,1.0,5.0]") + _gaus_pars
+
+
+# --- nominal + altBkg --addGaus 全套解析變體 (2026-07-15) ---
+# fitUtils isaddGaus: signal=通用 gen-level lineshape ⊗ Gaussian(平滑,無 template shoulder)
+# + sigGaussFail 補真實 shoulder。nominal=CMSShape bkg(pin acmsP 防 rail); altBkg=Exp bkg。
+# bimodal(中央 et20-35: 18-21): 窄 sigmaF + pin failing bkg + shoulder Gaussian。
+# high-ET 中央(34-37,42-45): 窄 sigmaF,Gaussian 自動關。
+_gs = ["meanGF[77.0,73.0,81.0]", "sigmaGF[3.5,2.0,6.0]"]
+_pass_nom = ("meanP[-0.0,-3.0,3.0]", "sigmaP[1.5,0.5,4.0]", "acmsP[60.0]", "betaP[0.05]", "gammaP[0.05,0.0,0.5]")
+_pass_ab  = ("meanP[-0.0,-3.0,3.0]", "sigmaP[1.5,0.5,4.0]")
+tnpParNomFit_addGaus = params_with_updates(tnpParNomFit, *_pass_nom) + _gaus_pars
+tnpParNomFit_addGausByBin = {}
+_nom_bimodal = params_with_updates(tnpParNomFit, "meanF[0.0,-3.0,3.0]","sigmaF[1.0,0.5,2.2]","acmsF[58.0]","betaF[0.10]","gammaF[0.0,-0.03,0.05]","acmsP[60.0]","betaP[0.05]","gammaP[0.05,0.0,0.5]") + _gs
+_nom_highet  = params_with_updates(tnpParNomFit, "meanF[0.0,-2.5,2.5]","sigmaF[1.0,0.5,2.5]","acmsP[60.0]","betaP[0.05]","gammaP[0.05,0.0,0.5]") + _gaus_pars
+for _b in (18,19,20,21): tnpParNomFit_addGausByBin[_b] = _nom_bimodal
+for _b in (16,17,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47): tnpParNomFit_addGausByBin[_b] = _nom_highet
+tnpParAltBkgFit_addGaus = params_with_updates(tnpParAltBkgFit, *_pass_ab) + _gaus_pars
+tnpParAltBkgFit_addGausByBin = {}
+_ab_bimodal = params_with_updates(tnpParAltBkgFit, "meanF[0.0,-3.0,3.0]","sigmaF[1.0,0.5,2.2]","alphaF[-0.02,-0.1,0.02]") + _gs
+_ab_highet  = params_with_updates(tnpParAltBkgFit, "meanF[0.0,-2.5,2.5]","sigmaF[1.0,0.5,2.5]","alphaF[0.0,-0.1,0.03]") + _gaus_pars
+for _b in (18,19,20,21): tnpParAltBkgFit_addGausByBin[_b] = _ab_bimodal
+for _b in (16,17,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47): tnpParAltBkgFit_addGausByBin[_b] = _ab_highet
+
+# --- Joseph 2026-07-18 per-bin tunes (0p15_nongap_2025) ---
+# bin18,19,20 altSig bimodal shoulder 過描述: 薄 DSCB 尾逼 addGaus Gaussian 做 shoulder(同法)
+_thintail_181920 = ("sigmaF[1.5,0.8,2.8]", "sigmaF_2[1.4,0.7,3.0]", "sosF[0.3,0.0,1.2]", "alphaF[2.8,2.0,3.4]", "nF[1.4,0.7,2.2]", "meanGF[77.0,74.0,80.0]", "sigmaGF[5.5,4.0,7.5]")
+for _b in (18, 19, 20):
+    tnpParAltSigFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigFit_addGausByBin[_b]), *_thintail_181920)
+for _b in (18, 19, 20, 21):
+    tnpParAltSigBkgFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin.get(_b, tnpParAltSigBkgFit_addGaus)), *_thintail_181920)
+
+# bin35,37 altSigBkg (high-ET central) failing 峰右移+高質量continuum(Joseph 2026-07-18): 收 meanF + alphaF_2 描述 continuum
+for _b in (35, 37):
+    tnpParAltSigBkgFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin.get(_b, tnpParAltSigBkgFit_addGaus)), "meanF[0.0,-1.5,1.0]", "alphaF_2[0.0,-0.08,0.03]")

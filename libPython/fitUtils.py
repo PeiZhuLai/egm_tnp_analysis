@@ -513,14 +513,21 @@ def createWorkspaceForAltSig( sample, tnpBin, tnpWorkspaceParam, preserve_params
 #############################################################
 ########## nominal fitter
 #############################################################
-def histFitterNominal( sample, tnpBin, tnpWorkspaceParam, bin_index=None ):
-        
+def histFitterNominal( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None ):
+
     tnpWorkspaceFunc = [
         "Gaussian::sigResPass(x,meanP,sigmaP)",
         "Gaussian::sigResFail(x,meanF,sigmaF)",
         "RooCMSShape::bkgPass(x, acmsP, betaP, gammaP, peakP)",
         "RooCMSShape::bkgFail(x, acmsF, betaF, gammaF, peakF)",
         ]
+    ## optional 2nd Gaussian on the FAILING signal to absorb the low-mass (FSR/DY)
+    ## shoulder: pdfFail = sigFracF*(template⊗Gauss) + (1-sigFracF)*sigGaussFail, both
+    ## counted as signal (nSigF). Needs meanGF/sigmaGF in the param list (config).
+    if isaddGaus==1:
+        tnpWorkspaceFunc += [ "Gaussian::sigGaussFail(x,meanGF,sigmaGF)", ]
+        if not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):
+            tnpWorkspaceFunc += [ "sigFracF[0.5,0.0,1.0]", ]
 
     tnpWorkspace = []
     tnpWorkspace.extend(tnpWorkspaceParam)
@@ -546,27 +553,36 @@ def histFitterNominal( sample, tnpBin, tnpWorkspaceParam, bin_index=None ):
     fitter.setOutputFile( rootfile )
     
     ## generated Z LineShape
-    ## for high pT change the failing spectra to any probe to get statistics
-    fileTruth  = rt.TFile(sample.mcRef.histFile,'read')
-    histZLineShapeP = fileTruth.Get('%s_Pass'%tnpBin['name'])
-    histZLineShapeF = fileTruth.Get('%s_Fail'%tnpBin['name'])
-    if ptMin( tnpBin ) > minPtForSwitch: 
-        histZLineShapeF = fileTruth.Get('%s_Pass'%tnpBin['name'])
-#        fitter.fixSigmaFtoSigmaP()
-    fitter.setZLineShapes(histZLineShapeP,histZLineShapeF)
-
-    fileTruth.Close()
+    if isaddGaus==1:
+        ## addGaus 模式: PASSING 用 MC template(Pass,乾淨隔離電子峰,無 shoulder,配 data 峰形最好);
+        ## FAILING 用通用 gen-level lineshape(無 template 過量 shoulder)+ sigGaussFail 補真實 shoulder。
+        fileP = rt.TFile(sample.mcRef.histFile,'read')
+        histZLineShapeP = fileP.Get('%s_Pass'%tnpBin['name'])
+        fileG = rt.TFile('etc/inputs/ZeeGenLevel.root','read')
+        histZLineShapeF = fileG.Get('Mass')
+        fitter.setZLineShapes(histZLineShapeP,histZLineShapeF)
+        fileP.Close()
+        fileG.Close()
+    else:
+        ## for high pT change the failing spectra to any probe to get statistics
+        fileTruth  = rt.TFile(sample.mcRef.histFile,'read')
+        histZLineShapeP = fileTruth.Get('%s_Pass'%tnpBin['name'])
+        histZLineShapeF = fileTruth.Get('%s_Fail'%tnpBin['name'])
+        if ptMin( tnpBin ) > minPtForSwitch:
+            histZLineShapeF = fileTruth.Get('%s_Pass'%tnpBin['name'])
+        fitter.setZLineShapes(histZLineShapeP,histZLineShapeF)
+        fileTruth.Close()
 
     ### set workspace
     workspace = rt.vector("string")()
     for iw in tnpWorkspace:
         workspace.push_back(iw)
-    fitter.setWorkspace( workspace )
+    fitter.setWorkspace( workspace, isaddGaus )
 
     title = tnpBin['title'].replace(';',' - ')
     title = title.replace('probe_sc_eta','#eta_{SC}')
     title = title.replace('probe_Ele_pt','p_{T}')
-    fitter.fits(sample.mcTruth,sample.isMC,title)
+    fitter.fits(sample.mcTruth,sample.isMC,title, isaddGaus)
     rootfile.Close()
     _write_fit_diagnostics(
         sample,
@@ -617,7 +633,7 @@ def histFitterAltSig(
         ]
     if isaddGaus==1:
         tnpWorkspaceFunc += [ "Gaussian::sigGaussFail(x,meanGF,sigmaGF)", ]
-        if sample.isMC:
+        if sample.isMC and not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):
             tnpWorkspaceFunc += [ "sigFracF[0.5,0.0,1.0]", ]
 
     tnpWorkspace = []
@@ -691,7 +707,7 @@ def histFitterAltSig(
 #############################################################
 ########## alternate background fitter
 #############################################################
-def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, bin_index=None ):
+def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None ):
 
     tnpWorkspaceFunc = [
         "Gaussian::sigResPass(x,meanP,sigmaP)",
@@ -699,6 +715,10 @@ def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, bin_index=None ):
         "Exponential::bkgPass(x, alphaP)",
         "Exponential::bkgFail(x, alphaF)",
         ]
+    if isaddGaus==1:
+        tnpWorkspaceFunc += [ "Gaussian::sigGaussFail(x,meanGF,sigmaGF)", ]
+        if not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):
+            tnpWorkspaceFunc += [ "sigFracF[0.5,0.0,1.0]", ]
 
     tnpWorkspace = []
     tnpWorkspace.extend(tnpWorkspaceParam)
@@ -724,26 +744,35 @@ def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, bin_index=None ):
 #    fitter.setFitRange(65,115)
 
     ## generated Z LineShape
-    ## for high pT change the failing spectra to any probe to get statistics
-    fileTruth = rt.TFile(sample.mcRef.histFile,'read')
-    histZLineShapeP = fileTruth.Get('%s_Pass'%tnpBin['name'])
-    histZLineShapeF = fileTruth.Get('%s_Fail'%tnpBin['name'])
-    if ptMin( tnpBin ) > minPtForSwitch: 
-        histZLineShapeF = fileTruth.Get('%s_Pass'%tnpBin['name'])
-#        fitter.fixSigmaFtoSigmaP()
-    fitter.setZLineShapes(histZLineShapeP,histZLineShapeF)
-    fileTruth.Close()
+    if isaddGaus==1:
+        ## addGaus 模式: PASSING 用 MC template(乾淨峰); FAILING 用通用 lineshape + sigGaussFail 補 shoulder。
+        fileP = rt.TFile(sample.mcRef.histFile,'read')
+        histZLineShapeP = fileP.Get('%s_Pass'%tnpBin['name'])
+        fileG = rt.TFile('etc/inputs/ZeeGenLevel.root','read')
+        histZLineShapeF = fileG.Get('Mass')
+        fitter.setZLineShapes(histZLineShapeP,histZLineShapeF)
+        fileP.Close()
+        fileG.Close()
+    else:
+        ## for high pT change the failing spectra to any probe to get statistics
+        fileTruth = rt.TFile(sample.mcRef.histFile,'read')
+        histZLineShapeP = fileTruth.Get('%s_Pass'%tnpBin['name'])
+        histZLineShapeF = fileTruth.Get('%s_Fail'%tnpBin['name'])
+        if ptMin( tnpBin ) > minPtForSwitch:
+            histZLineShapeF = fileTruth.Get('%s_Pass'%tnpBin['name'])
+        fitter.setZLineShapes(histZLineShapeP,histZLineShapeF)
+        fileTruth.Close()
 
     ### set workspace
     workspace = rt.vector("string")()
     for iw in tnpWorkspace:
         workspace.push_back(iw)
-    fitter.setWorkspace( workspace )
+    fitter.setWorkspace( workspace, isaddGaus )
 
     title = tnpBin['title'].replace(';',' - ')
     title = title.replace('probe_sc_eta','#eta_{SC}')
     title = title.replace('probe_Ele_pt','p_{T}')
-    fitter.fits(sample.mcTruth,sample.isMC,title)
+    fitter.fits(sample.mcTruth,sample.isMC,title, isaddGaus)
     rootfile.Close()
     _write_fit_diagnostics(
         sample,
@@ -768,7 +797,7 @@ def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, bin_index=None ):
 #############################################################
 ########## alternate signal+background fitter
 #############################################################
-def histFitterAltSigBkg( sample, tnpBin, tnpWorkspaceParam, bin_index=None):
+def histFitterAltSigBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None):
 
 
     tnpWorkspaceFunc = [
@@ -778,6 +807,12 @@ def histFitterAltSigBkg( sample, tnpBin, tnpWorkspaceParam, bin_index=None):
         "Exponential::bkgPass(x, alphaP_2)",
         "Exponential::bkgFail(x, alphaF_2)",
         ]
+    ## optional 2nd Gaussian on FAILING signal to absorb the low-mass FSR/DY shoulder
+    ## (altSigBkg 的 signal 是解析 DSCB,與 altSig 同 → addGaus 有效)。需 meanGF/sigmaGF in config.
+    if isaddGaus==1:
+        tnpWorkspaceFunc += [ "Gaussian::sigGaussFail(x,meanGF,sigmaGF)", ]
+        if not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):
+            tnpWorkspaceFunc += [ "sigFracF[0.5,0.0,1.0]", ]
 
     tnpWorkspace = []
     tnpWorkspace.extend(tnpWorkspaceParam)
@@ -805,25 +840,37 @@ def histFitterAltSigBkg( sample, tnpBin, tnpWorkspaceParam, bin_index=None):
 
     ## generated Z LineShape
     ## for high pT change the failing spectra to any probe to get statistics
-    fileTruth = rt.TFile(sample.mcRef.histFile,'read')
-    histZLineShapeP = fileTruth.Get('%s_Pass'%tnpBin['name'])
-    histZLineShapeF = fileTruth.Get('%s_Fail'%tnpBin['name'])
-    if ptMin( tnpBin ) > minPtForSwitch: 
-        histZLineShapeF = fileTruth.Get('%s_Pass'%tnpBin['name'])
+    if isaddGaus==1:
+        ## addGaus 模式(2026-07-18): PASSING 用 MC template Pass(乾淨隔離電子峰,勿動 passing);
+        ## FAILING 用 generic gen-level(無 template FSR shoulder),讓 addGaus sigGaussFail 乾淨做
+        ## failing shoulder。template FSR shoulder>data → DSCB 尾 overshoot+starve 主峰;此組合解之。
+        ## (2026-07-18b 修正: 原先 pass+fail 都用 generic 會壞 passing peak,改回 pass=template)
+        fileP = rt.TFile(sample.mcRef.histFile,'read')
+        histZLineShapeP = fileP.Get('%s_Pass'%tnpBin['name'])
+        fileG = rt.TFile('etc/inputs/ZeeGenLevel.root','read')
+        histZLineShapeF = fileG.Get('Mass')
+        fitter.setZLineShapes(histZLineShapeP,histZLineShapeF)
+        fileP.Close(); fileG.Close()
+    else:
+        fileTruth = rt.TFile(sample.mcRef.histFile,'read')
+        histZLineShapeP = fileTruth.Get('%s_Pass'%tnpBin['name'])
+        histZLineShapeF = fileTruth.Get('%s_Fail'%tnpBin['name'])
+        if ptMin( tnpBin ) > minPtForSwitch:
+            histZLineShapeF = fileTruth.Get('%s_Pass'%tnpBin['name'])
 #        fitter.fixSigmaFtoSigmaP()
-    fitter.setZLineShapes(histZLineShapeP,histZLineShapeF)
-    fileTruth.Close()
+        fitter.setZLineShapes(histZLineShapeP,histZLineShapeF)
+        fileTruth.Close()
 
     ### set workspace
     workspace = rt.vector("string")()
     for iw in tnpWorkspace:
         workspace.push_back(iw)
-    fitter.setWorkspace( workspace )
+    fitter.setWorkspace( workspace, isaddGaus )
 
     title = tnpBin['title'].replace(';',' - ')
     title = title.replace('probe_sc_eta','#eta_{SC}')
     title = title.replace('probe_Ele_pt','p_{T}')
-    fitter.fits(sample.mcTruth,sample.isMC,title)
+    fitter.fits(sample.mcTruth,sample.isMC,title, isaddGaus)
     rootfile.Close()
     _write_fit_diagnostics(
         sample,

@@ -162,6 +162,23 @@ tnpParNomFitByBin = params_for_bins(
     "peakF[89.0,86.0,91.0]",
 )
 
+# --- addGaus 變體 (proof-of-concept) ---
+# nominal 用 --addGaus 時,failing signal 加第二個 Gaussian(sigGaussFail, meanGF~78)吸收
+# FSR/DY 低質量 shoulder;pdfFail = sigFracF*(template⊗Gauss) + (1-sigFracF)*sigGaussFail,
+# 兩者都算 nSigF(signal)。meanGF/sigmaGF 供 C++ sigGaussFail(見 fitUtils.histFitterNominal)。
+_gaus_pars = ["meanGF[77.0,73.0,81.0]", "sigmaGF[4.0,2.0,8.0]"]
+tnpParNomFit_addGaus = tnpParNomFit + _gaus_pars
+# bins 1,2: 把 failing CMSShape 壓成平滑低 pedestal(acmsF 固定 58 => erfc turn-on 落在
+# fit 範圍[60,120]外、gammaF≈0 => 全域近平),讓 78 shoulder 改由 sigGaussFail(meanGF~77)
+# 描述,而非 CMSShape hump(避免與 Gaussian 冗餘導致 sigFracF->1 關掉 Gaussian)。
+tnpParNomFit_addGausByBin = {
+    b: params_with_updates(
+        tnpParNomFitByBin[b],
+        "acmsF[58.0]", "betaF[0.10]", "gammaF[0.0,-0.03,0.05]",
+    ) + _gaus_pars
+    for b in (1, 2)
+}
+
 # # 15
 # tnpParNomFit = [
 #     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
@@ -203,7 +220,27 @@ tnpParAltSigFitByBin = params_for_bins(
     "betaF[0.02,0.001,0.06]",
     "gammaF[0.03,0.001,0.6]",
 )
-     
+
+# altSig(解析 DSCB) 的 addGaus 變體: DSCB 平滑、undershoots 78 shoulder → 加 sigGaussFail
+# (meanGF~77) 正好補上真實 shoulder。這才是 addGaus 該用的模型(框架 --addGaus 原生支援 altSig)。
+tnpParAltSigFit_addGaus = tnpParAltSigFit + _gaus_pars
+tnpParAltSigFit_addGausByBin = {k: (list(v) + _gaus_pars) for k, v in tnpParAltSigFitByBin.items()}
+
+# --- gap crack (bin0 η-1.57~-1.44, bin3 η+1.44~+1.57) altSig 專屬 (2026-07-16) ---
+# crack 低統計、failing 譜寬又亂(主峰~85 broad + 低質量 shoulder~74)。base meanF 撞界 -5
+# (bin0 eff 離群高 0.9515)、sosF 撞界 0.5(bin3 DSCB 過寬 undershoot 主峰)。放寬 meanF/sosF
+# 下界並讓 addGaus 第二 Gaussian 往更低質量 catch shoulder(收窄 altSig systematic band)。
+_crack_altsig = params_with_updates(
+    tnpParAltSigFit,
+    "meanF[-3.0,-8.0,1.0]",
+    "sigmaF[2.5,1.0,6.0]",
+    "sigmaF_2[3.5,1.0,8.0]",
+    "sosF[0.6,0.05,3.0]",
+) + ["meanGF[73.0,66.0,80.0]", "sigmaGF[5.0,2.5,11.0]"]
+for _cb in (0, 3):
+    tnpParAltSigFit_addGausByBin[_cb] = _crack_altsig
+
+
 tnpParAltBkgFit = [
     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
     "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
@@ -261,6 +298,13 @@ tnpParAltSigBkgFitByBin = {
         tnpParAltSigBkgFit,
         'alphaF_2[-0.014, -1, 0.]',
     ),
+    # bin5 (η-1.44~0.00, et35-500): failing bkg Exponential(alphaF_2) 原界[-1,0.05]允許
+    # alphaF_2→-0.808 極陡 → 正規化後 x=60 左邊緣爆 spike(Joseph flag wrong rising@60GeV)。
+    # 收斂 alphaF_2 到溫和範圍防 spike,低質量 shoulder 交 DSCB tail/addGaus。 (2026-07-16)
+    5: params_with_updates(
+        tnpParAltSigBkgFit,
+        'alphaF_2[-0.01, -0.05, 0.01]',
+    ),
 }
 
 # ## 06
@@ -278,3 +322,57 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- altSigBkg --addGaus 變體 (2026-07-15) ---
+# altSigBkg 的 signal 也是解析 DSCB(RooCBExGaussShapeTNP) → 同 altSig,加第二 Gaussian
+# (sigGaussFail, meanGF~77)補 failing 的真實 FSR/DY shoulder。保留各 bin 現有調參。
+tnpParAltSigBkgFit_addGaus = tnpParAltSigBkgFit + _gaus_pars
+tnpParAltSigBkgFit_addGausByBin = {k: (list(v) + _gaus_pars) for k, v in tnpParAltSigBkgFitByBin.items()}
+
+# --- gap v3 shoulder rollout: bins 1,2 barrel 大 bin failing 雙峰 shoulder (2026-07-16) ---
+# 疊 v3 failing 參數(DSCB 左 tail 推出 + shoulder Gaussian 收窄),保留既有 bin override。
+_gap_v3_fail = ("sigmaF[1.0,0.5,2.5]", "sigmaF_2[1.4,0.5,4.0]", "sosF[0.3,0.0,1.6]", "alphaF[3.0,2.3,3.5]", "nF[1.0,0.0,3.0]", "sigmaGF[3.5,2.0,5.5]")
+for _gb in (1, 2):
+    if _gb in tnpParAltSigFit_addGausByBin:
+        tnpParAltSigFit_addGausByBin[_gb] = params_with_updates(list(tnpParAltSigFit_addGausByBin[_gb]), *_gap_v3_fail)
+    if _gb in tnpParAltSigBkgFit_addGausByBin:
+        tnpParAltSigBkgFit_addGausByBin[_gb] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin[_gb]), *_gap_v3_fail)
+
+# altSig bin1,2 failing shoulder 過描述(Joseph 2026-07-18): 薄 DSCB 尾(nF↓)逼 addGaus Gaussian
+# 乾淨做 shoulder,減 DSCB 肥尾 overshoot(同 nongap bin19,20 修法,gap 解析度寬故參數放大)。只動 altSig。
+_gap_altsig_thintail = ("sigmaF[2.0,1.0,3.5]", "sigmaF_2[1.5,0.6,3.0]", "sosF[0.3,0.0,1.2]", "alphaF[2.5,1.6,3.2]", "nF[0.6,0.0,1.2]", "meanGF[77.5,75.0,80.0]", "sigmaGF[4.5,3.0,6.0]")
+for _gb in (1, 2):
+    tnpParAltSigFit_addGausByBin[_gb] = params_with_updates(list(tnpParAltSigFit_addGausByBin[_gb]), *_gap_altsig_thintail)
+
+# bin01 further tune(Joseph 2026-07-18 v2): 窄 shoulder Gaussian 坐 shoulder 峰~76.5 + 中等 DSCB 尾,
+# 避免 78-80 pileup overshoot(bin01 shoulder 較 prominent,thintail 版 nF 撞界仍略 overshoot)。只動 bin01。
+_gap_bin01_altsig = ("meanGF[77.0,74.0,80.0]", "sigmaGF[6.0,4.5,8.0]", "nF[1.4,0.7,2.2]", "alphaF[2.8,2.0,3.4]", "sigmaF[1.8,1.0,3.2]", "sigmaF_2[1.6,0.7,3.2]", "sosF[0.3,0.0,1.2]")
+tnpParAltSigFit_addGausByBin[1] = params_with_updates(list(tnpParAltSigFit_addGausByBin[1]), *_gap_bin01_altsig)
+
+
+
+# --- nominal + altBkg --addGaus 全套解析變體 (2026-07-15) ---
+# fitUtils isaddGaus: signal=通用 gen-level lineshape ⊗ Gaussian(平滑,無 template shoulder)
+# + sigGaussFail 補真實 shoulder。nominal=CMSShape bkg(pin acmsP 防 rail); altBkg=Exp bkg。
+# bimodal(中央 et20-35: 18-21): 窄 sigmaF + pin failing bkg + shoulder Gaussian。
+# high-ET 中央(34-37,42-45): 窄 sigmaF,Gaussian 自動關。
+_gs = ["meanGF[77.0,73.0,81.0]", "sigmaGF[3.5,2.0,6.0]"]
+_pass_nom = ("meanP[-0.0,-3.0,3.0]", "sigmaP[1.5,0.5,4.0]", "acmsP[60.0]", "betaP[0.05]", "gammaP[0.05,0.0,0.5]")
+_pass_ab  = ("meanP[-0.0,-3.0,3.0]", "sigmaP[1.5,0.5,4.0]")
+tnpParNomFit_addGaus = params_with_updates(tnpParNomFit, *_pass_nom) + _gaus_pars
+tnpParNomFit_addGausByBin = {}
+_nom_bimodal = params_with_updates(tnpParNomFit, "meanF[0.0,-3.0,3.0]","sigmaF[1.0,0.5,2.2]","acmsF[58.0]","betaF[0.10]","gammaF[0.0,-0.03,0.05]","acmsP[60.0]","betaP[0.05]","gammaP[0.05,0.0,0.5]") + _gs
+_nom_highet  = params_with_updates(tnpParNomFit, "meanF[0.0,-2.5,2.5]","sigmaF[1.0,0.5,2.5]","acmsP[60.0]","betaP[0.05]","gammaP[0.05,0.0,0.5]") + _gaus_pars
+for _b in (18,19,20,21): tnpParNomFit_addGausByBin[_b] = _nom_bimodal
+for _b in (16,17,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47): tnpParNomFit_addGausByBin[_b] = _nom_highet
+tnpParAltBkgFit_addGaus = params_with_updates(tnpParAltBkgFit, *_pass_ab) + _gaus_pars
+tnpParAltBkgFit_addGausByBin = {}
+_ab_bimodal = params_with_updates(tnpParAltBkgFit, "meanF[0.0,-3.0,3.0]","sigmaF[1.0,0.5,2.2]","alphaF[-0.02,-0.1,0.02]") + _gs
+_ab_highet  = params_with_updates(tnpParAltBkgFit, "meanF[0.0,-2.5,2.5]","sigmaF[1.0,0.5,2.5]","alphaF[-0.02,-0.1,0.005]") + _gaus_pars
+for _b in (18,19,20,21): tnpParAltBkgFit_addGausByBin[_b] = _ab_bimodal
+for _b in (16,17,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47): tnpParAltBkgFit_addGausByBin[_b] = _ab_highet
+
+# altSigBkg bin05 (et35-500 modest shoulder): generic-fail 後 Gaussian 過大 overshoot。調小 Gaussian
+# (sigFracF 高=少 Gaussian + 窄 sigmaGF) match modest shoulder。(Joseph 2026-07-18)
+tnpParAltSigBkgFit_addGausByBin[5] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin.get(5, tnpParAltSigBkgFit_addGaus)), "sigFracF[0.9,0.78,0.97]", "sigmaGF[3.0,2.0,4.5]", "meanGF[79.0,77.0,81.0]")
