@@ -402,12 +402,21 @@ if  args.doFit:
                     bin_index=ib,
                     preserve_params_from_mc=changed_names,
                 )
+            elif args.altBkg and args.addGaus:
+                fit_params = _resolve_fit_params('tnpParAltBkgFit_addGaus', ib, tnp_bin)
+                tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib )
             elif args.altBkg:
                 fit_params = _resolve_fit_params('tnpParAltBkgFit', ib, tnp_bin)
                 tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib )
+            elif args.altSigBkg and args.addGaus:
+                fit_params = _resolve_fit_params('tnpParAltSigBkgFit_addGaus', ib, tnp_bin)
+                tnpRoot.histFitterAltSigBkg(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib )
             elif args.altSigBkg:
                 fit_params = _resolve_fit_params('tnpParAltSigBkgFit', ib, tnp_bin)
                 tnpRoot.histFitterAltSigBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib )
+            elif args.addGaus:
+                fit_params = _resolve_fit_params('tnpParNomFit_addGaus', ib, tnp_bin)
+                tnpRoot.histFitterNominal( sampleToFit, tnp_bin, fit_params, 1, bin_index=ib )
             else:
                 fit_params = _resolve_fit_params('tnpParNomFit', ib, tnp_bin)
                 tnpRoot.histFitterNominal( sampleToFit, tnp_bin, fit_params, bin_index=ib )

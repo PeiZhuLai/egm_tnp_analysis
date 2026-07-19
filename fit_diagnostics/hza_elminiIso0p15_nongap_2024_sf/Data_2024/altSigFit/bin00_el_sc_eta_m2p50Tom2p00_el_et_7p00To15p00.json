@@ -15,7 +15,7 @@
       }
     }
   },
-  "created_at_utc": "2026-07-13T07:55:43.929674+00:00",
+  "created_at_utc": "2026-07-17T21:42:35.980797+00:00",
   "derived": {
     "efficiency": 0.9624072225203163,
     "efficiency_error": 0.0,
@@ -37,7 +37,7 @@
     }
   },
   "fit_metadata": {
-    "add_gaussian_fail_component": false,
+    "add_gaussian_fail_component": true,
     "bin_index": 0,
     "fail_hist_uses_pass_hist": false,
     "fit_range": {
@@ -516,11 +516,11 @@
     }
   },
   "sample": {
-    "fitOutputBinRoot": "/eos/home-p/pelai/HZa/root_TnP//hza_elminiIso0p15_nongap_2024_sf//Data_2024_hza_elminiIso0p15_nongap_2024_sf.altSigFit-bin00_el_sc_eta_m2p50Tom2p00_el_et_7p00To15p00.root",
-    "fitOutputRoot": "/eos/home-p/pelai/HZa/root_TnP//hza_elminiIso0p15_nongap_2024_sf//Data_2024_hza_elminiIso0p15_nongap_2024_sf.altSigFit.root",
-    "histFile": "/eos/home-p/pelai/HZa/root_TnP//hza_elminiIso0p15_nongap_2024_sf//Data_2024_hza_elminiIso0p15_nongap_2024_sf.root",
+    "fitOutputBinRoot": "/eos/cms/store/group/phys_susy/pelai/HZa/root_TnP_local//hza_elminiIso0p15_nongap_2024_sf//Data_2024_hza_elminiIso0p15_nongap_2024_sf.altSigFit-bin00_el_sc_eta_m2p50Tom2p00_el_et_7p00To15p00.root",
+    "fitOutputRoot": "/eos/cms/store/group/phys_susy/pelai/HZa/root_TnP_local//hza_elminiIso0p15_nongap_2024_sf//Data_2024_hza_elminiIso0p15_nongap_2024_sf.altSigFit.root",
+    "histFile": "/eos/cms/store/group/phys_susy/pelai/HZa/root_TnP_local//hza_elminiIso0p15_nongap_2024_sf//Data_2024_hza_elminiIso0p15_nongap_2024_sf.root",
     "isMC": false,
-    "mcRefHistFile": "/eos/home-p/pelai/HZa/root_TnP//hza_elminiIso0p15_nongap_2024_sf//DY_MC_LO_2024_hza_elminiIso0p15_nongap_2024_sf.root",
+    "mcRefHistFile": "/eos/cms/store/group/phys_susy/pelai/HZa/root_TnP_local//hza_elminiIso0p15_nongap_2024_sf//DY_MC_LO_2024_hza_elminiIso0p15_nongap_2024_sf.root",
     "mcTruth": false,
     "name": "Data_2024"
   },
@@ -765,6 +765,30 @@
           "0.8"
         ],
         "value": 0.04
+      },
+      {
+        "name": "meanGF",
+        "raw": "meanGF[73.011]",
+        "tokens": [
+          "73.011"
+        ],
+        "value": 73.011
+      },
+      {
+        "name": "sigFracF",
+        "raw": "sigFracF[1.000]",
+        "tokens": [
+          "1.000"
+        ],
+        "value": 1.0
+      },
+      {
+        "name": "sigmaGF",
+        "raw": "sigmaGF[7.965]",
+        "tokens": [
+          "7.965"
+        ],
+        "value": 7.965
       }
     ],
     "effective_raw": [
@@ -787,16 +811,79 @@
       "gammaP[0.04,0.001,0.8]",
       "acmsF[78.,45.,100.]",
       "betaF[0.02,0.001,0.08]",
-      "gammaF[0.04,0.001,0.8]"
+      "gammaF[0.04,0.001,0.8]",
+      "meanGF[73.011]",
+      "sigFracF[1.000]",
+      "sigmaGF[7.965]"
     ],
     "functions": [
       "tailLeft[1]",
       "RooCBExGaussShapeTNP::sigResPass(x,meanP,expr('sqrt(sigmaP*sigmaP+sosP*sosP)',{sigmaP,sosP}),alphaP,nP, expr('sqrt(sigmaP_2*sigmaP_2+sosP*sosP)',{sigmaP_2,sosP}),tailLeft)",
       "RooCBExGaussShapeTNP::sigResFail(x,meanF,expr('sqrt(sigmaF*sigmaF+sosF*sosF)',{sigmaF,sosF}),alphaF,nF, expr('sqrt(sigmaF_2*sigmaF_2+sosF*sosF)',{sigmaF_2,sosF}),tailLeft)",
       "RooCMSShape::bkgPass(x, acmsP, betaP, gammaP, peakP)",
-      "RooCMSShape::bkgFail(x, acmsF, betaF, gammaF, peakF)"
+      "RooCMSShape::bkgFail(x, acmsF, betaF, gammaF, peakF)",
+      "Gaussian::sigGaussFail(x,meanGF,sigmaGF)"
     ],
-    "overrides": [],
+    "overrides": [
+      {
+        "effective": {
+          "name": "meanGF",
+          "raw": "meanGF[73.011]",
+          "tokens": [
+            "73.011"
+          ],
+          "value": 73.011
+        },
+        "name": "meanGF",
+        "requested": {
+          "max": 81.0,
+          "min": 73.0,
+          "name": "meanGF",
+          "raw": "meanGF[77.0,73.0,81.0]",
+          "tokens": [
+            "77.0",
+            "73.0",
+            "81.0"
+          ],
+          "value": 77.0
+        }
+      },
+      {
+        "effective": {
+          "name": "sigFracF",
+          "raw": "sigFracF[1.000]",
+          "tokens": [
+            "1.000"
+          ],
+          "value": 1.0
+        },
+        "name": "sigFracF",
+        "requested": null
+      },
+      {
+        "effective": {
+          "name": "sigmaGF",
+          "raw": "sigmaGF[7.965]",
+          "tokens": [
+            "7.965"
+          ],
+          "value": 7.965
+        },
+        "name": "sigmaGF",
+        "requested": {
+          "max": 8.0,
+          "min": 2.0,
+          "name": "sigmaGF",
+          "raw": "sigmaGF[4.0,2.0,8.0]",
+          "tokens": [
+            "4.0",
+            "2.0",
+            "8.0"
+          ],
+          "value": 4.0
+        }
+      }
+    ],
     "requested_parsed": [
       {
         "max": 90.0,
@@ -1037,6 +1124,30 @@
           "0.8"
         ],
         "value": 0.04
+      },
+      {
+        "max": 81.0,
+        "min": 73.0,
+        "name": "meanGF",
+        "raw": "meanGF[77.0,73.0,81.0]",
+        "tokens": [
+          "77.0",
+          "73.0",
+          "81.0"
+        ],
+        "value": 77.0
+      },
+      {
+        "max": 8.0,
+        "min": 2.0,
+        "name": "sigmaGF",
+        "raw": "sigmaGF[4.0,2.0,8.0]",
+        "tokens": [
+          "4.0",
+          "2.0",
+          "8.0"
+        ],
+        "value": 4.0
       }
     ],
     "requested_raw": [
@@ -1059,7 +1170,9 @@
       "gammaP[0.04,0.001,0.8]",
       "acmsF[78.,45.,100.]",
       "betaF[0.02,0.001,0.08]",
-      "gammaF[0.04,0.001,0.8]"
+      "gammaF[0.04,0.001,0.8]",
+      "meanGF[77.0,73.0,81.0]",
+      "sigmaGF[4.0,2.0,8.0]"
     ]
   }
 }

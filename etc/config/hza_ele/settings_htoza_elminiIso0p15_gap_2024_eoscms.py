@@ -1,0 +1,363 @@
+# -*- coding: utf-8 -*-
+import os, sys
+if '_mod_path' not in globals() or not _mod_path:
+    _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+    if _mod_path not in sys.path:
+        sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_for_bins, params_with_updates
+
+#############################################################
+########## General settings
+#############################################################
+# EA reference: https://indico.cern.ch/event/1204277/contributions/5064356/attachments/2538496/4369369/CutBasedPhotonID_20221031.pdf
+
+# baseline selection shared by all branches (keep trailing && for concatenation)
+baseline_cut = (
+    '(el_pt > 7) &&'
+    '(abs(el_sc_eta) < 2.5) &&'
+    '(abs(el_dz) < 1.0) &&'
+    '(abs(el_dxy) < 0.5) &&'
+)
+
+# probe preselection (moved from old flags)
+probe_preselection_cut = (
+    '(('
+    + baseline_cut +
+    '(el_sc_et > 10) && ('
+    '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527)'
+    ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
+    ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
+    ' )'
+    '&& ( (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) || (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1 && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
+    ') || ('
+    + baseline_cut +
+    '(el_sc_et < 10) && ('
+    '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267)'
+    ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
+    ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
+    ' )'
+    '&& ( (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg2 == 1 && el_hltE23E12leg2_dR < 0.3 && pair_lead_el_sc_et > 15 ) || (passHltEle23Ele12CaloIdLTrackIdLIsoVLLeg1L1match == 1 && el_hltE23E12leg1_dR < 0.3 && pair_lead_el_sc_et > 25 ) || (passHltEle30WPTightGsf == 1 && el_hltE30single_dR < 0.3 && pair_lead_el_sc_et > 35))'
+    '))'
+)
+
+# flag to be Tested
+flags = {
+    'hza_elminiIso0p15_gap_2024_sf': '(el_miniPFRelIso_all < 0.15)',
+}
+
+# /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
+baseOutDir = '/eos/cms/store/group/phys_susy/pelai/HZa/root_TnP_local/'
+
+#############################################################
+########## samples definition  - preparing the samples
+#############################################################
+### samples are defined in etc/inputs/tnpSampleDef.py
+### not: you can setup another sampleDef File in inputs
+import etc.inputs.tnpSampleDef as tnpSamples
+tnpTreeDir = 'tnpEleTrig'
+
+samplesDef = {
+        'data'  : tnpSamples.Run3_2024_ele['Data_2024'].clone(),
+        'mcNom' : tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
+        'tagSel': tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
+        'mcAlt': tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
+    }
+## can add data sample easily
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024D'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024E'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024F'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024G'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024H'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024I'] )
+
+
+## can add data sample easily
+# samplesDef['data'].add_sample(tnpSamples.Run3_124X_PromptReco2022G['data_Run2022G'].clone()) 
+## some sample-based cuts... general cuts defined here after
+## require mcTruth on MC DY samples and additional cuts
+## all the samples MUST have different names (i.e. sample.name must be different for all)
+## if you need to use 2 times the same sample, then rename the second one
+#samplesDef['data'  ].set_cut('run >= 273726')
+samplesDef['data' ].set_tnpTree(tnpTreeDir)
+if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_tnpTree(tnpTreeDir)
+if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_tnpTree(tnpTreeDir)
+if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_tnpTree(tnpTreeDir)
+
+if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
+if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
+if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
+if not samplesDef['tagSel'] is None:
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2024')
+    samplesDef['tagSel'].set_cut('tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0')
+
+## set MC weight, simple way (use tree weight) 
+# weightName = 'totWeight'
+# if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
+# if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
+# if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
+
+## set MC weight, can use several pileup rw for different data taking 
+# mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_madgraph_pho.pu.puTree.root'
+# mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_amcatnloext_pho.pu.puTree.root'
+weightName = 'totWeight'   ## HZa: in-tree totWeight = weight(gen)*PUweight (was stale 2023 friend)
+if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
+if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
+if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
+# if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree(mcNom_puFile)
+# if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree(mcAlt_puFile)
+# if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFile)
+
+#############################################################
+########## bining definition  [can be nD bining]
+#############################################################
+biningDef = [
+   { 'var' : 'el_sc_eta' , 'type': 'float', 'bins': [-1.566,-1.4442, 0.0, 1.4442, 1.566] },
+   { 'var' : 'el_et' , 'type': 'float', 'bins': [7,35,500] },
+]
+
+#############################################################
+########## Cuts definition for all samples
+#############################################################
+### cut
+cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0 &&' + probe_preselection_cut
+
+# can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
+additionalCuts = { 
+   0 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   1 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   2 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   3 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   4 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   5 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   6 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   7 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   8 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   9 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+}
+
+#### or remove any additional cut (default)
+additionalCuts = None
+
+#############################################################
+########## fitting params to tune fit by hand if necessary
+#############################################################
+tnpParNomFit = [
+    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
+    "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+    "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+    ]
+tnpParNomFitByBin = params_for_bins(
+    tnpParNomFit,
+    (1, 2),
+    "sigmaP[1.2,0.5,3.0]",
+    "sigmaF[1.2,0.5,3.5]",
+    "acmsP[89.,78.,92.]",
+    "betaP[0.02,0.001,0.06]",
+    "gammaP[0.02,-0.05,0.20]",
+    "peakP[89.0,86.0,91.0]",
+    "acmsF[88.,76.,92.]",
+    "betaF[0.02,0.001,0.06]",
+    "gammaF[0.02,-0.05,0.20]",
+    "peakF[89.0,86.0,91.0]",
+)
+
+# --- addGaus 變體 (proof-of-concept) ---
+# nominal 用 --addGaus 時,failing signal 加第二個 Gaussian(sigGaussFail, meanGF~78)吸收
+# FSR/DY 低質量 shoulder;pdfFail = sigFracF*(template⊗Gauss) + (1-sigFracF)*sigGaussFail,
+# 兩者都算 nSigF(signal)。meanGF/sigmaGF 供 C++ sigGaussFail(見 fitUtils.histFitterNominal)。
+_gaus_pars = ["meanGF[77.0,73.0,81.0]", "sigmaGF[4.0,2.0,8.0]"]
+tnpParNomFit_addGaus = tnpParNomFit + _gaus_pars
+# bins 1,2: 把 failing CMSShape 壓成平滑低 pedestal(acmsF 固定 58 => erfc turn-on 落在
+# fit 範圍[60,120]外、gammaF≈0 => 全域近平),讓 78 shoulder 改由 sigGaussFail(meanGF~77)
+# 描述,而非 CMSShape hump(避免與 Gaussian 冗餘導致 sigFracF->1 關掉 Gaussian)。
+tnpParNomFit_addGausByBin = {
+    b: params_with_updates(
+        tnpParNomFitByBin[b],
+        "acmsF[58.0]", "betaF[0.10]", "gammaF[0.0,-0.03,0.05]",
+    ) + _gaus_pars
+    for b in (1, 2)
+}
+
+# # 15
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,50.,70.]","betaF[0.05,0.05,0.07]","gammaF[0.01, -2, 2]","peakF[87.0,82.0,90.0]",
+#     ]
+
+# # 4
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[0.2,0.1,5.0]","sigmaF[1.5]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,40.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.01, -2, 0.1]","peakF[87.0,82.0,90.0]",
+#     ]
+# print("DEBUG tnpParNomFit =", tnpParNomFit)
+
+tnpParAltSigFit = [
+    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,8.0]","alphaF[2.0,1.2,3.5]",'nF[3,0,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
+    "acmsP[65.,45.,90.]","betaP[0.04,0.005,0.08]","gammaP[0.08, 0.002, 1.5]","peakP[89.0,82.0,90.0]",
+    "acmsF[65.,45.,90.]","betaF[0.04,0.005,0.08]","gammaF[0.08, 0.002, 1.5]","peakF[89.0,82.0,90.0]",
+    ]
+tnpParAltSigFitByBin = params_for_bins(
+    tnpParAltSigFit,
+    (1, 2),
+    "sigmaP[3.2,0.8,8.0]",
+    "sigmaP_2[1.8,0.5,6.0]",
+    "sosP[1.1,0.0,4.5]",
+    "alphaP[1.6,0.6,4.5]",
+    "nP[0.7,-2.0,10.0]",
+    "sigmaF[2.8,0.8,7.0]",
+    "sigmaF_2[1.2,0.5,5.0]",
+    "sosF[0.8,0.2,4.0]",
+    "acmsP[62.,45.,78.]",
+    "betaP[0.02,0.001,0.06]",
+    "gammaP[0.03,0.001,0.6]",
+    "acmsF[62.,45.,78.]",
+    "betaF[0.02,0.001,0.06]",
+    "gammaF[0.03,0.001,0.6]",
+)
+
+# altSig(解析 DSCB) 的 addGaus 變體: DSCB 平滑、undershoots 78 shoulder → 加 sigGaussFail
+# (meanGF~77) 正好補上真實 shoulder。這才是 addGaus 該用的模型(框架 --addGaus 原生支援 altSig)。
+tnpParAltSigFit_addGaus = tnpParAltSigFit + _gaus_pars
+tnpParAltSigFit_addGausByBin = {k: (list(v) + _gaus_pars) for k, v in tnpParAltSigFitByBin.items()}
+
+# --- gap crack (bin0 η-1.57~-1.44, bin3 η+1.44~+1.57) altSig 專屬 (2026-07-16) ---
+# crack 低統計、failing 譜寬又亂(主峰~85 broad + 低質量 shoulder~74)。base meanF 撞界 -5
+# (bin0 eff 離群高 0.9515)、sosF 撞界 0.5(bin3 DSCB 過寬 undershoot 主峰)。放寬 meanF/sosF
+# 下界並讓 addGaus 第二 Gaussian 往更低質量 catch shoulder(收窄 altSig systematic band)。
+_crack_altsig = params_with_updates(
+    tnpParAltSigFit,
+    "meanF[-3.0,-8.0,1.0]",
+    "sigmaF[2.5,1.0,6.0]",
+    "sigmaF_2[3.5,1.0,8.0]",
+    "sosF[0.6,0.05,3.0]",
+) + ["meanGF[73.0,66.0,80.0]", "sigmaGF[5.0,2.5,11.0]"]
+for _cb in (0, 3):
+    tnpParAltSigFit_addGausByBin[_cb] = _crack_altsig
+
+
+tnpParAltBkgFit = [
+    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
+    "alphaP[0.,-5.,5.]",
+    "alphaF[0.,-5.,5.]",
+    ]
+tnpParAltBkgFitByBin = params_for_bins(
+    tnpParAltBkgFit,
+    (1, 2),
+    "sigmaP[1.2,0.6,3.0]",
+    "alphaP[-0.002,-0.04,0.03]",
+    "sigmaF[1.2,0.6,3.0]",
+    "alphaF[-0.002,-0.04,0.03]",
+)
+
+
+tnpParAltSigBkgFit = [
+  'meanP[-0.0, -5.0, 5.0]',
+  'meanF[-0.0, -5.0, 5.0]',
+  'sigmaP[0.5, 0.1, 2.0]',
+  'sigmaF[0.5, 0.1, 2.0]',
+  'sigmaP_2[0.5, 0.1, 2.0]',
+  'sigmaF_2[0.5, 0.1, 3.0]',
+  'sosP[0.10, 0.0, 1.0]',
+  'sosF[0.12, 0.0, 1.0]',
+  'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
+  'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
+  'alphaP_2[-0.012, -1, 0]',
+  'alphaF_2[-0.014, -1, 0.05]',
+]
+tnpParAltSigBkgFitByBin = {
+    1: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[0.5, 0.1, 1.5]',
+        'sigmaP_2[0.8, 0.1, 2.5]',
+        'sosP[0.15, 0.0, 0.8]',
+        'alphaP_2[-0.004, -0.05, 0.]',
+        'sigmaF[0.5, 0.1, 1.8]',
+        'sigmaF_2[0.8, 0.1, 2.5]',
+        'sosF[0.15, 0.0, 0.8]',
+        'alphaF_2[-0.004, -0.05, 0.]',
+    ),
+    2: params_with_updates(
+        tnpParAltSigBkgFit,
+        'sigmaP[0.5, 0.1, 1.5]',
+        'sigmaP_2[0.8, 0.1, 2.5]',
+        'sosP[0.15, 0.0, 0.8]',
+        'alphaP_2[-0.004, -0.05, 0.]',
+        'sigmaF[0.5, 0.1, 1.8]',
+        'sigmaF_2[0.8, 0.1, 2.5]',
+        'sosF[0.15, 0.0, 0.8]',
+        'alphaF_2[-0.004, -0.05, 0.]',
+    ),
+    6: params_with_updates(
+        tnpParAltSigBkgFit,
+        'alphaF_2[-0.014, -1, 0.]',
+    ),
+    # bin5 (η-1.44~0.00, et35-500): failing bkg Exponential(alphaF_2) 原界[-1,0.05]允許
+    # alphaF_2→-0.808 極陡 → 正規化後 x=60 左邊緣爆 spike(Joseph flag wrong rising@60GeV)。
+    # 收斂 alphaF_2 到溫和範圍防 spike,低質量 shoulder 交 DSCB tail/addGaus。 (2026-07-16)
+    5: params_with_updates(
+        tnpParAltSigBkgFit,
+        'alphaF_2[-0.01, -0.05, 0.01]',
+    ),
+}
+
+# ## 06
+# tnpParAltSigBkgFit = [
+#   'meanP[-0.0, -5.0, 5.0]',
+#   'meanF[-0.0, -5.0, 5.0]',
+#   'sigmaP[0.5, 0.1, 2.0]',
+#   'sigmaF[0.5, 0.1, 2.0]',
+#   'sigmaP_2[0.5, 0.1, 2.0]',
+#   'sigmaF_2[0.5, 0.1, 3.0]',
+#   'sosP[0.10, 0.0, 1.0]',
+#   'sosF[0.12, 0.0, 1.0]',
+#   'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
+#   'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
+#   'alphaP_2[-0.012, -1, 0]',
+#   'alphaF_2[-0.014, -1, 0.]',
+# ]
+
+
+# --- altSigBkg --addGaus 變體 (2026-07-15) ---
+# altSigBkg 的 signal 也是解析 DSCB(RooCBExGaussShapeTNP) → 同 altSig,加第二 Gaussian
+# (sigGaussFail, meanGF~77)補 failing 的真實 FSR/DY shoulder。保留各 bin 現有調參。
+tnpParAltSigBkgFit_addGaus = tnpParAltSigBkgFit + _gaus_pars
+tnpParAltSigBkgFit_addGausByBin = {k: (list(v) + _gaus_pars) for k, v in tnpParAltSigBkgFitByBin.items()}
+
+# --- gap v3 shoulder rollout: bins 1,2 barrel 大 bin failing 雙峰 shoulder (2026-07-16) ---
+# 疊 v3 failing 參數(DSCB 左 tail 推出 + shoulder Gaussian 收窄),保留既有 bin override。
+_gap_v3_fail = ("sigmaF[1.0,0.5,2.5]", "sigmaF_2[1.4,0.5,4.0]", "sosF[0.3,0.0,1.6]", "alphaF[3.0,2.3,3.5]", "nF[1.0,0.0,3.0]", "sigmaGF[3.5,2.0,5.5]")
+for _gb in (1, 2):
+    if _gb in tnpParAltSigFit_addGausByBin:
+        tnpParAltSigFit_addGausByBin[_gb] = params_with_updates(list(tnpParAltSigFit_addGausByBin[_gb]), *_gap_v3_fail)
+    if _gb in tnpParAltSigBkgFit_addGausByBin:
+        tnpParAltSigBkgFit_addGausByBin[_gb] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin[_gb]), *_gap_v3_fail)
+
+
+
+# --- nominal + altBkg --addGaus 全套解析變體 (2026-07-15) ---
+# fitUtils isaddGaus: signal=通用 gen-level lineshape ⊗ Gaussian(平滑,無 template shoulder)
+# + sigGaussFail 補真實 shoulder。nominal=CMSShape bkg(pin acmsP 防 rail); altBkg=Exp bkg。
+# bimodal(中央 et20-35: 18-21): 窄 sigmaF + pin failing bkg + shoulder Gaussian。
+# high-ET 中央(34-37,42-45): 窄 sigmaF,Gaussian 自動關。
+_gs = ["meanGF[77.0,73.0,81.0]", "sigmaGF[3.5,2.0,6.0]"]
+_pass_nom = ("meanP[-0.0,-3.0,3.0]", "sigmaP[1.5,0.5,4.0]", "acmsP[60.0]", "betaP[0.05]", "gammaP[0.05,0.0,0.5]")
+_pass_ab  = ("meanP[-0.0,-3.0,3.0]", "sigmaP[1.5,0.5,4.0]")
+tnpParNomFit_addGaus = params_with_updates(tnpParNomFit, *_pass_nom) + _gaus_pars
+tnpParNomFit_addGausByBin = {}
+_nom_bimodal = params_with_updates(tnpParNomFit, "meanF[0.0,-3.0,3.0]","sigmaF[1.0,0.5,2.2]","acmsF[58.0]","betaF[0.10]","gammaF[0.0,-0.03,0.05]","acmsP[60.0]","betaP[0.05]","gammaP[0.05,0.0,0.5]") + _gs
+_nom_highet  = params_with_updates(tnpParNomFit, "meanF[0.0,-2.5,2.5]","sigmaF[1.0,0.5,2.5]","acmsP[60.0]","betaP[0.05]","gammaP[0.05,0.0,0.5]") + _gaus_pars
+for _b in (18,19,20,21): tnpParNomFit_addGausByBin[_b] = _nom_bimodal
+for _b in (16,17,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47): tnpParNomFit_addGausByBin[_b] = _nom_highet
+tnpParAltBkgFit_addGaus = params_with_updates(tnpParAltBkgFit, *_pass_ab) + _gaus_pars
+tnpParAltBkgFit_addGausByBin = {}
+_ab_bimodal = params_with_updates(tnpParAltBkgFit, "meanF[0.0,-3.0,3.0]","sigmaF[1.0,0.5,2.2]","alphaF[-0.02,-0.1,0.02]") + _gs
+_ab_highet  = params_with_updates(tnpParAltBkgFit, "meanF[0.0,-2.5,2.5]","sigmaF[1.0,0.5,2.5]","alphaF[-0.02,-0.1,0.005]") + _gaus_pars
+for _b in (18,19,20,21): tnpParAltBkgFit_addGausByBin[_b] = _ab_bimodal
+for _b in (16,17,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47): tnpParAltBkgFit_addGausByBin[_b] = _ab_highet
