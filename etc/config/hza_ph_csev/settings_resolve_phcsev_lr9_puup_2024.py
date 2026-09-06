@@ -75,8 +75,19 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 #############################################################
 ########## bining definition  [can be nD bining]
 #############################################################
+# 2026-08-23 分箱合併:原 nPV 分箱在低 pileup 端每格 fail 事件數不足,
+# 導致 Hesse 算不出誤差矩陣(covQual=0、誤差全為 0)。門檻由實測標定:
+# 今天重跑的 516 個 failing 側依 fail 事件數分組,誤差可用的比例為
+#   0-20:58%  20-40:59%  40-60:60%  60-80:50%  80-120:86%  200-400:96%  400+:99%
+# 轉折在 fail~80,故以 fail>=80 且 pass>=200 為準合併 nPV(et 分箱不動,
+# 因為 SF 是對 et 套用的)。pileup 系統變體(bkg/puup/pudown)必須同步,否則對不起來。
+# 2026-08-24 二次分箱:2024 改用 **MC** 統計量當判準(每格 MC fail>=10)。
+# 8/23 那次是用 data 的 fail>=80,對 2022/2023 合理(那裡 MC 少 data 一到兩個
+# 數量級,是限制因素),但 2024 用的是 DYto2Mu 過濾樣本、MC 統計量充足
+# (每格 MC fail 49-1941),照 data 判準反而把它併過頭、白白損失解析度。
+# SF = eff(data)/eff(MC),分箱該由較弱的一側決定 —— 2024 那一側是 data。
 biningDef = [
-   { 'var' : 'event_nPV' , 'type': 'float', 'bins': [10,15,20,25,30,35,40,100] },
+   { 'var' : 'event_nPV' , 'type': 'float', 'bins': [10, 30, 35, 40, 100] },
 #    { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-1.566,-1.4442,0.0,1.4442,1.566,2.5] },
 #    { 'var' : 'ph_sc_abseta' , 'type': 'float', 'bins': [0.0,1.4442,1.566,2.5] },
    { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,35,50,80] },

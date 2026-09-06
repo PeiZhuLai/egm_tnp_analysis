@@ -29,6 +29,7 @@ baseOutDir = '/eos/home-p/pelai/HZa/root_TnP'
 ### samples are defined in etc/inputs/tnpSampleDef.py
 ### not: you can setup another sampleDef File in inputs
 import etc.inputs.tnpSampleDef as tnpSamples
+from etc.config.fit_param_utils import params_with_updates
 tnpTreeDir = 'tnpPhoIDs'
 
 samplesDef = {
@@ -73,11 +74,23 @@ if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
 #############################################################
 ########## bining definition  [can be nD bining]
 #############################################################
+# 2026-08-23 分箱合併:原 nPV 分箱在低 pileup 端每格 fail 事件數不足,
+# 導致 Hesse 算不出誤差矩陣(covQual=0、誤差全為 0)。門檻由實測標定:
+# 今天重跑的 516 個 failing 側依 fail 事件數分組,誤差可用的比例為
+#   0-20:58%  20-40:59%  40-60:60%  60-80:50%  80-120:86%  200-400:96%  400+:99%
+# 轉折在 fail~80,故以 fail>=80 且 pass>=200 為準合併 nPV(et 分箱不動,
+# 因為 SF 是對 et 套用的)。pileup 系統變體(bkg/puup/pudown)必須同步,否則對不起來。
 biningDef = [
-   { 'var' : 'event_nPV' , 'type': 'float', 'bins': [10,20,25,30,35,100] },
+# 2026-08-29 重新分箱:判準改為 **data 的 failing 側 >= 300 個事件**。
+# 舊分箱(2026-08-23)用的是 MC 側(2022/2023)或 data 總量(2024)的統計量,
+# 沒有把 failing 側單獨當約束 —— 但 CSEV 的 failing 只佔 2-24%,效率誤差完全由它決定。
+# 實測 74 個 bin 有 42 個(57%) failing < 300,擬合有 7 個自由參數、每個分不到 15 個事件,
+# Hessian 必然奇異(covQual=0),逐格調參是在調雜訊。
+# bkg/puup/pudown 三個變體必須與 nominal 同分箱,否則系統誤差無法對照。
+   { 'var' : 'event_nPV' , 'type': 'float', 'bins': [10,100] },
 #    { 'var' : 'ph_sc_eta' , 'type': 'float', 'bins': [-2.5,-1.566,-1.4442,0.0,1.4442,1.566,2.5] },
 #    { 'var' : 'ph_sc_abseta' , 'type': 'float', 'bins': [0.0,1.4442,1.566,2.5] },
-   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,35,80] },
+   { 'var' : 'ph_et' , 'type': 'float', 'bins': [10,20,80] },
 ]
 
 #############################################################
@@ -107,39 +120,39 @@ additionalCuts = None
 ########## fitting params to tune fit by hand if necessary
 #############################################################
 tnpParNomFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
-    "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-    "acmsF[60.,50.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+    "meanP[-0,-8,5]","sigmaP[0.9,0.2,8]",
+    "meanF[-0,-8,5]","sigmaF[0.9,0.2,8]",
+    "acmsP[60,50,95]","betaP[0.05,0.01,0.4]","gammaP[0.1,-2,2]","peakP[87.0,82.0,90.0]",
+    "acmsF[60,50,95]","betaF[0.05,0.01,0.4]","gammaF[0.1,-2,2]","peakF[87.0,82.0,90.0]",
     ]
 
 # # 15
 # tnpParNomFit = [
-#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-#     "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
-#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-#     "acmsF[60.,50.,70.]","betaF[0.05,0.05,0.07]","gammaF[0.01, -2, 2]","peakF[87.0,82.0,90.0]",
+#     "meanP[-0,-8,5]","sigmaP[0.9,0.2,8]",
+#     "meanF[-0,-8,5]","sigmaF[1,0,8]",
+#     "acmsP[60,50,95]","betaP[0.05,0.01,0.4]","gammaP[0.1,-2,2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60,50,95]","betaF[0.05,0.05,0.4]","gammaF[0.01,-2,2]","peakF[87.0,82.0,90.0]",
 #     ]
 
 # # 4
 # tnpParNomFit = [
-#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-#     "meanF[0.2,0.1,5.0]","sigmaF[1.5]",
-#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
-#     "acmsF[60.,40.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.01, -2, 0.1]","peakF[87.0,82.0,90.0]",
+#     "meanP[-0,-8,5]","sigmaP[0.9,0.2,8]",
+#     "meanF[0.2,-8,5]","sigmaF[1.5]",
+#     "acmsP[60,50,95]","betaP[0.05,0.01,0.4]","gammaP[0.1,-2,2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60,40,95]","betaF[0.05,0.01,0.4]","gammaF[0.01,-2,0.1]","peakF[87.0,82.0,90.0]",
 #     ]
 # print("DEBUG tnpParNomFit =", tnpParNomFit)
 
 tnpParAltSigFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,8.0]","alphaF[2.0,1.2,3.5]",'nF[3,0,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
-    "acmsP[60.,50.,75.]","betaP[0.04,0.01,0.06]","gammaP[0.1, 0.005, 1]","peakP[89.0,82.0,90.0]",
-    "acmsF[60.,50.,75.]","betaF[0.04,0.01,0.06]","gammaF[0.1, 0.01, 1]","peakF[89.0,82.0,90.0]",
+    "meanP[-0,-8,5]","sigmaP[1,0.2,8]","alphaP[2.0,1.2,3.5]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
+    "meanF[-0,-8,5]","sigmaF[2,0.2,8]","alphaF[2.0,1.2,3.5]",'nF[3,0,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
+    "acmsP[60,50,95]","betaP[0.04,0.01,0.4]","gammaP[0.1,-0.5,1]","peakP[89.0,82.0,90.0]",
+    "acmsF[60,50,95]","betaF[0.04,0.01,0.4]","gammaF[0.1,-0.5,1]","peakF[89.0,82.0,90.0]",
     ]
      
 tnpParAltBkgFit = [
-    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
-    "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
+    "meanP[-0,-8,5]","sigmaP[0.9,0.2,8]",
+    "meanF[-0,-8,5]","sigmaF[0.9,0.2,8]",
     "alphaP[0.,-5.,5.]",
     "alphaF[0.,-5.,5.]",
     ]
@@ -175,3 +188,35 @@ tnpParAltSigBkgFit = [
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+# 2026-08-29 nominalFit bin02 failing:edm **恰好等於 0.0**、status=-1、covQual=0,
+# 而且零個參數撞界 —— MIGRAD 連第一步都沒踏出去。這不是「解不好」,是「沒有開始找」。
+# 典型成因是起點落在似然面的平坦處(或 NaN 區)。給接近資料的起點把它推離原地。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[2] = params_with_updates(
+    tnpParNomFitByBin.get(2, tnpParNomFit),
+    "meanF[-1,-8,4]",
+    "sigmaF[2.5,0.2,8]",
+    "acmsF[68,45,95]",
+    "betaF[0.04,0.003,0.4]",
+    "gammaF[0.05,-1,2]",
+)
+
+# ---------------------------------------------------------------------------
+# 2026-08-29 重新分箱後清空所有 per-bin 覆寫。
+# 舊的覆寫是針對舊的 bin 編號寫的,而合併之後同一個編號指的是完全不同的物理區域
+# （例如 2022preEE 由 6 格併成 1 格,舊 bin02 的調參會被套到新的唯一一格上）。
+# 而且那些覆寫多半是為了搶救統計不足的格子而存在 —— 合併的目的正是消除統計不足,
+# 留著只會把錯誤的約束帶進新的擬合。
+# 這些賦值放在檔案最後,會覆蓋上面所有同名定義。重跑後若仍有壞掉的 bin,再逐一加回。
+# additionalCuts 不在此列 —— 它是 2023postBPix 的 eta/phi hole 區域排除,由
+# _nbins 從 biningDef 自動算出,會跟著新分箱走。
+tnpParNomFitByBin = {}
+
+# 2026-08-30 放寬 CMSShape / 解析度的窗。重新分箱後每格的 failing 事件數由
+# 10-300 提升到 300-2000,參數終於由資料決定 —— 結果 60 格裡有 55 格撞界,
+# 而且是同一組:acmsP/F 與 betaP/F 撞**上**界(60/60 與 58/60)、gammaF 撞**下**界(30)、
+# sigmaF 撞上界(12)、sigmaP 撞下界(6)、meanF 撞下界(4)。
+# 這些窗是舊統計量下手調出來的(有的被收到 acmsF 上界 75、sigmaF 上界 2.1),
+# 統計量增加 6 倍後就綁不住了。只開撞界那一側,另一側一律不動 ——
+# 不要把最佳解排除在範圍外(這個錯誤在 2026-08 已經犯過三次)。
