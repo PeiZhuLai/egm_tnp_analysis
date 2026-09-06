@@ -267,6 +267,16 @@ def _choose_custom_first_axis_bining(filein, eff_graph):
         return [(0.000, 1.444)]
 
     if "lowpt" in measurement_key:
+        # The low-pT configs use a single endcap bin (1.566-2.5) instead of the
+        # 1.566-2.0 / 2.0-2.5 split used at high pT. Requesting the split binning
+        # here makes the same endcap bin be drawn twice (one curve hidden under the
+        # other) and mislabels it as 2.000-2.500, so use the binning actually
+        # present in the file whenever it can be read back.
+        lowpt_eta_bins = [
+            eta_bin for eta_bin in actual_abs_eta_bins if not _is_gap_eta_bin(eta_bin)
+        ]
+        if lowpt_eta_bins:
+            return lowpt_eta_bins
         return [(0.000, 1.444), (1.566, 2.000), (2.000, 2.500)]
 
     if "hole" in measurement_key:

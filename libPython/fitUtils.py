@@ -483,6 +483,23 @@ def createWorkspaceForAltSig( sample, tnpBin, tnpWorkspaceParam, preserve_params
         filemc.Close()
         return localParams
 
+    # 只有真的收斂過的 MC 擬合才能拿來覆寫參數。若 MC 擬合從未最小化，
+    # RooFit 會把參數留在初始值、誤差全部歸零 —— 取它的 getVal() 等於把
+    # 「初始猜測」當成擬合結果餵進 data 的 altSig，而且外觀完全正常。
+    # 這正是先前 nominal 大量「假成功」的同一種模式，所以在此擋下。
+    def _never_minimised(res):
+        pars = res.floatParsFinal()
+        n = pars.getSize()
+        return bool(n) and all(pars.at(i).getError() == 0.0 for i in range(n))
+
+    if _never_minimised(fitresP) or _never_minimised(fitresF):
+        logging.warning(
+            f"MC 參考擬合未收斂（參數誤差全為 0）: {tnpBin['name']} @ {fileref} "
+            f"→ 不用它覆寫 altSig 參數，改用設定檔的初始值"
+        )
+        filemc.Close()
+        return localParams
+
     listOfParam = ['nF','alphaF','nP','alphaP','sigmaP','sigmaF','sigmaP_2','sigmaF_2','meanGF','sigmaGF','sigFracF']
 
     # 失敗樣本參數
@@ -707,14 +724,77 @@ def histFitterAltSig(
 #############################################################
 ########## alternate background fitter
 #############################################################
-def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None ):
+def _altBkgShapeLines( bkgModel, tnpWorkspaceParam ):
+    """Background pdf lines for the alternate-background fit.
+
+    Default stays the single-parameter RooExponential this fit has always used --
+    passing bkgModel=None reproduces the previous behaviour exactly.
+
+    'bernsteinN' is the escape hatch for bins where one exponential parameter
+    provably cannot describe the failing spectrum. Measured on
+    elid_nongap_2024 altBkg bin03/bin04 (et 15-20): the data falls only 23% over
+    60->80 GeV but by a factor 5 over 90->115. A single exponential must split the
+    difference -- alphaF settled at -0.0332, which is far too steep at low mass and
+    far too flat at high mass -- and the failing signal width then rails at its
+    upper bound trying to make up the shortfall. A Bernstein polynomial adds the
+    second shape degree of freedom while staying a genuinely *different* model from
+    the nominal RooCMSShape, so the alternate-background systematic still means
+    something. (Switching those bins to CMSShape would make altBkg identical to
+    nominal and the systematic would collapse to zero.)
+
+    Bernstein coefficients are non-negative by construction, so the pdf cannot go
+    negative the way a free polynomial would.
+    """
+    if not bkgModel:
+        return [
+            "Exponential::bkgPass(x, alphaP)",
+            "Exponential::bkgFail(x, alphaF)",
+            ]
+
+    # A bare string applies to both legs; a dict switches one leg only. Usually only
+    # the failing leg needs it -- the passing background is a couple of percent and
+    # its exponential is fine, so there is no reason to disturb a working fit.
+    if isinstance(bkgModel, dict):
+        per_side = {'P': bkgModel.get('pass'), 'F': bkgModel.get('fail')}
+    else:
+        per_side = {'P': bkgModel, 'F': bkgModel}
+
+    lines = []
+    coeffs = {}
+    for side in ('P', 'F'):
+        long_side = 'Pass' if side == 'P' else 'Fail'
+        model = per_side.get(side)
+        if not model:
+            lines.append('Exponential::bkg%s(x, alpha%s)' % (long_side, side))
+            continue
+        model = str(model).strip().lower()
+        if not model.startswith('bernstein'):
+            raise ValueError('unknown altBkg background model: %s' % model)
+        try:
+            order = int(model[len('bernstein'):])
+        except ValueError:
+            raise ValueError('bernstein model needs an order, e.g. bernstein2: %s' % model)
+        if order < 1 or order > 6:
+            raise ValueError('bernstein order out of range (1-6): %s' % model)
+        names = []
+        for i in range(order + 1):
+            name = 'b%s%d' % (side, i)
+            names.append(name)
+            # Only declare a coefficient the settings file has not already provided,
+            # so a per-bin tune can narrow the range the same way it does for any
+            # other parameter.
+            if not any(str(_p).startswith('%s[' % name) for _p in tnpWorkspaceParam):
+                coeffs[name] = '%s[0.5,0.,20.]' % name
+        lines.append('Bernstein::bkg%s(x, {%s})' % (long_side, ', '.join(names)))
+    return [coeffs[k] for k in sorted(coeffs)] + lines
+
+
+def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None, bkgModel=None ):
 
     tnpWorkspaceFunc = [
         "Gaussian::sigResPass(x,meanP,sigmaP)",
         "Gaussian::sigResFail(x,meanF,sigmaF)",
-        "Exponential::bkgPass(x, alphaP)",
-        "Exponential::bkgFail(x, alphaF)",
-        ]
+        ] + _altBkgShapeLines( bkgModel, tnpWorkspaceParam )
     if isaddGaus==1:
         tnpWorkspaceFunc += [ "Gaussian::sigGaussFail(x,meanGF,sigmaGF)", ]
         if not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):

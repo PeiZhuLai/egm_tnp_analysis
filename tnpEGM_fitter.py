@@ -351,6 +351,56 @@ def _changed_param_names(base_attr, override_params):
             changed.add(name)
     return changed
 
+def _addgaus_for_bin(bin_index):
+    """Whether this bin gets the extra shoulder Gaussian on the failing leg.
+
+    --addGaus used to be all or nothing, and a full comparison showed that is the
+    wrong granularity: turning it on for every bin improved 699 fits and made 1766
+    worse. The recipe helps exactly where the failing leg really is "narrow peak +
+    shoulder" -- elsewhere the extra component has nothing to describe and only
+    costs a degree of freedom. So let the settings name the bins that need it:
+
+        addGausBins = (18, 19, 20, 21)                  # same for every fit type
+        addGausBins = {'nominalFit': (18, 19),          # or per fit type
+                       'altSigFit' : (18, 19, 20, 21)}
+
+    --addGaus stays as a global override, which is what the exploratory runs used.
+    """
+    if args.addGaus:
+        return True
+    spec = getattr(tnpConf, 'addGausBins', None)
+    if not spec:
+        return False
+    if isinstance(spec, dict):
+        spec = spec.get(_current_fit_type(), spec.get('all', ()))
+    return bin_index in set(spec)
+
+
+def _altbkg_model_for_bin(bin_index, tnp_bin):
+    """Per-bin background model for the alternate-background fit.
+
+    Settings files may define
+
+        tnpAltBkgModelByBin = { 3: 'bernstein2', 4: 'bernstein2' }
+
+    keyed by bin index or by bin name. Absent -- which is the case for every
+    measurement unless it opts in -- the fit keeps its single-parameter
+    RooExponential and nothing changes.
+    """
+    spec = getattr(tnpConf, 'tnpAltBkgModelByBin', None)
+    if not spec:
+        return None
+    model = spec.get(bin_index)
+    if model is None:
+        model = spec.get(str(bin_index))
+    if model is None:
+        model = spec.get(tnp_bin['name'])
+    if model:
+        print('[tnpEGM_fitter] altBkg background model %r for bin %s (%s)'
+              % (model, bin_index, tnp_bin['name']))
+    return model
+
+
 def _resolve_fit_params(base_attr, bin_index, tnp_bin, return_changed_names=False):
     params = list(getattr(tnpConf, base_attr))
     override_map = getattr(tnpConf, '%sByBin' % base_attr, None)
@@ -383,7 +433,8 @@ if  args.doFit:
     def parallel_fit(ib):
         if (args.binNumber >= 0 and ib == args.binNumber) or args.binNumber < 0:
             tnp_bin = tnpBins['bins'][ib]
-            if args.altSig and not args.addGaus:
+            use_gaus = _addgaus_for_bin(ib)
+            if args.altSig and not use_gaus:
                 fit_params, changed_names = _resolve_fit_params('tnpParAltSigFit', ib, tnp_bin, return_changed_names=True)
                 tnpRoot.histFitterAltSig(
                     sampleToFit,
@@ -392,7 +443,7 @@ if  args.doFit:
                     bin_index=ib,
                     preserve_params_from_mc=changed_names,
                 )
-            elif args.altSig and args.addGaus:
+            elif args.altSig and use_gaus:
                 fit_params, changed_names = _resolve_fit_params('tnpParAltSigFit_addGaus', ib, tnp_bin, return_changed_names=True)
                 tnpRoot.histFitterAltSig(
                     sampleToFit,
@@ -402,29 +453,82 @@ if  args.doFit:
                     bin_index=ib,
                     preserve_params_from_mc=changed_names,
                 )
-            elif args.altBkg and args.addGaus:
+            elif args.altBkg and use_gaus:
                 fit_params = _resolve_fit_params('tnpParAltBkgFit_addGaus', ib, tnp_bin)
-                tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib )
+                tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib,
+                                           bkgModel=_altbkg_model_for_bin(ib, tnp_bin) )
             elif args.altBkg:
                 fit_params = _resolve_fit_params('tnpParAltBkgFit', ib, tnp_bin)
-                tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib )
-            elif args.altSigBkg and args.addGaus:
+                tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib,
+                                           bkgModel=_altbkg_model_for_bin(ib, tnp_bin) )
+            elif args.altSigBkg and use_gaus:
                 fit_params = _resolve_fit_params('tnpParAltSigBkgFit_addGaus', ib, tnp_bin)
                 tnpRoot.histFitterAltSigBkg(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib )
             elif args.altSigBkg:
                 fit_params = _resolve_fit_params('tnpParAltSigBkgFit', ib, tnp_bin)
                 tnpRoot.histFitterAltSigBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib )
-            elif args.addGaus:
+            elif use_gaus:
                 fit_params = _resolve_fit_params('tnpParNomFit_addGaus', ib, tnp_bin)
                 tnpRoot.histFitterNominal( sampleToFit, tnp_bin, fit_params, 1, bin_index=ib )
             else:
                 fit_params = _resolve_fit_params('tnpParNomFit', ib, tnp_bin)
                 tnpRoot.histFitterNominal( sampleToFit, tnp_bin, fit_params, bin_index=ib )
-    pool = Pool()
+    # Pool() with no argument uses every core the machine has, which is not what
+    # was asked for: on a batch worker the job holds one requested CPU but forks
+    # ~13 ROOT processes (a 2.6 h job reported 33.5 h of CPU), and on a shared
+    # login node it is how a handful of measurements turn into 200 processes.
+    # The memory a job appears to need is likewise N processes' worth, not one
+    # fit's. Take it from TNP_NPROC so the submit file and the code agree.
+    _nproc = int(os.environ.get('TNP_NPROC', '0')) or len(os.sched_getaffinity(0))
+    print('===> fitting %d bins with %d parallel processes' % (len(tnpBins['bins']), _nproc))
+    pool = Pool(processes=_nproc)
     pool.map(parallel_fit, range(len(tnpBins['bins'])))
 
     args.doPlot = True
      
+def _concat_bin_files(target, pattern):
+    """Gather the per-bin result files into the measurement-level file.
+
+    This used to be `hadd -f`, which goes through TFileMerger and crashes
+    non-deterministically on these files: repeating the same 28-file merge eight
+    times aborted twice reading from EOS and three times reading from a local
+    copy, so it is the merger, not the storage. os.system() hid the failure, and
+    the truncated output only surfaced later as the plotting step dereferencing a
+    null canvas.
+
+    There is nothing to merge in the first place -- every object is named after
+    its own bin, so this is a pure concatenation. Copying the keys ourselves is
+    deterministic, and a missing or unreadable input now raises instead of
+    quietly producing a short file.
+    """
+    import glob as _glob
+    import ROOT as rt
+    sources = sorted(_glob.glob(pattern))
+    if not sources:
+        raise RuntimeError('no per-bin files matching %s' % pattern)
+    out = rt.TFile.Open(target, 'RECREATE')
+    if not out or out.IsZombie():
+        raise RuntimeError('cannot open %s for writing' % target)
+    nobj = 0
+    for src in sources:
+        fin = rt.TFile.Open(src)
+        if not fin or fin.IsZombie():
+            out.Close()
+            raise RuntimeError('cannot read %s' % src)
+        for key in fin.GetListOfKeys():
+            obj = key.ReadObj()
+            if not obj:
+                fin.Close(); out.Close()
+                raise RuntimeError('unreadable object %s in %s' % (key.GetName(), src))
+            out.cd()
+            obj.Write(key.GetName(), rt.TObject.kOverwrite)
+            nobj += 1
+        fin.Close()
+    out.Close()
+    print('===> merged %d per-bin files (%d objects) into %s' % (len(sources), nobj, target))
+    return len(sources), nobj
+
+
 ####################################################################
 ##### dumping plots
 ####################################################################
@@ -438,7 +542,7 @@ if  args.doPlot:
     if fitType == 'altSigBkgFit':
         fileName = sampleToFit.altSigBkgFit
         
-    os.system('hadd -f %s %s' % (fileName, fileName.replace('.root', '-*.root')))
+    _concat_bin_files(fileName, fileName.replace('.root', '-*.root'))
 
     plottingDir = '%s/plots/%s/%s' % (outputDirectory,sampleToFit.name,fitType)
     if not os.path.exists( plottingDir ):
