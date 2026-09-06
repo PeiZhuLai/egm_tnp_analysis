@@ -380,3 +380,42 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- failing 背景形狀調整 (2026-08-20) ---
+# altSigFit bin02 的 failing 側背景佔 22% (nBkgF=3.99e5 vs nSigF=1.41e6)，
+# 但 acmsF 撞上界 90、betaF 撞上界 0.08 -> CMSShape 的 turn-on 被推到 Z 峰上，
+# 90 GeV 以下等於沒有背景。訊號那邊 sigmaF/sigmaF_2/sosF 同時全部壓到下界，
+# 因為它被迫去補背景該做的事，最後低質量端沒人描述 —— 那就是殘差的來源。
+# 把 turn-on 限制在峰以下、並讓 beta 有調整餘地，背景才能覆蓋 failing spectrum。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[2] = params_with_updates(
+    tnpParAltSigFitByBin.get(2, tnpParAltSigFit),
+    "acmsF[65.,45.,80.]",
+    "betaF[0.04,0.005,0.25]",
+)
+
+# altSigBkgFit bin01 的 failing 側是背景主導 (nBkgF=1.52e6 vs nSigF=4.48e5，佔 77%)，
+# 而唯一的形狀參數 alphaF_2 = -0.0085 +- 0.165 —— 誤差是數值的 20 倍，完全不受約束，
+# 且趨近 0 表示指數幾乎是平的。背景佔七成卻用一個沒被約束的平坦形狀，edm 因此到 8.6e10。
+# 收窄到「確實在下降」的區間，讓它去描述 failing spectrum 的連續分佈。
+
+
+# --- bin6 passing Hessian 奇異 (2026-08-20) ---
+# passing 側的參數確實移動過(acmsP、sigmaP 都是擬合值而非初始值)、edm 也降到個位數，
+# 但誤差全為 0、covQual=0 —— 是 Hessian 算不出來，不是 MIGRAD 沒跑。
+# 原因: nBkgP/nSigP 只有 0.8% (高 et 35-100 的 barrel，Z 峰乾淨、背景幾乎不存在)，
+# 背景形狀參數 acmsP/betaP/gammaP 沒有任何資料能約束，Hessian 在那些方向奇異。
+# fail 側同設定 covQual=3 完全正常，排除設定本身的問題。
+# 與 sielleg30trigger_nongap_2026 bin27 同型(那次 edm 894 -> 2.3e-4、covQual 1 -> 3)，
+# 沿用同一處方: 釘住 passing 背景 turn-on，只讓 meanP/sigmaP 浮動。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[6] = params_with_updates(
+    tnpParNomFitByBin.get(6, tnpParNomFit),
+    "meanP[0.0,-2.0,2.0]",
+    "sigmaP[1.0,0.5,3.0]",
+    "acmsP[52.0]",
+    "betaP[0.006]",
+    "gammaP[0.0,-0.05,0.05]",
+    "peakP[87.0]",
+)

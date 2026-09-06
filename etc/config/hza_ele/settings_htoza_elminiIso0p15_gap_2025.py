@@ -354,3 +354,16 @@ for _b in (16,17,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,
 # altSigBkg bin05 (et35-500 modest shoulder): generic-fail 後 Gaussian 過大 overshoot。調小 Gaussian
 # (sigFracF 高=少 Gaussian + 窄 sigmaGF) match modest shoulder。(Joseph 2026-07-18)
 tnpParAltSigBkgFit_addGausByBin[5] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin.get(5, tnpParAltSigBkgFit_addGaus)), "sigFracF[0.9,0.78,0.97]", "sigmaGF[3.0,2.0,4.5]", "meanGF[79.0,77.0,81.0]")
+
+
+# --- 背景無約束釘住 (2026-08-21) ---
+# 這些 bin 的 nBkg 被壓到接近或等於框架下界(0.5 個事件)，背景佔比 <1.4%，
+# 於是背景形狀參數連半個事件都約束不了 -> Hessian 在那些方向奇異 ->
+# 誤差全為 0、covQual=0。參數本身是擬合值而非初始值，代表中央值可信、壞的只有誤差。
+# 已在 elid_gap_2024/2025 bin6/bin5 與 sielleg30trigger_nongap_2025 bin2/10/29 驗證:
+# 釘住背景形狀後 covQual 0->3，效率變動僅 1e-5 量級。
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+tnpParAltSigBkgFitByBin[2] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(2, tnpParAltSigBkgFit),
+    "alphaP_2[-0.02]",
+)

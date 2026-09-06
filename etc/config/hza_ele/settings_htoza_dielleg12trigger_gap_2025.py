@@ -200,18 +200,32 @@ tnpParAltSigFit = [
 # signal and wrongly drags eff down, so they are left at default. Only the existing
 # bin6 override is kept.
 tnpParAltSigFitByBin = {
+    # 2026-09-06: this override was built on the premise that bin6 passing has
+    # no real Z peak -- meanP[-45,-8], sigmaP[3,18], peakP pinned at 68 GeV.
+    # The premise is wrong. The data has 26110 events in 90-95 GeV and the
+    # nominal fit describes it with meanP=-0.694, sigmaP=1.407, covQual 3.
+    # Every one of those bounds then excluded the answer, and the fit railed
+    # against them from the inside: meanP on -8 (wanting to be less negative),
+    # sigmaP on 3 (wanting to be narrower), plus sosP, betaP and acmsP. Result:
+    # 90-95 GeV data sits 72% above the curve, 80-85 GeV 44% below. Rebuild it
+    # around the Z, the way bin5 below already is.
     6: params_with_updates(
         tnpParAltSigFit,
-        "meanP[-30.0,-45.0,-8.0]",
-        "sigmaP[8.0,3.0,18.0]",
-        "sigmaP_2[4.0,0.8,14.0]",
+        "meanP[-0.70,-4.0,2.0]",
+        "sigmaP[1.4,0.5,5.0]",
+        "sigmaP_2[1.5,0.4,6.0]",
         "alphaP[2.0,0.8,4.5]",
         "nP[0.8,0.0,8.0]",
-        "sosP[3.0,0.2,12.0]",
-        "acmsP[58.,45.,72.]",
-        "betaP[0.006,0.001,0.025]",
-        "gammaP[0.02,0.001,0.30]",
-        "peakP[68.0,58.0,78.0]",
+        "sosP[0.5,0.0,3.0]",
+        # Round 2: with the Z-centered ranges every parameter came back at
+        # exactly its seed with an error of 0.0000 -- MIGRAD never took a step,
+        # so the -24% at 90-95 GeV was my starting guess, not a fit. The three
+        # background shape parameters are the flat directions; pin them as
+        # constants (the recipe bin27 of sielleg30_nongap_2026 documents) and
+        # let mean/sigma do the work.
+        "acmsP[75.5]",
+        "betaP[0.064]",
+        "gammaP[0.149]",
     ),
     # 2026-07-12: bin5 data 有真 Z 峰(非 bkg-dominated),default altSig passing 差 -> signal 坐 Z 峰、加寬。
     5: params_with_updates(

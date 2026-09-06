@@ -194,6 +194,27 @@ tnpParAltSigFit = [
 # signal and wrongly drags eff down, so they are left at default. Only the existing
 # bin14 (real Z) override is kept.
 tnpParAltSigFitByBin = {
+    # 2026-09-06 bin09 passing: edm 2.04e+08, no convergence. sigmaP settled at
+    # 3.284 where the converged nominalFit measures 1.022 -- 3.2x too broad --
+    # so the model spills over the whole high-mass side: 105-110 GeV -56%,
+    # 110-115 -62%, 115-120 -69%, 12 slices past 5 sigma. meanP also drifted
+    # 0.36 GeV right of nominal, which is the shift visible in the plot.
+    # gammaP came out 0.0192 +/- 1.1293 (undetermined) and betaP sat on its
+    # 0.08 ceiling. Anchor the core at the nominal resolution and give beta the
+    # room it is pressing against.
+    9: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-0.40,-3.0,2.0]",
+        # Round 2: the round-1 bounds converged the fit (edm 2.0e+08 ->
+        # 4.1e-04, covQual 3, systematic +3.1% -> -0.6%) but sigmaP, sigmaP_2
+        # and acmsP all ended up on the bounds I had just set. Open them.
+        "sigmaP[2.0,0.5,6.0]",
+        "sigmaP_2[1.0,0.2,6.0]",
+        "sosP[0.5,0.0,3.0]",
+        "acmsP[75.,45.,90.]",
+        "betaP[0.05,0.005,0.20]",
+        "gammaP[0.05,0.002,0.50]",
+    ),
     14: params_with_updates(
         tnpParAltSigFit,
         "meanP[-0.2,-5.0,5.0]",
@@ -251,3 +272,19 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- 背景無約束釘住 (2026-08-21) ---
+# 這些 bin 的 nBkg 被壓到接近或等於框架下界(0.5 個事件)，背景佔比 <1.4%，
+# 於是背景形狀參數連半個事件都約束不了 -> Hessian 在那些方向奇異 ->
+# 誤差全為 0、covQual=0。參數本身是擬合值而非初始值，代表中央值可信、壞的只有誤差。
+# 已在 elid_gap_2024/2025 bin6/bin5 與 sielleg30trigger_nongap_2025 bin2/10/29 驗證:
+# 釘住背景形狀後 covQual 0->3，效率變動僅 1e-5 量級。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[17] = params_with_updates(
+    tnpParAltSigFitByBin.get(17, tnpParAltSigFit),
+    "acmsP[80.0]",
+    "betaP[0.06]",
+    "gammaP[0.05]",
+    "peakP[89.0]",
+)

@@ -374,3 +374,26 @@ tnpParAltSigBkgFit_addGausByBin[8] = params_with_updates(list(tnpParAltSigBkgFit
 tnpParAltSigBkgFit_addGausByBin[26] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin.get(26, tnpParAltSigBkgFit_addGaus)), "alphaF_2[-0.01,-0.05,0.03]")
 # nom24 nominal failing 太窄(Joseph 2026-07-18): 加寬 sigmaF
 tnpParNomFit_addGausByBin[24] = params_with_updates(list(tnpParNomFit_addGausByBin.get(24, tnpParNomFit_addGaus)), "sigmaF[2.0,1.0,4.0]")
+
+
+# --- turn-on 上限與初始值修正 (2026-08-21) ---
+# bin9: acmsP 貼在上界(89.5~90)，CMSShape 的 turn-on 被推到 Z 峰上，
+# 低質量端沒有背景，訊號被迫去補。與 elid_gap_2024 bin02 同型
+# (那次 acmsF 90->45.5、sosF 脫離下界、背景佔比 22%->78%)。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[9] = params_with_updates(
+    tnpParAltSigFitByBin.get(9, tnpParAltSigFit),
+    "acmsP[65.,45.,80.]",
+    "betaP[0.04,0.005,0.25]",
+)
+
+# bin18: acmsF 貼在上界(89.5~90)，CMSShape 的 turn-on 被推到 Z 峰上，
+# 低質量端沒有背景，訊號被迫去補。與 elid_gap_2024 bin02 同型
+# (那次 acmsF 90->45.5、sosF 脫離下界、背景佔比 22%->78%)。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[18] = params_with_updates(
+    tnpParAltSigFitByBin.get(18, tnpParAltSigFit),
+    "acmsF[65.,45.,80.]",
+    "betaF[0.04,0.005,0.25]",
+)
+

@@ -78,6 +78,18 @@ Run3_2025_ele = {
         'DY_MC_LO_2025'  : tnpSample('DY_MC_LO_2025',  eos2025ele + '/mc/DY_LO_2024/DY_LO_2024.root', isMC=True, nEvts = 202883601),
         'Data_2025'      : tnpSample('Data_2025',      eos2025ele + '/data/Data_2025.root', lumi = 110.67),
         }
+#---------------- electron offline selection, single-/double-trigger efficiency measrement samples ----------------
+# 2026 measurement: 2026 data vs 2024 MC (no 2026 DY TnP ntuple in this framework yet),
+# same convention already used by Run3_2025_ele above.
+eos2026ele = '/eos/project/h/htozg-dy-privatemc/pelai/root_merged_eTnP_ntuple'
+Run3_2026_ele = {
+        'DY_MC_NLO_2026' : tnpSample('DY_MC_NLO_2026', eos2026ele + '/mc/DY_NLO_2024/DY_NLO_2024.root', isMC=True, nEvts = 203271136),
+        'DY_MC_LO_2026'  : tnpSample('DY_MC_LO_2026',  eos2026ele + '/mc/DY_LO_2024/DY_LO_2024.root', isMC=True, nEvts = 202883601),
+        # Data_2026.root = hadd of the Run2026B/C/D eTnP ntuples (930 jobs, combined golden JSON).
+        # lumi taken from HiggsDNA constants.py ("2026": 27.42); update once the official 2026
+        # integrated luminosity for the combined (golden + lowPU) run list is available.
+        'Data_2026'      : tnpSample('Data_2026',      eos2026ele + '/data/Data_2026.root', lumi = 27.42),
+        }
 #---------------- photon CSEV efficiency measrement samples ----------------
 eoszmmg = '/eos/home-p/pelai/HZa/root_P2Root/run3_tnp_zmmg'
 Run3_2022preEE_zmmg = {

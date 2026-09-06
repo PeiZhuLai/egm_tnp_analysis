@@ -290,3 +290,73 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+# ---------------------------------------------------------------------------
+# 2026-08-29  使用者標記的兩個 bin
+#
+# b33 (altSigBkgFit, eta -2.00..-1.57, ET 50-100, failing)
+#   sigmaF=0.161、sigmaF_2 撞下界 0.1、sosF 撞下界 0、alphaF 撞下界 1.4,edm 1.2e+02。
+#   訊號核心塌成 0.16 GeV —— 對 endcap 不可能。病根是 tnpParAltSigBkgFit 的種子
+#   (sigma 0.5、範圍下界 0.1)離真實解析度太遠,似然面在那附近平坦,MIGRAD 走不出去。
+#   給實體起點並把上界從 2.0/3.0 開到 6.0。
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+tnpParAltSigBkgFitByBin[33] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(33, tnpParAltSigBkgFit),
+    "meanF[-1.5,-6.0,3.0]",
+    "sigmaF[2.0,0.8,6.0]",
+    "sigmaF_2[2.0,0.6,6.0]",
+    "sosF[0.5,0.0,3.0]",
+    "alphaF[2.0,1.2,4.0]",
+)
+
+# ---------------------------------------------------------------------------
+# 2026-09-06  b23 / b24 / b33
+#
+# b23 (eta 2.00..2.50, ET 27-35) and b24 (eta -2.50..-2.00, ET 35-50):
+#   the same collapse b33 hit on 08-29, now on BOTH legs. Every sigma sits on
+#   the 0.1 floor of tnpParAltSigBkgFit (b23: sigmaP/sigmaP_2/sigmaF/sigmaF_2
+#   all four; b24: three of four) with alpha on its 1.4 floor and sos at 0 --
+#   the signal has degenerated into the unsmeared MC template. 0.1 GeV is not
+#   a resolution any endcap electron has.
+#   The data says the opposite: b24 passing runs +27..+33% short of the model
+#   across 100-120 GeV and -30% at 75-80 (11 slices past 5 sigma), b23 failing
+#   is +17% at 80-85 and +17% at 95-100 while 85-90 matches -- both want a
+#   WIDER core, yet the minimizer walked to the narrow bound and stopped
+#   (b24 passing edm 53.2). Give physical starts and lift the floor off 0.1.
+#
+# b33 failing: the 08-29 override widened the sigmas but the fit still does not
+#   converge (edm 35.2). sosF now rails at 0 and nF presses its 1.5 ceiling,
+#   and the peak is 10% too low at 90-95 -- this one wants a NARROWER core, so
+#   start it lower and open the two bounds it is pinned against.
+_endcap_widen = (
+    "sigmaP[1.5,0.5,6.0]", "sigmaP_2[1.5,0.5,6.0]", "sosP[0.4,0.0,3.0]",
+    "alphaP[2.0,1.2,4.0]", "nP[0.6,0.0,3.0]", "meanP[-0.3,-3.0,2.0]",
+    "sigmaF[1.5,0.5,6.0]", "sigmaF_2[1.5,0.5,6.0]", "sosF[0.4,0.0,3.0]",
+    "alphaF[2.0,1.2,4.0]", "nF[0.6,0.0,3.0]", "meanF[-0.3,-3.0,2.0]",
+)
+tnpParAltSigBkgFitByBin[23] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(23, tnpParAltSigBkgFit), *_endcap_widen)
+tnpParAltSigBkgFitByBin[24] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(24, tnpParAltSigBkgFit), *_endcap_widen)
+tnpParAltSigBkgFitByBin[33] = params_with_updates(
+    tnpParAltSigBkgFitByBin[33],
+    "sigmaF[1.8,0.5,5.0]",
+    "sigmaF_2[1.0,0.3,5.0]",
+    "sosF[0.3,0.0,3.0]",
+    "nF[1.0,0.0,4.0]",
+)
+
+# b18 (altSigFit, eta -1.57..-0.80, ET 27-35, failing)
+#   edm 5.2e+07(沒收斂)。三個參數同時撞在上界:
+#     sigmaF = 7.914  [0.7, 8]      訊號想更寬
+#     acmsF  = 72     [45, 72]      背景 turn-on 想更高
+#     betaF  = 0.15   [0.005, 0.15] turn-on 想更陡
+#   上界 72 / 0.15 是先前 _failbkg_altsig 那組覆寫收窄過的,現在三個方向全被關住,
+#   擬合無處可去。只放寬撞界那一側,下界一律不動(不要重蹈把最佳解排除在外的錯)。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[18] = params_with_updates(
+    tnpParAltSigFitByBin.get(18, tnpParAltSigFit),
+    "sigmaF[6.0,0.7,14.0]",
+    "acmsF[75.,45.,95.]",
+    "betaF[0.10,0.005,0.60]",
+)

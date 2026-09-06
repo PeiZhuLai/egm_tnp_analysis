@@ -534,3 +534,22 @@ for _b in (18, 19, 20, 21):
 
 # bin17 altSig (endcap et20-35) failing shoulder/valley sharp notch(Joseph 2026-07-18): 寬 Gaussian 平滑
 tnpParAltSigFit_addGausByBin[17] = params_with_updates(list(tnpParAltSigFit_addGausByBin.get(17, tnpParAltSigFit_addGaus)), *_thintail_1820)
+
+
+# ============ 2026-08-23 使用者旗標 ============
+# 原本改了五個 bin,但用殘差判準(fit_residuals.py:比對已存 canvas 裡的資料點與曲線)
+# 重新檢查後,只有 bin35 改前就有問題(115-120 GeV -23%,|pull|>5)。
+# bin03/bin10/bin29/bin20 改前改後都是「0 個 slice |pull|>5 且 >=200 事件」——
+# 它們是我看到參數撞界、edm 大就動手,但撞界與大 edm 並不等於形狀錯。
+# 沒有證據支持的人工約束留在設定檔裡,之後重跑或別人接手會誤以為是必要的,
+# 所以那四個已於 2026-08-23 還原(設定與擬合結果都回到 08-06/08-07 的版本)。
+
+# bin35 altSig: acmsF=90↑ betaF=0.08↑ sosF=0.5↓ 三個同時撞界,
+# 且殘差在 115-120 GeV 有 -23%(|pull|>5)。只放寬撞界那側。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[35] = params_with_updates(
+    list(tnpParAltSigFitByBin.get(35, tnpParAltSigFit)),
+    "acmsF[80.,45.,110.]",
+    "betaF[0.05,0.005,0.25]",
+    "sosF[1.0,0.0,5.0]",
+)

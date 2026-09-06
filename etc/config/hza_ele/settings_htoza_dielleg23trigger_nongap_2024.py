@@ -194,6 +194,16 @@ tnpParAltSigFit = [
 # free betaF). gammaF range already wide in altSig.
 _failbkg_altsig = ("acmsF[62.,45.,72.]", "betaF[0.04,0.005,0.15]", "gammaF[0.10,0.002,1.5]")
 tnpParAltSigFitByBin = {
+    # 2026-09-06: bins 13/14 have exactly the pathology _failbkg_altsig cures
+    # but were never added to the list -- acmsF railed at 90 and betaF on the
+    # 0.08 ceiling (nominal's own range goes to 0.10), so the CMSShape turn-on
+    # sat at the Z peak and its erfc flooded the low-mass end: 60-65 GeV curve
+    # ran +57% / +53% above the data while 65-70 GeV was 30% short. The
+    # failing background swallowed the signal -- nSigF 44%/49% below nominal --
+    # which pushed the altSig systematic to +7.5% / +9.8% against nominal,
+    # where altBkg and altSigBkg both sit within 2.6%.
+    13: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    14: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
     16: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
     18: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
     19: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
@@ -204,6 +214,48 @@ tnpParAltSigFitByBin = {
 }
 # bin18: passing CB floated left (meanP~-2.75) and undershoots the data Z peak.
 # Pin meanP near the Z AND widen the core (narrow cores over-peak the broad data Z).
+# bin13 additionally rails nF on its ceiling of 5 (longest possible power-law
+# tail, which is what reaches down into 60-70 GeV) and sosF on its 0.5 floor.
+# Round 2 (2026-09-06): _failbkg_altsig was treating the symptom. It caps acmsF
+# at 72 to keep the background off the low-mass end, but the fit then rails
+# there AND on betaF's ceiling. The real constraint is betaF: CMSShape is
+# erfc((acms-x)*beta) * exp, so a small beta makes the turn-on gradual and the
+# background leaks downward no matter where acms sits. This is a 23 GeV trigger
+# leg -- its background should fall off a cliff, i.e. beta wants to be LARGE.
+# Let beta go to 0.6 and give acms back the room it originally asked for.
+_failbkg_sharp = ("acmsF[80.,60.,90.]", "betaF[0.20,0.02,0.60]", "gammaF[0.10,0.002,1.5]")
+tnpParAltSigFitByBin[13] = params_with_updates(
+    tnpParAltSigFitByBin[13],
+    *_failbkg_sharp,
+    "nF[1.0,0.0,3.0]",
+    "sosF[0.8,0.0,3.0]",
+)
+# bin14 tried _failbkg_sharp too (2026-09-06 round 2) and it destroyed the
+# convergence: edm went 9.2e-06 -> 4.8e+05 for no residual gain (2 slices both
+# ways, 60-65 GeV -68% vs -53%). Reverted to round 1, which is _failbkg_altsig
+# alone -- edm 9.2e-06, covQual 3, altSig systematic +4.5% against nominal
+# (down from +9.8%). Only bin13 benefits from the sharp turn-on.
+
+# bin21 passing: edm 1.39e+06 -- no convergence at all. acmsP=89.06 puts the
+# CMSShape turn-on right at the Z peak, so its erfc lays a plateau across the
+# whole low-mass end: 60-65 GeV curve 23287 vs 1985 observed (-91%), 65-70 GeV
+# -81%, 70-75 GeV -40%; 12 slices past 5 sigma. sigmaP=4.31 is too broad and
+# sigmaP_2 rails on its 0.5 floor. Apply the _failbkg_altsig idea to the
+# passing leg -- pull the turn-on below the Z, free beta -- and narrow the core.
+tnpParAltSigFitByBin[21] = params_with_updates(
+    tnpParAltSigFitByBin[21],
+    # Round 2's acmsP[80,60,90]/betaP[..,0.60] did converge (edm 1.4e7 -> 0.008)
+    # but moved the efficiency -4.2% off nominal while the residuals stayed at
+    # 12 slices, so it bought convergence with bias. Back to round 1.
+    "acmsP[62.,45.,75.]",
+    "betaP[0.04,0.005,0.15]",
+    "gammaP[0.10,0.002,1.5]",
+    "meanP[-0.5,-2.5,1.5]",
+    "sigmaP[2.0,0.7,4.5]",
+    "sigmaP_2[1.2,0.3,5.0]",
+    "sosP[0.8,0.0,3.0]",
+)
+
 tnpParAltSigFitByBin[18] = params_with_updates(
     tnpParAltSigFitByBin[18],
     "meanP[0.0,-1.5,1.5]",
@@ -256,3 +308,58 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- 背景無約束釘住 (2026-08-21) ---
+# 這些 bin 的 nBkg 被壓到接近或等於框架下界(0.5 個事件)，背景佔比 <1.4%，
+# 於是背景形狀參數連半個事件都約束不了 -> Hessian 在那些方向奇異 ->
+# 誤差全為 0、covQual=0。參數本身是擬合值而非初始值，代表中央值可信、壞的只有誤差。
+# 已在 elid_gap_2024/2025 bin6/bin5 與 sielleg30trigger_nongap_2025 bin2/10/29 驗證:
+# 釘住背景形狀後 covQual 0->3，效率變動僅 1e-5 量級。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[24] = params_with_updates(
+    tnpParNomFitByBin.get(24, tnpParNomFit),
+    "acmsP[80.0]",
+    "betaP[0.06]",
+    "gammaP[0.05]",
+    "peakP[89.0]",
+)
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+tnpParAltSigBkgFitByBin[5] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(5, tnpParAltSigBkgFit),
+    "alphaF_2[-0.02]",
+)
+
+# ---------------------------------------------------------------------------
+# 2026-08-29  altBkgFit bin37 / bin38（ET 50-100，failing）
+#
+# 兩個都收斂良好(edm 1.5e-04 / 9.7e-04、covQual 3)且沒有任何參數撞界 —— 問題純粹是
+# altBkg 的單參數 Exponential 背景描述不了資料的形狀:
+#   b37  75-80 +25%  80-85 +15%  90-95 +6%  100-105 -9.5%  110-115 -9.7%
+#   b38  100-105 -15%
+# alphaF 分別是 -0.0088 和 +0.0142(b38 甚至是上升的指數,對背景不合物理),
+# 一個自由度不足以同時描述 Z 峰兩側。改用我在 2026-08-23 加進 fitUtils 的
+# 二階 Bernstein 背景(tnpAltBkgModelByBin),多兩個自由度但仍是平滑單調族。
+# 訊號解析度同時給實體起點:b37 sigmaF=1.23、b38 sigmaF=1.64 偏窄(ET 50-100 的
+# endcap 解析度應在 2 GeV 上下),讓它有往上的空間。
+tnpAltBkgModelByBin = dict(globals().get('tnpAltBkgModelByBin', {}))
+tnpAltBkgModelByBin[37] = 'bernstein2'
+# b38 第二輪:bernstein2 沒有改善(100-105 -14.9% -> -15.5%)。那一格的偏差不是背景
+# 彈性不足 —— 資料在 Z 峰上緣掉得比模型快(90-95 +7.8%、95-100 +0.4%、100-105 -15.5%),
+# 是訊號解析度的問題:altBkg 的訊號是 MC template 摺積 Gaussian(sigmaF=1.538),
+# 峰太鈍。給 sigmaF 往下的空間讓峰變利,同時升到 bernstein3 多一個自由度去刻 100-110。
+tnpAltBkgModelByBin[38] = 'bernstein3'
+
+tnpParAltBkgFitByBin = dict(globals().get('tnpParAltBkgFitByBin', {}))
+for _b, _m in ((37, -0.5), (38, -1.3)):
+    tnpParAltBkgFitByBin[_b] = params_with_updates(
+        tnpParAltBkgFitByBin.get(_b, tnpParAltBkgFit),
+        "meanF[%.1f,-5.0,3.0]" % _m,
+        "sigmaF[1.8,0.5,6.0]",
+    )
+# b38 第二輪:把 sigmaF 的起點壓低並收窄上界,逼出更利的峰(見上面的註解)。
+# 下界維持 0.3 不動,不排除比目前 1.538 更窄的解。
+tnpParAltBkgFitByBin[38] = params_with_updates(
+    tnpParAltBkgFitByBin[38],
+    "sigmaF[1.0,0.3,2.5]",
+)

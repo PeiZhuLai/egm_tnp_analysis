@@ -435,3 +435,16 @@ for _b in (18, 19, 20, 21):
 # bin35,37 altSigBkg (high-ET central) failing 峰右移+高質量continuum(Joseph 2026-07-18): 收 meanF + alphaF_2 描述 continuum
 for _b in (35, 37):
     tnpParAltSigBkgFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin.get(_b, tnpParAltSigBkgFit_addGaus)), "meanF[0.0,-1.5,1.0]", "alphaF_2[0.0,-0.08,0.03]")
+
+
+# --- turn-on 上限與初始值修正 (2026-08-21) ---
+# bin13: acmsP 貼在上界(89.5~90)，CMSShape 的 turn-on 被推到 Z 峰上，
+# 低質量端沒有背景，訊號被迫去補。與 elid_gap_2024 bin02 同型
+# (那次 acmsF 90->45.5、sosF 脫離下界、背景佔比 22%->78%)。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[13] = params_with_updates(
+    tnpParAltSigFitByBin.get(13, tnpParAltSigFit),
+    "acmsP[65.,45.,80.]",
+    "betaP[0.04,0.005,0.25]",
+)
+

@@ -307,6 +307,23 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 tnpParAltSigBkgFitByBin = {
+    # 2026-08-23 bin2: sigmaF 撞在 0.1 GeV 的下界 —— 電子質量解析度不可能是 0.1 GeV。
+    # 解析度被壓成近乎 delta 之後,gen-level Z lineshape 的輻射尾巴就直接去描述那條連續譜,
+    # nSigF 被灌到 1,305,846(佔 fail 總數 3,256,376 的 40%),背景 46.5%,edm 8.3e+08。
+    # 資料的 fail 譜是單調下降(60:339443 -> 115:56553,比值 6.0),只有 85 有個約 13 萬的
+    # 小 bump —— 真正的 failing 訊號量遠小於擬合宣稱的。
+    # 把 sigmaF 地板抬到物理值、上界放寬(failing bump 本來就寬),並比照本檔 bin0 的先例
+    # 把 alphaF_2 限制成真正遞減(原上界 0.05 允許背景往上翹)。
+    # 純指數描述整條 fail 譜需要 alpha ~ -0.033,落在新範圍內、不會排除最佳解。
+    2: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[-0.5, -4.0, 2.0]',
+        'sigmaF[1.5, 0.8, 5.0]',
+        'sigmaF_2[2.0, 0.5, 5.0]',
+        'sosF[0.2, 0.0, 1.0]',
+        'nF[0.4, 0.0, 3.0]',
+        'alphaF_2[-0.03, -0.20, -0.002]',
+    ),
     0: params_with_updates(
         tnpParAltSigBkgFit,
         'meanF[-1.0, -4.0, 2.0]',
@@ -317,15 +334,25 @@ tnpParAltSigBkgFitByBin = {
         'nF[0.2, 0.0, 1.0]',
         'alphaF_2[-0.05, -0.2, -0.005]',
     ),
+    # 2026-08-30 bin6:上一輪把 alphaF_2 鎖成 [-0.15, -0.005](整段都是負的,背景只能遞減)
+    # 反而變成這一格的病因。這一格的 fail 譜是**單調上升**的:
+    #   60-65 資料 6143 -> 115-120 資料 23238(3.8 倍)
+    # 背景無法上升,擬合只好把 alphaF_2 貼死在最靠近 0 的 -0.005 => 幾乎水平的背景
+    #   60-65 曲線 14385 / 65-70 14136 / 70-75 14306
+    # 於是低質量端曲線是資料的 2.3 倍(-57%)、高質量端只有資料的 2/3(+74%)。
+    # sigmaF_2 同時撞上界 2.5 —— 訊號的寬成分被迫去補高質量端。
+    # 修法:讓 alphaF_2 的上界跨過 0(資料要的是上升的背景),並放寬被連累的 sigmaF_2。
+    # 下界維持 -0.20 不動,不排除「其實該遞減」的解。
+    # ⚠️ 這一格的遞減限制與 bin0/bin2 是各自獨立的覆寫,那兩格不受影響。
     6: params_with_updates(
         tnpParAltSigBkgFit,
         'meanF[-0.8, -3.0, 1.0]',
-        'sigmaF[0.5, 0.1, 1.2]',
-        'sigmaF_2[1.5, 0.2, 2.5]',
-        'sosF[0.15, 0.0, 0.6]',
+        'sigmaF[0.5, 0.1, 2.0]',
+        'sigmaF_2[1.5, 0.2, 5.0]',
+        'sosF[0.15, 0.0, 0.8]',
         'alphaF[2.4, 1.4, 3.5]',
         'nF[0.6, 0.0, 1.5]',
-        'alphaF_2[-0.03, -0.15, -0.005]',
+        'alphaF_2[0.005, -0.20, 0.06]',
     ),
 }
 
@@ -344,3 +371,23 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- bin5 passing Hessian 奇異 (2026-08-20) ---
+# passing 側的參數確實移動過(acmsP、sigmaP 都是擬合值而非初始值)、edm 也降到個位數，
+# 但誤差全為 0、covQual=0 —— 是 Hessian 算不出來，不是 MIGRAD 沒跑。
+# 原因: nBkgP/nSigP 只有 0.8% (高 et 35-100 的 barrel，Z 峰乾淨、背景幾乎不存在)，
+# 背景形狀參數 acmsP/betaP/gammaP 沒有任何資料能約束，Hessian 在那些方向奇異。
+# fail 側同設定 covQual=3 完全正常，排除設定本身的問題。
+# 與 sielleg30trigger_nongap_2026 bin27 同型(那次 edm 894 -> 2.3e-4、covQual 1 -> 3)，
+# 沿用同一處方: 釘住 passing 背景 turn-on，只讓 meanP/sigmaP 浮動。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[5] = params_with_updates(
+    tnpParNomFitByBin.get(5, tnpParNomFit),
+    "meanP[0.0,-2.0,2.0]",
+    "sigmaP[1.0,0.5,3.0]",
+    "acmsP[52.0]",
+    "betaP[0.006]",
+    "gammaP[0.0,-0.05,0.05]",
+    "peakP[87.0]",
+)

@@ -313,3 +313,37 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- bin15 passing:meanP 被鎖在 -5 以下 (2026-08-28) ---
+# meanP 死貼上界 -5、acmsP 撞上界 65、betaP 撞上界 0.035,edm=8.6。
+# 與 dielleg12trigger_nongap_2026 的 bin08/09/15/16/17 是同一個 bug 家族:
+# meanP 的範圍假設 passing 峰大幅下移,但資料的峰就在 85-90
+# (638 667 927 1870 3814 5665 3708 911 ...),最佳解在 -5 之外。
+# 2026 那批放寬後收斂在 meanP = -1.5 ~ -2.6,沿用同一組已驗證的參數。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[15] = params_with_updates(
+    tnpParAltSigFitByBin.get(15, tnpParAltSigFit),
+    "meanP[-2.0,-12.0,5.0]",
+    "sigmaP[2.5,0.7,7.0]",
+    "sigmaP_2[2.0,0.5,7.0]",
+    "sosP[1.0,0.0,5.0]",
+    "acmsP[60.,40.,85.]",
+    "betaP[0.02,0.001,0.10]",
+)
+
+
+# --- bin41 failing: converged but pinned on three bounds (2026-09-06) ---
+# edm 6.5e-04 and covQual 3, yet sigmaF sits exactly on the 2.0 ceiling of
+# tnpParAltSigBkgFit, alphaF on its 1.4 floor and sosF at 0. The peak comes out
+# 10% low at 90-95 GeV. Same cell (eta -2.00..-1.57, ET 50-100) and same +10%
+# as bin33 of dielleg23_nongap_2025. Open the three bounds it is against.
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+tnpParAltSigBkgFitByBin[41] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(41, tnpParAltSigBkgFit),
+    "sigmaF[1.8,0.3,5.0]",
+    "sigmaF_2[0.8,0.2,4.0]",
+    "alphaF[2.0,1.0,4.0]",
+    "sosF[0.3,0.0,2.0]",
+    "nF[0.8,0.0,3.0]",
+)

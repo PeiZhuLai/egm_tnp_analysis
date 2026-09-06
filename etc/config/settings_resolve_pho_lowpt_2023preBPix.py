@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # 初始化 _mod_path 並更新 sys.path，供 tnpEGM_fitter 與 etc.* 匯入使用
 import os, sys
+from etc.config.fit_param_utils import params_with_updates
 # 以 globals() 安全檢查，避免在 Py2 觸發 NameError
 if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
@@ -223,3 +224,44 @@ tnpParAltSigBkgFit = [
   'alphaP_2[-0.020, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]
+
+# ---------------------------------------------------------------------------
+# 2026-08-29  altSigBkgFit bin07（|eta| 2.0-2.5, ET 10-20, failing）
+#
+# 低 pT endcap 光子,背景佔 87.6%(nBkgF=8.1e4 對 nSigF=1.15e4)。三個參數同時撞界:
+#   meanF    = 4.997  [-5, 5]      訊號想往上移超過 5 GeV,被上界擋住
+#   nF       = 6.6e-05 [0, 1.5]    冪次尾退化成常數平台(n->0),被下界擋住
+#   sigmaF_2 = 0.1043 [0.1, 3]     第二成分塌掉,被下界擋住
+# edm 39.2。殘差 85-90 +9.4%、75-80 -7.4%、60-65 +4.7%。
+# 三個方向都被關住時擬合無處可去,只放寬撞界那一側,另一側不動。
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+tnpParAltSigBkgFitByBin[7] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(7, tnpParAltSigBkgFit),
+    # 2026-09-06 round 2: the 08-29 widening did not hold. sigmaF_2 came back
+    # onto the new 0.05 floor and nF onto 0, while meanF ran to +3.59 -- the
+    # same collapse, just against the new bounds. Widening the same three
+    # bounds again would only repeat it.
+    # The real problem is that nothing stops the signal shrinking to a spike:
+    # sigmaF = 0.213 +/- 1.507 (error 7x the value) is not a resolution any
+    # endcap photon has at ET 10-20. With the signal collapsed the exponential
+    # background has no reason to be steep -- alphaF_2 = -0.0097, nearly flat --
+    # so the model runs 18-22% short at 60-65 GeV, which is the deficit on the
+    # left of the plot.
+    # Put a physical floor under the resolution and force the background to
+    # fall, so the left edge has to come from the background.
+    "meanF[0.0,-4.0,4.0]",
+    "sigmaF[2.0,0.8,6.0]",
+    "sigmaF_2[1.5,0.5,6.0]",
+    "nF[0.5,0.0,5.0]",
+    "sosF[0.3,0.0,2.0]",
+    "alphaF_2[-0.03,-1.0,0.0]",
+)
+
+# --- altSigFit bin07: attempted 2026-09-06, REVERTED ---
+# Opening the six bounds it was pinned against did converge the fit
+# (edm 673 -> 6.3e-05, covQual 0 -> 2) and cut the residuals 12 -> 7 slices,
+# but it moved the efficiency the wrong way: 0.6375 -> 0.3771 against
+# nominalFit's 0.8651, i.e. the altSig systematic went from -26% to -56%.
+# The failing signal absorbed the background instead (nSigF 29697 -> 65507).
+# Left at the original settings. The altSigBkgFit override above DID work on
+# this bin (-58% -> +0.6%), so the two alternates need different treatment.

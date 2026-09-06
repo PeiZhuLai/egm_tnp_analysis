@@ -154,20 +154,26 @@ _lowpt_nominal_tail_common = (
     "gammaF[0.03,-0.2,0.4]",
 )
 tnpParNomFitByBin = {
+    # bin00 is the mirror of bin05 and showed the same railed, over-wide failing-leg Z
+    # bump (sigmaF at its 4.5 upper bound). Both bins are averaged into the same |eta|
+    # point, so they get the same capped smearing.
     0: params_with_updates(
         tnpParNomFit,
         "meanP[-2.0,-5.0,5.0]",
         "sigmaP[1.8,0.5,3.0]",
         "meanF[-2.2,-5.0,1.0]",
-        "sigmaF[3.0,0.8,4.5]",
+        "sigmaF[2.0,0.8,3.0]",
         *_lowpt_nominal_tail_common,
     ),
+    # bin05: sigmaF railed at its 4.8 upper bound, giving a far too wide failing-leg Z
+    # bump that overshoots the data between 78 and 95 GeV. Cap the extra smearing at a
+    # physical level (the passing leg needs only ~1.8 GeV) so the bump stays narrow.
     5: params_with_updates(
         tnpParNomFit,
         "meanP[-2.0,-5.0,5.0]",
         "sigmaP[1.9,0.5,3.0]",
         "meanF[-2.0,-5.0,1.0]",
-        "sigmaF[3.2,0.8,4.8]",
+        "sigmaF[2.0,0.8,3.0]",
         *_lowpt_nominal_tail_common,
     ),
     # bin02: default fit fell into a bad min (meanF~+3.2, sigmaF railed at 5 -> the
@@ -179,6 +185,18 @@ tnpParNomFitByBin = {
         "sigmaP[1.6,0.5,3.0]",
         "meanF[-1.0,-4.0,1.5]",
         "sigmaF[2.6,1.6,4.0]",
+        *_lowpt_nominal_tail_common,
+    ),
+    # bin03 is the mirror of bin02 and showed the same bad minimum with the default
+    # parameters (meanF railed at +5.0, sigmaF railed at 5.0 -> over-wide, right-shifted
+    # failing-leg Z bump). Use the bin02 recipe, with a slightly lower sigmaF floor so
+    # the fit can reach the narrow width preferred by the data.
+    3: params_with_updates(
+        tnpParNomFit,
+        "meanP[-1.5,-5.0,5.0]",
+        "sigmaP[1.6,0.5,3.0]",
+        "meanF[-1.0,-4.0,1.5]",
+        "sigmaF[2.0,0.8,3.5]",
         *_lowpt_nominal_tail_common,
     ),
 }
@@ -273,7 +291,29 @@ tnpParAltSigBkgFit = [
   'alphaP_2[-0.012, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]
+_lowpt_altsigbkg_endcap_fail = (
+    # Endcap failing leg: without these the DSCB tail exponent nF runs into 0, so the
+    # power-law tails absorb the falling continuum and the efficiency comes out far
+    # below the nominal fit. Pin the mean near the Z peak, keep the core narrow and the
+    # tail exponent away from 0, and force the exponential background to fall.
+    'meanF[-1.0, -4.0, 1.0]',
+    'sigmaF[1.5, 0.5, 3.0]',
+    'sigmaF_2[1.0, 0.3, 3.0]',
+    'sosF[0.2, 0.0, 1.0]',
+    'alphaF[2.5, 1.4, 3.5]',
+    'nF[1.5, 0.5, 5.0]',
+    'alphaF_2[-0.03, -1, 0.]',
+)
 tnpParAltSigBkgFitByBin = {
+    # bin00 is the mirror of bin05 and had the same failing-leg pathology
+    # (nF railed at 0, nSigF ~ 8e4, eff = 0.4995 against a nominal 0.6732).
+    0: params_with_updates(
+        tnpParAltSigBkgFit,
+        *_lowpt_altsigbkg_endcap_fail,
+    ),
+    # bin05: the failing leg first railed alphaF_2 at its +0.05 upper bound, i.e. a
+    # *rising* exponential background, which let the DSCB absorb the whole falling
+    # continuum (nSigF ~ 6.4e5, eff = 0.114, fit status 3).
     5: params_with_updates(
         tnpParAltSigBkgFit,
         'sigmaP[0.35, 0.1, 1.5]',
@@ -282,6 +322,7 @@ tnpParAltSigBkgFitByBin = {
         'alphaP[2.0, 0.8, 4.0]',
         'nP[0.3, 0.0, 2.0]',
         'alphaP_2[-0.03, -1, 0.05]',
+        *_lowpt_altsigbkg_endcap_fail,
     ),
     6: params_with_updates(
         tnpParAltSigBkgFit,

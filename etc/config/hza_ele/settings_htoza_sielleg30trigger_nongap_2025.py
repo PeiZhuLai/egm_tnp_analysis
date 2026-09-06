@@ -225,3 +225,123 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- bin2/10/29 passing Hessian 奇異 (2026-08-20) ---
+# 三個 bin 的 nBkgP 都停在框架給的下界 0.5 個事件(nBkgP[nTot*0.1, 0.5, nTot*1.5])，
+# 背景佔比 0.00%。背景形狀參數 acmsP/betaP/gammaP 因此連半個事件都約束不了，
+# Hessian 在那三個方向奇異 -> 誤差全為 0、covQual=0。參數本身是擬合值(不是初始值)，
+# 所以中央值可信、壞掉的只有誤差 —— 與 elid_gap_2024/2025 bin6/bin5 同型，
+# 那兩個釘住背景後 covQual 0->3 而效率只動 1e-5。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+for _b in (2, 10, 29):
+    tnpParAltSigFitByBin[_b] = params_with_updates(
+        tnpParAltSigFitByBin.get(_b, tnpParAltSigFit),
+        "acmsP[80.0]",
+        "betaP[0.06]",
+        "gammaP[0.05]",
+        "peakP[89.0]",
+    )
+
+# ---------------------------------------------------------------------------
+# 2026-08-29  使用者標記的三個 bin（altSigBkg b22 fail / altSig b00 fail / altSig b02 pass）
+#
+# b22 (altSigBkgFit, |eta| 1.57-2.00, ET 35-38, failing)
+#   edm 3.7e+07、covQual 2 —— 根本沒收斂。meanF = -2.5e-07、sigmaF = 0.49997、
+#   sigmaF_2 = 0.50001 三個都逐位元停在 tnpParAltSigBkgFit 的種子(0.0 / 0.5 / 0.5)，
+#   只有 alpha/n/sos/產率動過。0.5 GeV 的解析度對 |eta| 1.57-2.0 不可能。
+#   資料峰在 85-90(43916)，模型峰偏高(90-95 曲線 34619 對資料 26531，+30% 在 80-85)。
+#   給接近資料的起點,並把 sigma 的上界從 2.0/3.0 開到 6.0(原上界對這個 |eta| 太窄)。
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+tnpParAltSigBkgFitByBin[22] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(22, tnpParAltSigBkgFit),
+    "meanF[-3.0,-8.0,2.0]",
+    "sigmaF[2.5,0.8,6.0]",
+    "sigmaF_2[2.0,0.6,6.0]",
+    "sosF[0.5,0.0,3.0]",
+)
+
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+
+# b00 (altSigFit, eta -2.50..-2.00, ET 7-33, failing)
+#   sigmaF_2 撞下界 0.5、alphaF 撞上界 3.5、gammaF 撞下界。第二個高斯本來要當寬尾,
+#   卻塌到跟核心(sigmaF=4.87)重疊 -> 尾巴不足:65-70 +94%、70-75 +87%(資料遠多於曲線),
+#   峰區反而過剩(85-90 -8%、90-95 -13%)。
+#   修法:把 sigmaF_2 的下界抬到核心之上,強迫它只能當寬尾;同時解開撞界的 alphaF/gammaF。
+tnpParAltSigFitByBin[0] = params_with_updates(
+    tnpParAltSigFitByBin.get(0, tnpParAltSigFit),
+    "sigmaF[4.0,1.0,10.0]",
+    "sigmaF_2[9.0,4.0,20.0]",
+    "sosF[1.0,0.1,5.0]",
+    "alphaF[2.5,1.2,6.0]",
+    "nF[3.0,0.0,10.0]",
+    "gammaF[0.02,-0.2,1.5]",
+)
+
+# b02 (altSigFit, eta -1.57..-0.80, ET 7-33, passing)
+#   與 b00 反向:核心 sigmaP=5.77 逼近上界 6、nP 撞上界 5、sosP 撞下界 0.5,
+#   結果尾巴過肥 —— 60-65 -68%、65-70 -47%、105-110 -25%、115-120 -29%(曲線都比資料高)。
+#   sosP 想再往下卻被 0.5 的下界擋住,nP 想再往上卻被 5 擋住:兩個方向都被關住。
+#   把 sosP 下界放到 0.05、nP 上界開到 10,並讓 sigmaP 有往下的空間。
+#   ⚠️ 背景已由檔案上方的 (2,10,29) 迴圈釘死(nBkgP 停在框架下界 0.5 個事件),
+#      那組 acmsP/betaP/gammaP/peakP 必須保留 —— 這裡是在它之上再疊訊號參數。
+tnpParAltSigFitByBin[2] = params_with_updates(
+    tnpParAltSigFitByBin.get(2, tnpParAltSigFit),
+    "sigmaP[2.5,0.7,6.0]",
+    "sigmaP_2[1.0,0.3,6.0]",
+    "sosP[0.5,0.05,3.0]",
+    "alphaP[2.5,1.2,6.0]",
+    "nP[3.0,0.0,10.0]",
+)
+
+# ---------------------------------------------------------------------------
+# 2026-08-29 b02 第二輪。第一輪(放寬 sosP/nP/alphaP)參數確實變了
+#   alphaP 3.44->5.44、nP 5.0->0.01、sosP 0.503->0.332
+# 但殘差**逐位元不變** —— 走的是 CB 尾巴 alpha/n 的簡併方向(nP->0 時冪次尾退化成
+# 常數平台,與 alphaP 往外移等價),形狀完全沒動。真正卡住的是另外兩個:
+#   sigmaP  = 5.77 貼在上界 6      核心寬到 5.8 GeV(|eta| 0.80-1.57 的 passing 電子
+#                                  解析度應在 1.5-2.5 GeV)
+#   nBkgP   = 0.5  停在框架下界    背景被上方 (2,10,29) 那組覆寫釘死形狀後,
+#                                  擬合乾脆把它的產率設成零
+# 後果:60-70 與 100-120 兩端曲線都比資料高(-68%/-47% 與 -25%/-29%),
+# 因為沒有背景可用,只能讓訊號的尾巴撐滿整個窗。
+#
+# 第二輪換方向:把背景放開(但限制在合理的 turn-on 範圍),同時把核心壓回物理值。
+# 背景一旦能描述兩端,nBkgP 就會離開下界,訊號尾巴也不必再被拉長。
+# ⚠️ 這會取代 (2,10,29) 迴圈對 bin2 釘死背景的做法 —— 那組原本是為了修 Hessian 奇異,
+#    而奇異的成因正是 nBkgP 卡在下界。若重跑後 covQual 掉回 0,代表背景仍撐不起來,
+#    那就要退回釘死並接受形狀偏差。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[2] = params_with_updates(
+    tnpParAltSigFitByBin.get(2, tnpParAltSigFit),
+    "sigmaP[2.0,0.8,4.5]",
+    "sigmaP_2[1.2,0.4,5.0]",
+    "sosP[0.8,0.05,3.0]",
+    "alphaP[2.0,1.2,4.0]",
+    "nP[2.0,0.3,10.0]",
+    "acmsP[72.,55.,88.]",
+    "betaP[0.05,0.01,0.25]",
+    "gammaP[0.05,-0.1,0.6]",
+    "peakP[89.0]",
+)
+
+
+# --- bin52 passing: MIGRAD never moved (2026-09-06) ---
+# meanP = -0.0045 +/- 0.0000 and sigmaP = 0.8992 +/- 0.0001, i.e. still on the
+# seed with no error, edm 8.55, status -1, covQual 1. The peak therefore sits
+# left of the data: 85-90 GeV curve 11658 vs 9660 observed (+17%), 90-95 GeV
+# 22663 vs 24486 (-8%), 95-100 GeV +17% the other way.
+# The passing background is 8 events out of 42556, so acmsP/betaP/peakP are
+# unconstrained and merely open a flat direction the minimizer cannot leave.
+# Same cure bin27 of the 2026 file documents: pin the turn-on shape to
+# constants and let only meanP/sigmaP float, with meanP started to the right.
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[52] = params_with_updates(
+    tnpParNomFitByBin.get(52, tnpParNomFit),
+    "meanP[0.3,-2.0,2.5]",
+    "sigmaP[0.9,0.4,3.0]",
+    "acmsP[60.0]",
+    "betaP[0.05]",
+    "gammaP[0.05,0.0,0.5]",
+    "peakP[87.0]",
+)

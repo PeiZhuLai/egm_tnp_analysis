@@ -214,3 +214,16 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- turn-on 上限與初始值修正 (2026-08-21) ---
+# bin1: acmsF 貼在上界(89.5~90)，CMSShape 的 turn-on 被推到 Z 峰上，
+# 低質量端沒有背景，訊號被迫去補。與 elid_gap_2024 bin02 同型
+# (那次 acmsF 90->45.5、sosF 脫離下界、背景佔比 22%->78%)。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[1] = params_with_updates(
+    tnpParAltSigFitByBin.get(1, tnpParAltSigFit),
+    "acmsF[65.,45.,80.]",
+    "betaF[0.04,0.005,0.25]",
+)
+

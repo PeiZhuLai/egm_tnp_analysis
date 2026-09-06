@@ -377,15 +377,22 @@ tnpParAltSigFitByBin = {
         "sigmaP_2[1.2,0.3,5.0]",
         "sosP[1.2,0.0,5.0]",
         "meanF[-2.0,-5.0,1.0]",
-        "sigmaF[3.8,1.2,6.5]",
+        # 2026-08-23: betaF/gammaF/sigmaF 三個同時撞界(0.08↑ / 0.001↓ / 6.5↑),edm 1.31e+10。
+        # gammaF 撞下界代表 CMSShape 的指數項想要更平甚至上翹;fail 資料平滑下降
+        # (15850->2850)看不到 Z bump,背景 72.8%。只放寬撞界那側;betaF/gammaF 的覆寫寫在
+        # *_nongap_altsig_fail_falling 之後(params_with_updates 後者覆蓋前者),
+        # 不動那個被多個 bin 共用的 tuple。
+        "sigmaF[4.5,1.2,11.0]",
         "sigmaF_2[0.8,0.3,2.5]",
         "alphaF[1.4,1.0,3.0]",
-        "nF[0.4,0.0,3.0]",
+        "nF[0.8,0.5,3.0]",
         "sosF[1.2,0.0,3.0]",
         "acmsP[75.,40.,100.]",
         "betaP[0.035,0.002,0.10]",
         "gammaP[0.06,0.002,1.2]",
         *_nongap_altsig_fail_falling,
+        "betaF[0.05,0.001,0.30]",
+        "gammaF[0.01,-0.05,0.80]",
     ),
     7: params_with_updates(
         tnpParAltSigFit,
@@ -455,6 +462,19 @@ tnpParAltBkgFit = [
     "alphaF[0.,-5.,5.]",
     ]
 tnpParAltBkgFitByBin = {
+    # 2026-08-23 bin30。第一輪我把 sigmaF 上界從 5.0 放寬到 10.0(它在 4.812,96% 位置),
+    # edm 確實從 1.03e+06 掉到 2.89e-06,但背景佔比同時從 47.4% 崩到 6.7% —— 訊號變寬之後
+    # 直接吃掉了高質量端 ~2350/5GeV 的平台。**那個方向是錯的**:這個 bin 的病不是訊號被
+    # 上界卡住,而是訊號本來就想變寬去吃背景,所以該收不該放。
+    # 第二輪:把 sigmaF 收在 et 50-100、|eta| 1.57-2.00 的合理解析度範圍內(~1.5-3 GeV),
+    # 迫使高質量端的平台由背景描述。
+    # (alphaF=+0.029「上升」的指數是合理的:et 50-100 的 failing probe 本來就把低質量端
+    #  切掉,資料 60:442 -> 90:4555 -> 平台 ~2350,背景確實隨質量上升,不強迫它遞減。)
+    30: params_with_updates(
+        tnpParAltBkgFit,
+        "meanF[-0.7,-5.0,5.0]",
+        "sigmaF[2.0,1.0,3.5]",
+    ),
     0: params_with_updates(
         tnpParAltBkgFit,
         "meanP[-2.5,-5.0,1.0]",
@@ -475,8 +495,15 @@ tnpParAltBkgFitByBin = {
         "meanP[-0.4,-5.0,5.0]",
         "sigmaP[1.1,0.6,3.0]",
         "alphaP[-0.03,-5.,5.]",
-        "meanF[-1.3,-3.0,1.0]",
-        "sigmaF[1.5,0.6,2.8]",
+        # 2026-09-06 failing peak sat 0.77 GeV left of where it belongs.
+        # sigmaF railed at its 2.8 ceiling and meanF never left its -1.3
+        # start, ending at -1.3067 against nominalFit's -0.5351. The signal
+        # was broadening to eat background: nSigF=56832 vs nominal 39267
+        # (+45%). Same failure bin30 documents above -- the cure is to TIGHTEN
+        # sigmaF, not release it. Anchor both at the converged nominal
+        # solution (sigmaF=1.136 +/- 0.172, meanF=-0.535).
+        "meanF[-0.55,-2.0,1.5]",
+        "sigmaF[1.14,0.6,5.0]",
         "alphaF[-0.015,-0.08,0.04]",
     ),
     5: params_with_updates(
@@ -542,6 +569,18 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 tnpParAltSigBkgFitByBin = {
+    # 2026-08-23 bin30: edm 1.34e+07。sigmaF=0.344 GeV 對 et 50-100、|eta| 1.57-2.00 的
+    # 電子是不可能的解析度,那是尖峰;搭配 nF=0.21(CB 冪次尾巴在 n->0 時趨近水平)讓訊號
+    # 吃掉高質量端 ~2350/5GeV 的平台,nSigF 因此被灌到 20735(fail 總數 28624 的 72%),
+    # 但資料的 Z 峰超出量只有 ~5000-8000。抬 sigmaF 與 nF 的地板到物理值。
+    30: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[-0.2, -4.0, 3.0]',
+        'sigmaF[1.8, 1.0, 5.0]',
+        'sigmaF_2[1.5, 0.5, 5.0]',
+        'sosF[0.4, 0.0, 1.0]',
+        'nF[0.8, 0.5, 3.0]',
+    ),
     # bins 24/31 (et 50-100 endcap): high-pT resolution larger than the default
     # sigmaP cap (2.0), so the passing CB core rails at 2.0 and over-peaks the data.
     # Raise the core caps. (Only the passing leg was flagged; leave the failing/bkg
@@ -631,3 +670,50 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- failing 背景 turn-on 調整 (2026-08-20) ---
+# 與 elid_gap_2024 altSigFit bin02 同型的病徵：failing 側的 CMSShape turn-on 撞界，
+# 背景無法覆蓋 failing spectrum，訊號的寬度參數因此被擠到界上去補背景該做的事。
+# 那個 bin 修好後 acmsF 90->45.5、sosF 由下界 0.5 脫離到 1.29、背景佔比 22%->78%，
+# 證實因果是「背景缺位擠壓訊號」而非訊號模型不足。這裡只放寬撞界的那一側。
+# bin01: 同上，另有 sigmaF_2 也撞下界
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[1] = params_with_updates(
+    tnpParAltSigFitByBin.get(1, tnpParAltSigFit),
+    "acmsF[65.,45.,80.]",
+    "betaF[0.04,0.005,0.25]",
+)
+
+
+# --- 背景無約束釘住 (2026-08-21) ---
+# 這些 bin 的 nBkg 被壓到接近或等於框架下界(0.5 個事件)，背景佔比 <1.4%，
+# 於是背景形狀參數連半個事件都約束不了 -> Hessian 在那些方向奇異 ->
+# 誤差全為 0、covQual=0。參數本身是擬合值而非初始值，代表中央值可信、壞的只有誤差。
+# 已在 elid_gap_2024/2025 bin6/bin5 與 sielleg30trigger_nongap_2025 bin2/10/29 驗證:
+# 釘住背景形狀後 covQual 0->3，效率變動僅 1e-5 量級。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[17] = params_with_updates(
+    tnpParAltSigFitByBin.get(17, tnpParAltSigFit),
+    "acmsP[80.0]",
+    "betaP[0.06]",
+    "gammaP[0.05]",
+    "peakP[89.0]",
+)
+
+
+# --- bin04 failing background: exponential -> Bernstein (2026-09-06) ---
+# The failing peak sat ~0.7-0.8 GeV left of the converged nominalFit solution
+# and sigmaF railed at its 2.8 ceiling, with nSigF running 34-45%% above
+# nominal -- the signal was broadening to patch a background shape the model
+# cannot make. A single exponential has one slope, but this bin's background
+# falls slowly below the Z and steeply above it (2025 data: 60->80 GeV drops
+# 1.28x, 95->120 GeV drops 2.78x), so the residual keeps the same signature
+# whatever the signal does: -10%% at 60-65, +9%% at 70-80, -12%% at 115-120.
+# Tightening sigmaF (first attempt) only moved the peak 0.22 GeV right and
+# made the residuals worse -- the peak position is a symptom, not the cause.
+# nongap_2024 already fixed exactly this on its own bins 3/4; reuse it here.
+# alphaF is left in place: no pdf uses it under Bernstein, and it is harmless.
+tnpAltBkgModelByBin = {
+    4: {'fail': 'bernstein2'},
+}

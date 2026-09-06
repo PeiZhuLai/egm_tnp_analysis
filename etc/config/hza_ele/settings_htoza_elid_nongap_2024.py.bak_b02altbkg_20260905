@@ -1,0 +1,697 @@
+# -*- coding: utf-8 -*-
+import os, sys
+if '_mod_path' not in globals() or not _mod_path:
+    _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+    if _mod_path not in sys.path:
+        sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_with_updates
+
+#############################################################
+########## General settings
+#############################################################
+# EA reference: https://indico.cern.ch/event/1204277/contributions/5064356/attachments/2538496/4369369/CutBasedPhotonID_20221031.pdf
+
+# baseline selection shared by all branches (keep trailing && for concatenation)
+baseline_cut = (
+    '(el_pt > 7) &&'
+    '(abs(el_sc_eta) < 2.5) &&'
+    '(abs(el_dz) < 1.0) &&'
+    '(abs(el_dxy) < 0.5) &&'
+)
+
+# flag to be Tested
+flags = {
+    'hza_elid_nongap_2024_sf': (
+        '('
+        + baseline_cut +
+        '('
+        # ele Et > 10 region
+        '((el_sc_et > 10) && ('
+        '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.3527)'
+        ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.2601)'
+        ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > -0.4954)'
+        ' ))'
+        ' || '
+        # ele Et < 10 region
+        '((el_sc_et < 10) && ('
+        '    (abs(el_sc_eta) < 0.8   && el_hzzMVA > 0.9267)'
+        ' || (abs(el_sc_eta) >= 0.8  && abs(el_sc_eta) < 1.479 && el_hzzMVA > 0.9138)'
+        ' || (abs(el_sc_eta) >= 1.479 && el_hzzMVA > 0.9683)'
+        ' ))'
+        ')'
+        ')'
+    ),
+}
+
+# /eos/cms/store/group/phys_egamma/ec/nkasarag/EGM_comm/TnP_samples/2022/sim/DY_NLO/merged_Run3Summer22MiniAODv4-130X_mcRun3_2022_realistic_v5-v2.root
+baseOutDir = '/eos/home-p/pelai/HZa/root_TnP/'
+
+#############################################################
+########## samples definition  - preparing the samples
+#############################################################
+### samples are defined in etc/inputs/tnpSampleDef.py
+### not: you can setup another sampleDef File in inputs
+import etc.inputs.tnpSampleDef as tnpSamples
+tnpTreeDir = 'tnpEleIDs'
+
+samplesDef = {
+        'data'  : tnpSamples.Run3_2024_ele['Data_2024'].clone(),
+        'mcNom' : tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
+        'tagSel': tnpSamples.Run3_2024_ele['DY_MC_LO_2024'].clone(),
+        'mcAlt': tnpSamples.Run3_2024_ele['DY_MC_NLO_2024'].clone(),
+    }
+## can add data sample easily
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024D'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024E'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024F'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024G'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024H'] )
+# samplesDef['data'].add_sample( tnpSamples.Run3_2024['Data_2024I'] )
+
+
+## can add data sample easily
+# samplesDef['data'].add_sample(tnpSamples.Run3_124X_PromptReco2022G['data_Run2022G'].clone()) 
+## some sample-based cuts... general cuts defined here after
+## require mcTruth on MC DY samples and additional cuts
+## all the samples MUST have different names (i.e. sample.name must be different for all)
+## if you need to use 2 times the same sample, then rename the second one
+#samplesDef['data'  ].set_cut('run >= 273726')
+samplesDef['data' ].set_tnpTree(tnpTreeDir)
+if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_tnpTree(tnpTreeDir)
+if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_tnpTree(tnpTreeDir)
+if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_tnpTree(tnpTreeDir)
+
+if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_mcTruth()
+if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_mcTruth()
+if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_mcTruth()
+if not samplesDef['tagSel'] is None:
+    samplesDef['tagSel'].rename('mcAltSel_DY_MC_LO_2024')
+    samplesDef['tagSel'].set_cut('tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0')
+
+## set MC weight, simple way (use tree weight) 
+# weightName = 'totWeight'
+# if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
+# if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
+# if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
+
+## set MC weight, can use several pileup rw for different data taking 
+# mcNom_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_madgraph_pho.pu.puTree.root'
+# mcAlt_puFile = '/eos/cms/store/group/phys_egamma/ec/tnpTuples/Prompt2023/pileupReweightingFiles/preBPIX/DY_amcatnloext_pho.pu.puTree.root'
+weightName = 'totWeight'   ## HZa: in-tree totWeight = weight(gen)*PUweight (was stale 2023 friend)
+if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_weight(weightName)
+if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_weight(weightName)
+if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_weight(weightName)
+# if not samplesDef['mcNom' ] is None: samplesDef['mcNom' ].set_puTree(mcNom_puFile)
+# if not samplesDef['mcAlt' ] is None: samplesDef['mcAlt' ].set_puTree(mcAlt_puFile)
+# if not samplesDef['tagSel'] is None: samplesDef['tagSel'].set_puTree(mcNom_puFile)
+
+#############################################################
+########## bining definition  [can be nD bining]
+#############################################################
+biningDef = [
+   { 'var' : 'el_sc_eta' , 'type': 'float', 'bins': [-2.5,-2.0,-1.566,-0.8, 0.0, 0.8, 1.566, 2.0, 2.5] },
+   { 'var' : 'el_et' , 'type': 'float', 'bins': [15,20,35,50,100] },
+]
+
+#############################################################
+########## Cuts definition for all samples
+#############################################################
+### cut
+cutBase   = 'tag_Ele_pt > 40 && abs(tag_sc_eta) < 2.17 && (tag_Ele_q + el_q) == 0'
+
+# can add addtionnal cuts for some bins (first check bin number using tnpEGM --checkBins)
+additionalCuts = { 
+   0 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   1 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   2 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   3 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   4 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   5 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   6 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   7 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   8 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+   9 : 'sqrt( 2*event_met_pfmet*tag_Ele_pt*(1-cos(event_met_pfphi-tag_Ele_phi))) < 45',
+}
+
+#### or remove any additional cut (default)
+additionalCuts = None
+
+#############################################################
+########## fitting params to tune fit by hand if necessary
+#############################################################
+tnpParNomFit = [
+    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
+    "acmsP[65.,45.,90.]","betaP[0.05,0.005,0.10]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+    "acmsF[65.,45.,90.]","betaF[0.05,0.005,0.10]","gammaF[0.1, -2, 2]","peakF[87.0,82.0,90.0]",
+    ]
+_nongap_nominal_fail_falling = (
+    "acmsF[55.,35.,75.]",
+    "betaF[0.02,0.001,0.08]",
+    "gammaF[0.03,-0.2,0.4]",
+)
+_nongap_nominal_fail_turn68 = (
+    "acmsF[68.,58.,78.]",
+    "betaF[0.04,0.005,0.08]",
+    "gammaF[0.03,-0.1,0.3]",
+)
+tnpParNomFitByBin = {
+    0: params_with_updates(
+        tnpParNomFit,
+        "meanP[-2.2,-5.0,5.0]",
+        "meanF[-2.5,-5.0,1.0]",
+        "sigmaF[3.2,0.8,4.6]",
+        "acmsP[75.,40.,100.]",
+        "betaP[0.05,0.002,0.12]",
+        "gammaP[0.08,0.002,2.]",
+        *_nongap_nominal_fail_falling,
+    ),
+    1: params_with_updates(
+        tnpParNomFit,
+        "meanP[-1.2,-5.0,5.0]",
+        "sigmaP[2.5,0.8,6.5]",
+        "meanF[-2.5,-5.0,2.0]",
+        "sigmaF[6.0,1.0,12.0]",
+        "acmsP[75.,40.,100.]",
+        "betaP[0.05,0.002,0.12]",
+        "gammaP[0.08,0.002,2.]",
+        *_nongap_nominal_fail_falling,
+    ),
+    2: params_with_updates(
+        tnpParNomFit,
+        "meanF[-2.5,-5.0,1.0]",
+        "sigmaF[3.0,0.8,4.2]",
+        *_nongap_nominal_fail_falling,
+    ),
+    3: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.4,-5.0,5.0]",
+        "meanF[-2.2,-5.0,1.0]",
+        "sigmaF[2.8,0.8,4.0]",
+        "acmsP[75.,40.,100.]",
+        "betaP[0.05,0.002,0.12]",
+        "gammaP[0.08,0.002,2.]",
+        *_nongap_nominal_fail_falling,
+    ),
+    5: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.6,-5.0,5.0]",
+        "meanF[-2.2,-5.0,1.0]",
+        "sigmaF[3.0,0.8,4.2]",
+        "acmsP[75.,40.,100.]",
+        "betaP[0.05,0.002,0.12]",
+        "gammaP[0.08,0.002,2.]",
+        *_nongap_nominal_fail_falling,
+    ),
+    6: params_with_updates(
+        tnpParNomFit,
+        "meanF[-2.2,-5.0,1.0]",
+        "sigmaF[3.2,0.8,4.5]",
+        *_nongap_nominal_fail_falling,
+    ),
+    8: params_with_updates(
+        tnpParNomFit,
+        "meanF[-2.2,-5.0,1.0]",
+        "sigmaF[3.2,1.0,4.8]",
+        "acmsF[62.,55.,70.]",
+        "betaF[0.02,0.002,0.06]",
+        "gammaF[0.02,-0.05,0.2]",
+    ),
+    9: params_with_updates(
+        tnpParNomFit,
+        "meanF[-2.2,-5.0,1.0]",
+        "sigmaF[2.4,0.8,3.6]",
+        *_nongap_nominal_fail_turn68,
+    ),
+    10: params_with_updates(
+        tnpParNomFit,
+        "meanF[-2.0,-5.0,1.0]",
+        "sigmaF[2.4,0.8,3.6]",
+        *_nongap_nominal_fail_turn68,
+    ),
+    11: params_with_updates(
+        tnpParNomFit,
+        "meanF[-1.8,-5.0,1.0]",
+        "sigmaF[2.4,0.8,3.6]",
+        *_nongap_nominal_fail_turn68,
+    ),
+    12: params_with_updates(
+        tnpParNomFit,
+        "meanF[-1.8,-5.0,1.0]",
+        "sigmaF[2.4,0.8,3.6]",
+        *_nongap_nominal_fail_turn68,
+    ),
+    13: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.2,-5.0,5.0]",
+        "sigmaP[1.3,0.5,3.2]",
+        "acmsP[92.,65.,115.]",
+        "betaP[0.045,0.002,0.10]",
+        "gammaP[0.06,-0.1,1.0]",
+        "peakP[89.5,85.0,93.0]",
+        "meanF[-2.0,-5.0,1.0]",
+        "sigmaF[2.4,0.8,3.6]",
+        *_nongap_nominal_fail_turn68,
+    ),
+    14: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.2,-5.0,5.0]",
+        "sigmaP[1.3,0.5,3.2]",
+        "acmsP[92.,65.,115.]",
+        "betaP[0.045,0.002,0.10]",
+        "gammaP[0.06,-0.1,1.0]",
+        "peakP[89.5,85.0,93.0]",
+        "meanF[-2.6,-5.0,1.0]",
+        "sigmaF[2.0,0.7,3.2]",
+        "acmsF[68.,56.,82.]",
+        "betaF[0.04,0.003,0.10]",
+        "gammaF[0.03,-0.1,0.5]",
+    ),
+    15: params_with_updates(
+        tnpParNomFit,
+        "meanP[-0.2,-5.0,5.0]",
+        "sigmaP[1.4,0.5,3.5]",
+        "acmsP[92.,65.,115.]",
+        "betaP[0.045,0.002,0.10]",
+        "gammaP[0.06,-0.1,1.0]",
+        "peakP[89.5,85.0,93.0]",
+        # 2026-08-23: acmsF/betaF/sigmaF 三個上界同時被撞(92 / 0.12 / 5.0)。fail 資料由
+        # 60:6592 升到 85:28445 再陡降,turn-on 確實在窗內,擬合想要更高的 turn-on、更陡的
+        # 轉折、更寬的訊號,但三個方向都被上界擋住。只放寬撞界那側,下界全部不動。
+        # 2026-08-28 第二輪。8/23 我依 edm(1.0e-03 -> 6.5e-05)與撞界數(3->1)判定修好,
+        # 但那時還沒有殘差工具,沒驗形狀 —— 實際上 8 個 slice 超過 5 sigma
+        # (60-65 +51%、75-80 -23%、85-90 +18%、80-85 -16%)。收斂指標好不等於形狀對。
+        # 現況:betaF 撞上界 0.30、acmsF 在 87%、sigmaF 在 85%(7.75 GeV)。
+        # 資料 fail 由 60:6592 升到 85:28445 再降,turn-on 確實在窗內;背景想要更陡更高的
+        # turn-on 卻被 betaF 的上界擋住,訊號只好用 7.75 GeV 的寬度去補低質量端,
+        # 於是 60-65 多出 51%。放寬 betaF 與 acmsF 的撞界側,同時把訊號寬度收回,
+        # 逼背景自己描述那段上升。
+        # 2026-08-28 第三輪。第二輪(sigmaF 上界壓到 6.0)把 betaF 從 0.30 的界解放了
+        # (0.337),Z 峰區 85-100 的殘差確實改善(+18%->+5%、-16%->-5%),但 sigmaF 反而
+        # 撞死在我自己設的上界 6.0,低質量端因此更差:60-65 +51%->+76%、65-70 +27%->+48%。
+        # 我把最佳解排除在範圍外了(原本 [0.8,9] 擬合出 7.75,我卻改成上界 6.0)。
+        # 這個 bin 的 fail 資料 60:6592 一路升到 85:28445 再降到 115:3606 的平台。
+        # 高質量平台 = 背景(acmsF~102 的 turn-on 讓背景只活在 95-120,nBkgF 1.29e4 合理);
+        # 60-95 的整段上升只能由訊號負責 —— 而 60 GeV 處是峰值的 23%,要 Gaussian 平滑
+        # 到這種程度需要 sigma ~14 GeV(|eta| 2.0-2.5、ET 20-35 的 failing 電子質量解析度
+        # 本來就極差)。第二輪把它鎖在 6 等於不准擬合描述資料。
+        # 第三輪:sigmaF 上界放到 14、meanF 下界放到 -8,讓訊號有能力填低質量端;
+        # betaF/acmsF 維持第二輪(已脫離界)。
+        "meanF[-2.0,-8.0,2.0]",
+        "sigmaF[6.0,0.8,14.0]",
+        "acmsF[95.,55.,125.]",
+        "betaF[0.10,0.003,0.80]",
+        "gammaF[0.04,-0.1,0.8]",
+    ),
+    28: params_with_updates(
+        tnpParNomFit,
+        "meanP[1.0,-5.0,6.0]",
+        "sigmaP[2.2,0.6,6.0]",
+        "acmsP[95.,65.,125.]",
+        "betaP[0.06,0.001,0.20]",
+        "gammaP[0.05,-0.2,1.0]",
+        "peakP[91.0,86.0,96.0]",
+        "meanF[1.4,-5.0,5.0]",
+        "sigmaF[2.0,0.5,5.0]",
+        "acmsF[45.,40.,90.]",
+        "betaF[0.005,0.0005,0.05]",
+        "gammaF[-0.025,-0.40,0.20]",
+        "peakF[85.0,80.0,92.0]",
+    ),
+}
+
+# # 15
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[-0.0,-5.0,5.0]","sigmaF[1.0,0.0,3.0]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,50.,70.]","betaF[0.05,0.05,0.07]","gammaF[0.01, -2, 2]","peakF[87.0,82.0,90.0]",
+#     ]
+
+# # 4
+# tnpParNomFit = [
+#     "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+#     "meanF[0.2,0.1,5.0]","sigmaF[1.5]",
+#     "acmsP[60.,50.,80.]","betaP[0.05,0.01,0.08]","gammaP[0.1, -2, 2]","peakP[87.0,82.0,90.0]",
+#     "acmsF[60.,40.,80.]","betaF[0.05,0.01,0.08]","gammaF[0.01, -2, 0.1]","peakF[87.0,82.0,90.0]",
+#     ]
+# print("DEBUG tnpParNomFit =", tnpParNomFit)
+
+tnpParAltSigFit = [
+    "meanP[-0.0,-5.0,5.0]","sigmaP[1,0.7,6.0]","alphaP[2.0,1.2,3.5]" ,'nP[3,-5,5]',"sigmaP_2[1.5,0.5,6.0]","sosP[1,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]","sigmaF[2,0.7,8.0]","alphaF[2.0,1.2,3.5]",'nF[3,0,5]',"sigmaF_2[2.0,0.5,6.0]","sosF[1,0.5,5.0]",
+    "acmsP[65.,45.,90.]","betaP[0.04,0.005,0.08]","gammaP[0.08, 0.002, 1.5]","peakP[89.0,82.0,90.0]",
+    "acmsF[65.,45.,90.]","betaF[0.04,0.005,0.08]","gammaF[0.08, 0.002, 1.5]","peakF[89.0,82.0,90.0]",
+    ]
+_nongap_altsig_fail_falling = (
+    "acmsF[55.,35.,75.]",
+    "betaF[0.02,0.001,0.08]",
+    "gammaF[0.03,0.001,0.80]",
+)
+_nongap_altsig_fail_turn68 = (
+    "acmsF[68.,58.,78.]",
+    "betaF[0.03,0.001,0.08]",
+    "gammaF[0.03,0.001,0.80]",
+)
+tnpParAltSigFitByBin = {
+    0: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-2.0,-5.0,5.0]",
+        "sigmaP[4.0,1.0,6.0]",
+        "sigmaP_2[1.5,0.4,4.0]",
+        "alphaP[1.8,0.8,4.0]",
+        "nP[0.8,0.0,6.0]",
+        "sosP[1.5,0.0,4.0]",
+        "meanF[-1.8,-4.0,2.0]",
+        "sigmaF[3.2,1.0,5.0]",
+        "sigmaF_2[0.7,0.3,2.0]",
+        "alphaF[1.4,1.0,3.0]",
+        "nF[0.4,0.0,3.0]",
+        "sosF[0.5,0.0,2.0]",
+        "acmsP[85.,25.,110.]",
+        "betaP[0.04,0.001,0.10]",
+        "gammaP[0.08,0.001,2.0]",
+        *_nongap_altsig_fail_falling,
+    ),
+    1: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-1.4,-5.0,5.0]",
+        "sigmaP[4.0,0.8,8.0]",
+        "sigmaP_2[2.0,0.4,7.0]",
+        "alphaP[1.8,0.8,4.0]",
+        "nP[0.8,0.0,8.0]",
+        "sosP[1.5,0.0,6.0]",
+        "meanF[-2.0,-5.0,3.0]",
+        "sigmaF[6.0,1.0,12.0]",
+        "sigmaF_2[2.0,0.3,8.0]",
+        "alphaF[1.8,0.8,4.0]",
+        "nF[0.3,0.0,4.0]",
+        "sosF[1.5,0.0,8.0]",
+        "acmsP[85.,30.,115.]",
+        "betaP[0.05,0.001,0.12]",
+        "gammaP[0.06,0.001,1.2]",
+        *_nongap_altsig_fail_falling,
+    ),
+    4: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-0.8,-5.0,5.0]",
+        "sigmaP[3.5,0.8,7.0]",
+        "sigmaP_2[1.8,0.4,6.0]",
+        "sosP[1.3,0.0,5.0]",
+        "meanF[-1.8,-5.0,3.0]",
+        "sigmaF[5.0,1.0,10.0]",
+        "sigmaF_2[1.5,0.3,7.0]",
+        "alphaF[1.8,0.8,4.0]",
+        "nF[0.3,0.0,4.0]",
+        "sosF[1.2,0.0,7.0]",
+        "acmsP[88.,40.,115.]",
+        "betaP[0.05,0.001,0.12]",
+        "gammaP[0.06,0.001,1.2]",
+        *_nongap_altsig_fail_falling,
+    ),
+    7: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-1.0,-5.0,5.0]",
+        "sigmaP[3.5,0.8,7.0]",
+        "sigmaP_2[1.8,0.4,6.0]",
+        "sosP[1.3,0.0,5.0]",
+        "meanF[-1.8,-5.0,3.0]",
+        "sigmaF[5.5,1.0,11.0]",
+        "sigmaF_2[1.5,0.3,7.0]",
+        "alphaF[1.8,0.8,4.0]",
+        "nF[0.3,0.0,4.0]",
+        "sosF[1.2,0.0,7.0]",
+        "acmsP[85.,35.,115.]",
+        "betaP[0.05,0.001,0.12]",
+        "gammaP[0.06,0.001,1.2]",
+        *_nongap_altsig_fail_falling,
+    ),
+    8: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-2.1,-5.0,5.0]",
+        "sigmaP[4.0,1.5,8.0]",
+        "sigmaP_2[2.0,0.5,8.0]",
+        "alphaP[1.8,0.8,4.0]",
+        "nP[1.0,0.0,8.0]",
+        "sosP[1.5,0.2,6.0]",
+        "meanF[-2.0,-5.0,5.0]",
+        "sigmaF[7.0,1.5,12.0]",
+        "sigmaF_2[1.0,0.3,8.0]",
+        "alphaF[2.0,0.8,4.0]",
+        "nF[1.0,0.0,8.0]",
+        "sosF[2.5,0.2,10.0]",
+        "acmsP[75.,35.,100.]",
+        "betaP[0.04,0.002,0.12]",
+        "gammaP[0.08,0.002,2.0]",
+        "acmsF[75.,35.,100.]",
+        "betaF[0.04,0.002,0.12]",
+        "gammaF[0.08,0.002,2.0]",
+    ),
+    9: params_with_updates(
+        tnpParAltSigFit,
+        "meanF[-2.5,-5.0,1.0]",
+        "sigmaF[3.5,1.2,5.5]",
+        "sigmaF_2[0.8,0.3,2.0]",
+        "alphaF[1.4,1.0,3.0]",
+        "nF[0.4,0.0,3.0]",
+        "sosF[1.2,0.0,3.0]",
+        *_nongap_altsig_fail_turn68,
+    ),
+    10: params_with_updates(
+        tnpParAltSigFit,
+        "meanF[-2.0,-5.0,1.0]",
+        "sigmaF[3.5,1.2,5.5]",
+        "sigmaF_2[0.8,0.3,2.0]",
+        "alphaF[1.4,1.0,3.0]",
+        "nF[0.4,0.0,3.0]",
+        "sosF[1.0,0.0,3.0]",
+        *_nongap_altsig_fail_turn68,
+    ),
+    12: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-0.4,-5.0,5.0]",
+        "sigmaP[2.0,0.7,6.0]",
+        "sigmaP_2[1.6,0.4,5.0]",
+        "sosP[1.3,0.0,5.0]",
+        "meanF[-0.6,-5.0,5.0]",
+        "sigmaF[3.5,0.8,8.0]",
+        "sigmaF_2[1.5,0.3,6.0]",
+        "alphaF[1.8,0.8,4.0]",
+        "nF[0.3,0.0,4.0]",
+        "sosF[2.0,0.0,8.0]",
+        "acmsP[88.,40.,115.]",
+        "betaP[0.05,0.001,0.12]",
+        "gammaP[0.06,0.001,1.2]",
+        "acmsF[90.,50.,120.]",
+        "betaF[0.02,0.001,0.10]",
+        "gammaF[0.02,0.001,1.0]",
+    ),
+    13: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-0.2,-5.0,5.0]",
+        "sigmaP[3.2,1.0,7.0]",
+        "sigmaP_2[2.6,0.6,7.0]",
+        "sosP[1.8,0.2,6.0]",
+        "acmsP[90.,60.,115.]",
+        "betaP[0.045,0.001,0.12]",
+        "gammaP[0.08,0.001,1.2]",
+        "peakP[89.5,85.0,93.0]",
+        "meanF[-2.2,-5.0,1.0]",
+        "sigmaF[3.8,1.2,5.8]",
+        "sigmaF_2[0.8,0.3,2.0]",
+        "alphaF[1.4,1.0,3.0]",
+        "nF[0.4,0.0,3.0]",
+        "sosF[1.2,0.0,3.0]",
+        *_nongap_altsig_fail_turn68,
+    ),
+    14: params_with_updates(
+        tnpParAltSigFit,
+        "meanF[-2.8,-5.0,1.0]",
+        "sigmaF[3.5,1.2,5.5]",
+        "sigmaF_2[0.8,0.3,2.0]",
+        "alphaF[1.4,1.0,3.0]",
+        "nF[0.4,0.0,3.0]",
+        "sosF[1.2,0.0,3.0]",
+        *_nongap_altsig_fail_turn68,
+    ),
+}
+     
+tnpParAltBkgFit = [
+    "meanP[-0.0,-5.0,5.0]","sigmaP[0.9,0.5,5.0]",
+    "meanF[-0.0,-5.0,5.0]","sigmaF[0.9,0.5,5.0]",
+    "alphaP[0.,-5.,5.]",
+    "alphaF[0.,-5.,5.]",
+    ]
+tnpParAltBkgFitByBin = {
+    3: params_with_updates(
+        tnpParAltBkgFit,
+        "meanF[-1.0,-2.5,1.0]",
+        "sigmaF[2.2,1.0,3.5]",
+        "alphaF[-0.06,-0.15,-0.005]",
+    ),
+    4: params_with_updates(
+        tnpParAltBkgFit,
+        "meanP[-0.4,-5.0,5.0]",
+        "sigmaP[1.3,0.8,4.0]",
+        "alphaP[-0.03,-5.,5.]",
+        # 2026-08-23: sigmaF 撞上界 3.3 —— 那是訊號在補背景做不到的事,背景換成 Bernstein
+        # 之後應該不需要那麼寬,但撞界的那一側還是要放開才知道真正的最佳解在哪。
+        # alphaF 在 Bernstein 下已不被任何 pdf 使用,保留無害。
+        "meanF[-1.0,-2.5,1.0]",
+        "sigmaF[2.1,1.0,6.0]",
+        "alphaF[-0.06,-0.15,-0.005]",
+    ),
+    5: params_with_updates(
+        tnpParAltBkgFit,
+        "meanP[-0.65,-5.0,5.0]",
+        "sigmaP[1.5,0.8,4.5]",
+        "alphaP[-0.04,-5.,5.]",
+        "meanF[-1.1,-5.0,5.0]",
+        "sigmaF[1.9,0.8,5.0]",
+        "alphaF[-0.03,-5.,5.]",
+    ),
+    31: params_with_updates(
+        tnpParAltBkgFit,
+        "meanP[-0.8,-5.0,5.0]",
+        "sigmaP[1.8,0.8,6.0]",
+        "alphaP[-0.1,-5.,5.]",
+        "meanF[0.3,-5.0,5.0]",
+        "sigmaF[4.8,1.0,10.0]",
+        "alphaF[0.1,-5.,5.]",
+    ),
+}
+
+
+tnpParAltSigBkgFit = [
+  'meanP[-0.0, -5.0, 5.0]',
+  'meanF[-0.0, -5.0, 5.0]',
+  'sigmaP[0.5, 0.1, 2.0]',
+  'sigmaF[0.5, 0.1, 2.0]',
+  'sigmaP_2[0.5, 0.1, 2.0]',
+  'sigmaF_2[0.5, 0.1, 3.0]',
+  'sosP[0.10, 0.0, 1.0]',
+  'sosF[0.12, 0.0, 1.0]',
+  'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
+  'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
+  'alphaP_2[-0.012, -1, 0]',
+  'alphaF_2[-0.014, -1, 0.05]',
+]
+tnpParAltSigBkgFitByBin = {
+    # 2026-08-23 bin7: 同 bin6 的機制 —— nF=0.0055 撞在 0,CB 尾巴變平去吃連續背景。
+    # 另外 sigmaF=0.342 GeV 對 |eta| 2.0-2.5、et 15-20 的電子是不可能的解析度
+    # (該區材料多,解析度應在 2-3 GeV),那是一根尖峰而非真正的訊號核心。
+    # 抬 nF 地板、抬 sigmaF 地板到物理值,上界一併放寬(failing 峰本來就寬)。
+    7: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[-0.5, -4.0, 3.0]',
+        'sigmaF[2.0, 0.8, 5.0]',
+        'sigmaF_2[1.5, 0.5, 5.0]',
+        'sosF[0.3, 0.0, 1.0]',
+        'alphaF[2.2, 1.8, 3.5]',
+        'nF[0.8, 0.5, 3.0]',
+        'alphaF_2[-0.03, -0.20, -0.002]',
+    ),
+    6: params_with_updates(
+        tnpParAltSigBkgFit,
+        # 2026-08-23: meanF 撞上界 2、edm 3.65e+06,而且擬合宣稱 74% 是訊號
+        # (nSigF 85803 / 116249),但 fail 資料根本沒有 Z bump(85:8182 < 80:8895)。
+        # 機制:nF=0.051 讓 Crystal Ball 的冪次尾巴 (B-t)^(-n) 在 n->0 時趨近常數,
+        # 等於給訊號一條水平尾巴貫穿整個窗,連續背景就被算成訊號。alphaF=1.475 也貼近
+        # 下界 1.4(尾巴起點太靠近核心)使情況更糟。把 nF 地板抬離 0、alphaF 下界推開,
+        # 讓尾巴必須真的往下掉;meanF 只放寬撞界的上界。
+        'meanF[0.5, -3.0, 5.0]',
+        'sigmaF[0.8, 0.2, 1.8]',
+        'sigmaF_2[0.5, 0.1, 1.5]',
+        'sosF[0.2, 0.0, 0.8]',
+        'alphaF[2.2, 1.8, 3.5]',
+        'nF[0.8, 0.5, 3.0]',
+        'alphaF_2[-0.05, -0.2, -0.005]',
+    ),
+}
+
+# ## 06
+# tnpParAltSigBkgFit = [
+#   'meanP[-0.0, -5.0, 5.0]',
+#   'meanF[-0.0, -5.0, 5.0]',
+#   'sigmaP[0.5, 0.1, 2.0]',
+#   'sigmaF[0.5, 0.1, 2.0]',
+#   'sigmaP_2[0.5, 0.1, 2.0]',
+#   'sigmaF_2[0.5, 0.1, 3.0]',
+#   'sosP[0.10, 0.0, 1.0]',
+#   'sosF[0.12, 0.0, 1.0]',
+#   'alphaP[2.0, 1.4, 3.5]', 'nP[0.4, 0.0, 1.5]',
+#   'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
+#   'alphaP_2[-0.012, -1, 0]',
+#   'alphaF_2[-0.014, -1, 0.]',
+# ]
+
+
+# --- altBkg 的 failing 背景改用 Bernstein (2026-08-23) ---
+# bin03/bin04 (et 15-20, |eta|<0.8) 的 failing 譜要求兩件互相矛盾的事:
+#   60->80 GeV 只掉 23% (幾乎平坦)      90->115 GeV 掉到 1/5 (陡降)
+# 單一參數的 RooExponential 只能折衷,alphaF 停在 -0.0332 -> 低質量端太陡、高質量端太平,
+# 而 bin04 的 sigmaF 已經撞上界 3.3(訊號被迫變寬去補背景做不到的事)。
+# Bernstein 多一個形狀自由度,且係數非負保證 pdf 不會變負;它仍然是與 nominal 的
+# RooCMSShape 不同的模型,所以 alternate-background 系統誤差依然有意義
+# (若改成 CMSShape,altBkg 就與 nominal 相同,系統誤差會塌成 0)。
+# 只換 failing 側:passing 背景只佔 ~2%,其指數擬合正常,沒有理由動它。
+tnpAltBkgModelByBin = {
+    3: {'fail': 'bernstein2'},
+    4: {'fail': 'bernstein2'},
+}
+
+
+# --- bin31 failing:MIGRAD 從未執行 (2026-08-28) ---
+# 六個參數停在設定檔初始值、edm=1.4e-19、status=-1 —— 與 dielleg12_nongap_2024
+# bin00 完全同型(那個在 8/24 用「給 meanF 正確起點」修好)。
+# 殘差顯示曲線嚴重偏離:115-120 +175%、110-115 +134%、90-95 -40%、95-100 -38%。
+# 資料 fail 的峰在 90-95,高質量端有 2600-2800/5GeV 的平台一路到 120;
+# 起點 meanF=0 / sigmaF=0.9 離最佳解太遠,加上似然面平坦,MIGRAD 連第一步都踏不出去。
+# 給它接近資料的起點,並把背景 turn-on 放到能描述高質量平台的位置。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[31] = params_with_updates(
+    tnpParNomFitByBin.get(31, tnpParNomFit),
+    "meanF[-1.0,-6.0,3.0]",
+    "sigmaF[3.0,1.0,8.0]",
+    "acmsF[70.,45.,95.]",
+    "betaF[0.05,0.005,0.30]",
+    "gammaF[0.02,-0.5,1.0]",
+)
+
+# ---------------------------------------------------------------------------
+# 2026-08-28  bin15 雙 Gaussian 測試（TNP_B15_ADDGAUS=1 才啟用）
+#
+# 三輪單 Gaussian 調參之後確認 bin15 的 failing 殘差是模型能力不足,不是調參問題:
+# 不論把 sigmaF 的窗開多大,擬合都回到 sigmaF=7.75、meanF=-3.77 的同一個解,殘差固定是
+# 60-65 +52% / 75-80 -23% / 80-85 -16% / 85-90 +18%。資料要的是「峰夠窄(85-90 要 28445)
+# 而且尾巴夠肥(60-65 要 6592)」,單一 Gaussian 平滑做不到,只能二選一。
+#
+# 框架已有 per-bin 的雙 Gaussian 機制(tnpEGM_fitter._addgaus_for_bin):
+#   pdfFail = sigFracF*(template⊗Gauss) + (1-sigFracF)*Gaussian(meanGF,sigmaGF),兩者都算 nSigF
+# 而且 addGaus 模式下 failing 的 Z lineshape 會從 MC template 換成 generic gen-level。
+# 全開過的比較結果是「改善 699 個、變差 1766 個」,所以只能逐 bin 指定。
+#
+# 缺的低質量產率在 60-70 GeV,所以 meanGF 取 65-70 附近(注意 meanGF 是絕對質量不是位移)。
+#
+# 實測結果(2026-08-28):決定性改善,failing 殘差
+#     單 Gaussian  60-65 +52% / 75-80 -23% / 80-85 -16% / 85-90 +18%   8 個 slice 超過 5 sigma
+#     雙 Gaussian  最大偏差 2.6%,所有 pull < 3                          0 個 slice
+# 參數落在內部極小值,沒有撞界:sigmaF 7.75->3.96(窄核心)、sigmaGF 12.83(寬尾)、
+# meanGF 77.2、sigFracF 0.438。把 meanGF 範圍從 [58,78] 放寬到 [55,88]、sigmaGF 從
+# [2,15] 放寬到 [2,20] 重跑,結果幾乎不變(77.11/12.75 -> 77.22/12.83),確認最佳解
+# 沒有被範圍排除。
+#
+# ⚠️ 這會改變中央效率:0.82483 -> 0.83271(+0.95% 相對)。passing 側逐位元不變。
+# 要還原成單 Gaussian:把下面三個賦值註解掉即可(bin15 的其餘調參保持不變)。
+addGausBins = {'nominalFit': (15,)}
+tnpParNomFit_addGaus = params_with_updates(tnpParNomFit,
+    "meanGF[70.0,55.0,88.0]",
+    "sigmaGF[8.0,2.0,20.0]",
+)
+tnpParNomFit_addGausByBin = {
+    15: params_with_updates(
+        tnpParNomFitByBin[15],
+        "meanGF[70.0,55.0,88.0]",
+        "sigmaGF[8.0,2.0,20.0]",
+    ),
+}

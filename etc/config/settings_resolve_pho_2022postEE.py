@@ -214,3 +214,33 @@ tnpParAltSigBkgFit = [
   'alphaP_2[-0.012, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]
+
+from etc.config.fit_param_utils import params_with_updates
+
+
+# --- bin14 nominalFit: MIGRAD never moved on either leg (2026-09-06) ---
+# Every error is exactly 0.0000 and covQual is 0 on both legs. meanP = meanF =
+# 0.0000 and sigmaP = sigmaF = 0.9000 are the seeds from tnpParNomFit above,
+# and the yields are the framework's own seeds to the decimal: nSigP =
+# 1329658.2 = 0.9 * nTotP, nBkgP = 147739.8 = 0.1 * nTotP. So the drawn curve
+# is the starting configuration, not a fit.
+# The background parameters did move, into a corner: acmsP ran to its 80
+# ceiling, after which Hesse failed and the signal never got off its seed.
+# With 595k events in one 5 GeV slice the mismatch is glaring -- passing is
+# 84% short at 60-70 GeV and 20% over at 85-90, failing 44% short at 105-115.
+# Open the ceiling acmsP is against and start mean/sigma at values a barrel
+# photon at ET 35-50 can actually have.
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[14] = params_with_updates(
+    tnpParNomFitByBin.get(14, tnpParNomFit),
+    "meanP[-0.30,-3.0,2.0]",
+    "sigmaP[1.2,0.5,4.0]",
+    "acmsP[78.,50.,95.]",
+    "betaP[0.05,0.01,0.20]",
+    "gammaP[0.03,-0.5,0.5]",
+    "meanF[-0.30,-3.0,2.0]",
+    "sigmaF[1.5,0.5,5.0]",
+    "acmsF[62.,45.,85.]",
+    "betaF[0.02,0.005,0.15]",
+    "gammaF[0.0,-0.3,0.3]",
+)

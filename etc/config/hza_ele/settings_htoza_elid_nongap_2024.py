@@ -275,10 +275,32 @@ tnpParNomFitByBin = {
         "betaP[0.045,0.002,0.10]",
         "gammaP[0.06,-0.1,1.0]",
         "peakP[89.5,85.0,93.0]",
-        "meanF[-1.6,-5.0,2.0]",
-        "sigmaF[2.8,0.8,5.0]",
-        "acmsF[72.,55.,92.]",
-        "betaF[0.04,0.003,0.12]",
+        # 2026-08-23: acmsF/betaF/sigmaF 三個上界同時被撞(92 / 0.12 / 5.0)。fail 資料由
+        # 60:6592 升到 85:28445 再陡降,turn-on 確實在窗內,擬合想要更高的 turn-on、更陡的
+        # 轉折、更寬的訊號,但三個方向都被上界擋住。只放寬撞界那側,下界全部不動。
+        # 2026-08-28 第二輪。8/23 我依 edm(1.0e-03 -> 6.5e-05)與撞界數(3->1)判定修好,
+        # 但那時還沒有殘差工具,沒驗形狀 —— 實際上 8 個 slice 超過 5 sigma
+        # (60-65 +51%、75-80 -23%、85-90 +18%、80-85 -16%)。收斂指標好不等於形狀對。
+        # 現況:betaF 撞上界 0.30、acmsF 在 87%、sigmaF 在 85%(7.75 GeV)。
+        # 資料 fail 由 60:6592 升到 85:28445 再降,turn-on 確實在窗內;背景想要更陡更高的
+        # turn-on 卻被 betaF 的上界擋住,訊號只好用 7.75 GeV 的寬度去補低質量端,
+        # 於是 60-65 多出 51%。放寬 betaF 與 acmsF 的撞界側,同時把訊號寬度收回,
+        # 逼背景自己描述那段上升。
+        # 2026-08-28 第三輪。第二輪(sigmaF 上界壓到 6.0)把 betaF 從 0.30 的界解放了
+        # (0.337),Z 峰區 85-100 的殘差確實改善(+18%->+5%、-16%->-5%),但 sigmaF 反而
+        # 撞死在我自己設的上界 6.0,低質量端因此更差:60-65 +51%->+76%、65-70 +27%->+48%。
+        # 我把最佳解排除在範圍外了(原本 [0.8,9] 擬合出 7.75,我卻改成上界 6.0)。
+        # 這個 bin 的 fail 資料 60:6592 一路升到 85:28445 再降到 115:3606 的平台。
+        # 高質量平台 = 背景(acmsF~102 的 turn-on 讓背景只活在 95-120,nBkgF 1.29e4 合理);
+        # 60-95 的整段上升只能由訊號負責 —— 而 60 GeV 處是峰值的 23%,要 Gaussian 平滑
+        # 到這種程度需要 sigma ~14 GeV(|eta| 2.0-2.5、ET 20-35 的 failing 電子質量解析度
+        # 本來就極差)。第二輪把它鎖在 6 等於不准擬合描述資料。
+        # 第三輪:sigmaF 上界放到 14、meanF 下界放到 -8,讓訊號有能力填低質量端;
+        # betaF/acmsF 維持第二輪(已脫離界)。
+        "meanF[-2.0,-8.0,2.0]",
+        "sigmaF[6.0,0.8,14.0]",
+        "acmsF[95.,55.,125.]",
+        "betaF[0.10,0.003,0.80]",
         "gammaF[0.04,-0.1,0.8]",
     ),
     28: params_with_updates(
@@ -332,6 +354,40 @@ _nongap_altsig_fail_turn68 = (
     "gammaF[0.03,0.001,0.80]",
 )
 tnpParAltSigFitByBin = {
+    # --- bin02: neither leg converged (2026-09-05) ---
+    # fail edm=5.09e7, pass edm=99.2. Root cause on BOTH legs is the same:
+    # the base beta range [0.005, 0.08] excludes the optimum that the
+    # converged nominalFit finds -- betaP=0.0867 (outside the range) and
+    # betaF=0.0800 (sitting exactly on the ceiling). Unable to reach it, the
+    # altSig fit fled to the opposite bound and stalled: betaP railed at
+    # 0.005 with error 0.0618 (12x its own value), acmsP=76.0 +/- 25.6
+    # undetermined, and on the fail leg gammaF/nF/sigmaF_2 all railed at
+    # their lower bounds with zero error. The fail curve degenerated into a
+    # flat plateau (11 slices >5 sigma) and nSigF=124915 -- 4x what the two
+    # converged fits give.
+    # Fix: widen beta past the nominal optimum, anchor every start at the
+    # nominal solution, and open the floors the parameters railed on.
+    2: params_with_updates(
+        tnpParAltSigFit,
+        "meanP[-0.50,-3.0,2.0]",
+        "sigmaP[3.0,0.5,9.0]",
+        "sigmaP_2[1.0,0.1,6.0]",
+        "alphaP[2.0,1.2,3.5]",
+        "nP[1.0,0.0,5.0]",
+        "sosP[1.0,0.0,4.0]",
+        "acmsP[85.,60.,110.]",
+        "betaP[0.087,0.01,0.20]",
+        "gammaP[0.10,0.002,1.0]",
+        "meanF[-0.55,-3.0,2.0]",
+        "sigmaF[2.0,0.5,8.0]",
+        "sigmaF_2[1.0,0.1,6.0]",
+        "alphaF[2.0,1.2,3.5]",
+        "nF[1.0,0.0,5.0]",
+        "sosF[0.8,0.0,4.0]",
+        "acmsF[52.,40.,75.]",
+        "betaF[0.08,0.005,0.20]",
+        "gammaF[0.035,0.002,0.80]",
+    ),
     0: params_with_updates(
         tnpParAltSigFit,
         "meanP[-2.0,-5.0,5.0]",
@@ -501,6 +557,20 @@ tnpParAltBkgFit = [
     "alphaF[0.,-5.,5.]",
     ]
 tnpParAltBkgFitByBin = {
+    # --- bin02 failing: peak sat ~1.3 GeV too far left (2026-09-05) ---
+    # edm=30908 (never converged), sigmaF railed at the upper bound 5.0 with
+    # error 4.41 -- i.e. the width was completely undetermined, and the fit
+    # settled into a broad-and-left fake solution at meanF=-1.86.
+    # The two fits that DO converge on this bin put the peak far to the right
+    # of that: nominalFit meanF=-0.563 (sigmaF=0.992, covQual 3) and
+    # altSigBkgFit meanF=-0.032. Anchor the start at the nominal solution and
+    # keep sigmaF away from the broad rail so it cannot wander back.
+    2: params_with_updates(
+        tnpParAltBkgFit,
+        "meanF[-0.55,-2.0,1.0]",
+        "sigmaF[1.0,0.5,3.0]",
+        "alphaF[-0.032,-5.,5.]",
+    ),
     3: params_with_updates(
         tnpParAltBkgFit,
         "meanF[-1.0,-2.5,1.0]",
@@ -512,8 +582,11 @@ tnpParAltBkgFitByBin = {
         "meanP[-0.4,-5.0,5.0]",
         "sigmaP[1.3,0.8,4.0]",
         "alphaP[-0.03,-5.,5.]",
+        # 2026-08-23: sigmaF 撞上界 3.3 —— 那是訊號在補背景做不到的事,背景換成 Bernstein
+        # 之後應該不需要那麼寬,但撞界的那一側還是要放開才知道真正的最佳解在哪。
+        # alphaF 在 Bernstein 下已不被任何 pdf 使用,保留無害。
         "meanF[-1.0,-2.5,1.0]",
-        "sigmaF[2.1,1.0,3.3]",
+        "sigmaF[2.1,1.0,6.0]",
         "alphaF[-0.06,-0.15,-0.005]",
     ),
     5: params_with_updates(
@@ -552,14 +625,34 @@ tnpParAltSigBkgFit = [
   'alphaF_2[-0.014, -1, 0.05]',
 ]
 tnpParAltSigBkgFitByBin = {
+    # 2026-08-23 bin7: 同 bin6 的機制 —— nF=0.0055 撞在 0,CB 尾巴變平去吃連續背景。
+    # 另外 sigmaF=0.342 GeV 對 |eta| 2.0-2.5、et 15-20 的電子是不可能的解析度
+    # (該區材料多,解析度應在 2-3 GeV),那是一根尖峰而非真正的訊號核心。
+    # 抬 nF 地板、抬 sigmaF 地板到物理值,上界一併放寬(failing 峰本來就寬)。
+    7: params_with_updates(
+        tnpParAltSigBkgFit,
+        'meanF[-0.5, -4.0, 3.0]',
+        'sigmaF[2.0, 0.8, 5.0]',
+        'sigmaF_2[1.5, 0.5, 5.0]',
+        'sosF[0.3, 0.0, 1.0]',
+        'alphaF[2.2, 1.8, 3.5]',
+        'nF[0.8, 0.5, 3.0]',
+        'alphaF_2[-0.03, -0.20, -0.002]',
+    ),
     6: params_with_updates(
         tnpParAltSigBkgFit,
-        'meanF[0.0, -3.0, 2.0]',
+        # 2026-08-23: meanF 撞上界 2、edm 3.65e+06,而且擬合宣稱 74% 是訊號
+        # (nSigF 85803 / 116249),但 fail 資料根本沒有 Z bump(85:8182 < 80:8895)。
+        # 機制:nF=0.051 讓 Crystal Ball 的冪次尾巴 (B-t)^(-n) 在 n->0 時趨近常數,
+        # 等於給訊號一條水平尾巴貫穿整個窗,連續背景就被算成訊號。alphaF=1.475 也貼近
+        # 下界 1.4(尾巴起點太靠近核心)使情況更糟。把 nF 地板抬離 0、alphaF 下界推開,
+        # 讓尾巴必須真的往下掉;meanF 只放寬撞界的上界。
+        'meanF[0.5, -3.0, 5.0]',
         'sigmaF[0.8, 0.2, 1.8]',
         'sigmaF_2[0.5, 0.1, 1.5]',
         'sosF[0.2, 0.0, 0.8]',
-        'alphaF[2.2, 1.4, 3.5]',
-        'nF[0.4, 0.0, 1.2]',
+        'alphaF[2.2, 1.8, 3.5]',
+        'nF[0.8, 0.5, 3.0]',
         'alphaF_2[-0.05, -0.2, -0.005]',
     ),
 }
@@ -579,3 +672,74 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- altBkg 的 failing 背景改用 Bernstein (2026-08-23) ---
+# bin03/bin04 (et 15-20, |eta|<0.8) 的 failing 譜要求兩件互相矛盾的事:
+#   60->80 GeV 只掉 23% (幾乎平坦)      90->115 GeV 掉到 1/5 (陡降)
+# 單一參數的 RooExponential 只能折衷,alphaF 停在 -0.0332 -> 低質量端太陡、高質量端太平,
+# 而 bin04 的 sigmaF 已經撞上界 3.3(訊號被迫變寬去補背景做不到的事)。
+# Bernstein 多一個形狀自由度,且係數非負保證 pdf 不會變負;它仍然是與 nominal 的
+# RooCMSShape 不同的模型,所以 alternate-background 系統誤差依然有意義
+# (若改成 CMSShape,altBkg 就與 nominal 相同,系統誤差會塌成 0)。
+# 只換 failing 側:passing 背景只佔 ~2%,其指數擬合正常,沒有理由動它。
+tnpAltBkgModelByBin = {
+    3: {'fail': 'bernstein2'},
+    4: {'fail': 'bernstein2'},
+}
+
+
+# --- bin31 failing:MIGRAD 從未執行 (2026-08-28) ---
+# 六個參數停在設定檔初始值、edm=1.4e-19、status=-1 —— 與 dielleg12_nongap_2024
+# bin00 完全同型(那個在 8/24 用「給 meanF 正確起點」修好)。
+# 殘差顯示曲線嚴重偏離:115-120 +175%、110-115 +134%、90-95 -40%、95-100 -38%。
+# 資料 fail 的峰在 90-95,高質量端有 2600-2800/5GeV 的平台一路到 120;
+# 起點 meanF=0 / sigmaF=0.9 離最佳解太遠,加上似然面平坦,MIGRAD 連第一步都踏不出去。
+# 給它接近資料的起點,並把背景 turn-on 放到能描述高質量平台的位置。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[31] = params_with_updates(
+    tnpParNomFitByBin.get(31, tnpParNomFit),
+    "meanF[-1.0,-6.0,3.0]",
+    "sigmaF[3.0,1.0,8.0]",
+    "acmsF[70.,45.,95.]",
+    "betaF[0.05,0.005,0.30]",
+    "gammaF[0.02,-0.5,1.0]",
+)
+
+# ---------------------------------------------------------------------------
+# 2026-08-28  bin15 雙 Gaussian 測試（TNP_B15_ADDGAUS=1 才啟用）
+#
+# 三輪單 Gaussian 調參之後確認 bin15 的 failing 殘差是模型能力不足,不是調參問題:
+# 不論把 sigmaF 的窗開多大,擬合都回到 sigmaF=7.75、meanF=-3.77 的同一個解,殘差固定是
+# 60-65 +52% / 75-80 -23% / 80-85 -16% / 85-90 +18%。資料要的是「峰夠窄(85-90 要 28445)
+# 而且尾巴夠肥(60-65 要 6592)」,單一 Gaussian 平滑做不到,只能二選一。
+#
+# 框架已有 per-bin 的雙 Gaussian 機制(tnpEGM_fitter._addgaus_for_bin):
+#   pdfFail = sigFracF*(template⊗Gauss) + (1-sigFracF)*Gaussian(meanGF,sigmaGF),兩者都算 nSigF
+# 而且 addGaus 模式下 failing 的 Z lineshape 會從 MC template 換成 generic gen-level。
+# 全開過的比較結果是「改善 699 個、變差 1766 個」,所以只能逐 bin 指定。
+#
+# 缺的低質量產率在 60-70 GeV,所以 meanGF 取 65-70 附近(注意 meanGF 是絕對質量不是位移)。
+#
+# 實測結果(2026-08-28):決定性改善,failing 殘差
+#     單 Gaussian  60-65 +52% / 75-80 -23% / 80-85 -16% / 85-90 +18%   8 個 slice 超過 5 sigma
+#     雙 Gaussian  最大偏差 2.6%,所有 pull < 3                          0 個 slice
+# 參數落在內部極小值,沒有撞界:sigmaF 7.75->3.96(窄核心)、sigmaGF 12.83(寬尾)、
+# meanGF 77.2、sigFracF 0.438。把 meanGF 範圍從 [58,78] 放寬到 [55,88]、sigmaGF 從
+# [2,15] 放寬到 [2,20] 重跑,結果幾乎不變(77.11/12.75 -> 77.22/12.83),確認最佳解
+# 沒有被範圍排除。
+#
+# ⚠️ 這會改變中央效率:0.82483 -> 0.83271(+0.95% 相對)。passing 側逐位元不變。
+# 要還原成單 Gaussian:把下面三個賦值註解掉即可(bin15 的其餘調參保持不變)。
+addGausBins = {'nominalFit': (15,)}
+tnpParNomFit_addGaus = params_with_updates(tnpParNomFit,
+    "meanGF[70.0,55.0,88.0]",
+    "sigmaGF[8.0,2.0,20.0]",
+)
+tnpParNomFit_addGausByBin = {
+    15: params_with_updates(
+        tnpParNomFitByBin[15],
+        "meanGF[70.0,55.0,88.0]",
+        "sigmaGF[8.0,2.0,20.0]",
+    ),
+}

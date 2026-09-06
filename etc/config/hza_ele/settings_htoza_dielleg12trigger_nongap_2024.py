@@ -290,3 +290,66 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- bin00 altBkg passing 從未最小化 (2026-08-13) ---
+# resP 的參數停在設定檔初始值(alphaP=0, meanP=0, sigmaP=0.9)、誤差全為 0、status=303:
+# MIGRAD 沒有跑。病因是 alphaP 的範圍 [-5,5] 對 60-120 GeV 的質量尺度過寬 ——
+# RooExponential 的 exp(-alpha*x) 在 |alpha|~5 時會溢位，NLL 變成非有限值，
+# 最小化當場中止。fail 側同範圍卻正常(alphaF=-0.029)，因為它有 19257 個事件、
+# 不容易走進那個區域；pass 只有 2454 個。只收窄這個 bin 的 alphaP。
+tnpParAltBkgFitByBin = dict(globals().get('tnpParAltBkgFitByBin', {}))
+tnpParAltBkgFitByBin[0] = params_with_updates(
+    tnpParAltBkgFit,
+    "alphaP[-0.03,-0.30,0.10]",
+    "sigmaP[1.5,0.5,4.0]",
+)
+
+
+# --- turn-on 上限與初始值修正 (2026-08-21) ---
+# bin0: 參數全部停在設定檔初始值(acmsP=65, betaP=0.05, gammaP=0.1,
+# meanP=0, sigmaP=0.9)、status=-1 —— MIGRAD 從未執行。只有 2454 個事件、
+# 背景約 300 個，背景形狀無法被約束。釘住它以降低自由度。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[0] = params_with_updates(
+    tnpParNomFitByBin.get(0, tnpParNomFit),
+    "acmsP[62.0]",
+    "betaP[0.05]",
+    "gammaP[0.05,0.0,0.5]",
+    "peakP[87.0]",
+)
+
+# --- bin00 passing 峰位起點 (2026-08-24) ---
+# 上面釘背景那組降低了自由度但沒解決問題:MIGRAD 依然沒跑(edm=19.6、status=-1、
+# 五個參數全停在初始值,nSigP=2699.1 正好是 0.9*2999 的種子值)。
+# 殘差比對資料點與曲線才看出真正的病因 —— 曲線的峰整體右移約 5 GeV:
+#     80-85  資料 385 / 曲線 281  +37%  pull  +5.3
+#     90-95  資料 364 / 曲線 564  -36%  pull -10.5
+#     95-100 資料  97 / 曲線 178  -46%  pull  -8.2
+# 資料的峰在 85-90,模板在 90-95。對 et 7-13 GeV、|eta| 2.0-2.5 的電子,能量損失
+# 讓重建質量偏低是合理的。meanP 的範圍 [-5,5] 涵蓋得到,但它從 0 起步且從未移動,
+# 所以問題不是範圍而是「起點離最佳解太遠 + 只有 2999 個事件的平坦似然面」。
+# 把起點移到資料實際的峰位偏移量附近,讓 MIGRAD 有機會啟動。
+tnpParNomFitByBin[0] = params_with_updates(
+    tnpParNomFitByBin[0],
+    "meanP[-4.0,-8.0,2.0]",
+    "sigmaP[2.0,0.8,5.0]",
+)
+
+
+
+# --- bin46 failing: edm 1.486e+11, no convergence (2026-09-06) ---
+# The drawn curve happens to look fine (1 slice past 5 sigma, 100-105 GeV -15%)
+# but the fit behind it is meaningless: nSigF = 10504 +/- 5851 and nBkgF = 857
+# +/- 2507, i.e. 56% and 292% errors, with sigmaF pinned on its 1.2 ceiling and
+# gammaF = 0.049 +/- 1.299. Pin the background turn-on as constants near where
+# it sits and give sigmaF room, so the yields and their errors mean something.
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[46] = params_with_updates(
+    tnpParNomFitByBin.get(46, tnpParNomFit),
+    "meanF[-1.1,-4.0,2.0]",
+    "sigmaF[1.2,0.4,4.0]",
+    "acmsF[83.4]",
+    "betaF[0.065]",
+    "gammaF[0.05,-0.5,0.5]",
+)

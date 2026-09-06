@@ -445,3 +445,124 @@ for _b in (16,17,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,
 
 # altBkg bin30 passing 太窄(Joseph 2026-07-18): 加寬 sigmaP
 tnpParAltBkgFit_addGausByBin[30] = params_with_updates(list(tnpParAltBkgFit_addGausByBin.get(30, tnpParAltBkgFit_addGaus)), "sigmaP[2.5,1.5,4.5]")
+
+
+# ============ 2026-08-23 使用者旗標 ============
+
+# bin16 altBkg: 2026-08-23 曾把 meanF 從自由的 [-5,5] 收成 [0.0,-1.0,1.0],理由是
+# 「Z 峰位置不該偏移 2 GeV」——**那是錯的,已還原**。meanF=-2.08 是擬合在整體最佳化下
+# 選的;硬鎖峰位之後,原本只有肩膀不對(70-75 GeV +25%,唯一超標),變成峰區也跟著錯:
+# 超標 slice 由 1 個增為 5 個,而且要修的 70-75 反而惡化到 +38%。
+# 這個 bin 的殘差只有一處超標,屬可接受範圍,不再調整。
+
+# bin13 altSig passing: 殘差 11 個 slice 超過 5 sigma,最大 65 sigma
+# (60-65 +84%、80-85 -26%、90-95 +37%、115-120 -80%);曲線在 50-60 放了 2711 個事件
+# 而資料是 0。根因是 meanP 的範圍 [-40, 5] —— 與 dielleg12 那批「假設 passing 峰大幅
+# 下移」同一個家族 —— 配上 sigmaP 上界 16,訊號可以無限制地變寬;alphaP 又撞在下界 0.5
+# (CB 尾巴要更重 = 更寬)。這個 bin 要「收」不是「放」:把峰位鎖回 Z、把寬度與尾巴
+# 限制在物理範圍。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[13] = params_with_updates(
+    list(tnpParAltSigFitByBin.get(13, tnpParAltSigFit)),
+    "meanP[0.0,-5.0,5.0]",
+    "sigmaP[2.0,0.8,6.0]",
+    "sigmaP_2[1.5,0.5,5.0]",
+    "sosP[1.0,0.0,4.0]",
+    "alphaP[2.0,1.5,4.5]",
+)
+
+
+# --- bin32 failing:MIGRAD 從未執行 (2026-08-28) ---
+# 五個參數停在初始值、edm=2.0e-10、status=-1,與 elid_nongap_2024 bin31 同型。
+# fail 只有 1310 個事件,峰在 90-95(380),高質量端 100-120 有 59-91/5GeV 的尾巴。
+# 統計量低使似然面平坦,起點又離最佳解遠 —— 給起點讓 MIGRAD 能啟動。
+# 注意:這個 bin 事件數少,即使收斂,效率的統計誤差仍然大。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[32] = params_with_updates(
+    tnpParNomFitByBin.get(32, tnpParNomFit),
+    "meanF[-1.0,-6.0,3.0]",
+    "sigmaF[3.0,1.0,8.0]",
+    "acmsF[70.,45.,95.]",
+    "betaF[0.05,0.005,0.30]",
+)
+
+# ---------------------------------------------------------------------------
+# 2026-08-29  altSigBkgFit bin29 failing 的峰形扭曲（使用者:"peak failing 有一點扭曲"）
+#
+# 這個 bin 的殘差**量級是合格的** —— 82-97 GeV 逐點都在 ±3.6% 以內、pull 全部 <3、
+# 5 GeV 分格下 0 個 slice 超標。問題不是偏離資料,是峰的形狀:
+#   逐點殘差呈現五段交替  +1.4% -> -1.1% -> +1.3% -> -3.6% -> +9.9%
+#   曲率在 96 GeV 有跳變(0.144 -> 0.216)
+# 成因:sosF 撞在下界 0 -> 第二個成分權重歸零,峰只剩一個 sigmaF=0.584 GeV 的窄核心,
+# 再接上 nF=0.557 的硬冪次尾(alphaF*sigmaF≈1.5 GeV 就轉折)。窄核心配硬尾 =
+# 尖頂加突兀的肩膀,肉眼看就是「扭曲」。
+#
+# 修法:讓雙成分真的發揮作用(sosF 下界抬到 0.05,不准退化成單成分),
+#      放軟冪次尾(nF 上界 1.5 -> 5.0,讓轉折接得平順),核心稍微放寬。
+# ⚠️ sosF 的下界 0.05 是**刻意排除 sosF=0 那個似然最佳解**的 —— 因為那個解正是扭曲的來源。
+#    這是形狀優先於似然的取捨,重跑後要確認殘差量級沒有變差。
+# ⚠️ altSigBkg 是系統誤差分支,不動中央值。
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+tnpParAltSigBkgFitByBin[29] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(29, tnpParAltSigBkgFit),
+    "sigmaF[0.9,0.3,2.5]",
+    "sigmaF_2[1.6,0.5,4.0]",
+    "sosF[0.35,0.05,1.0]",
+    "alphaF[2.5,1.5,4.0]",
+    "nF[1.5,0.5,5.0]",
+)
+
+
+# --- bins 34/38/39 failing background rises (2026-09-06) ---
+# tnpParAltBkgFit declares alphaF[0.,-5.,5.], so RooExponential is free to
+# climb, and these three took it: alphaF = +0.0104 +/- 0.0070 (b34),
+# +0.0127 +/- 0.0085 (b38), +0.0234 +/- 0.0076 (b39). A failing-probe
+# background that grows toward the Z is not physical.
+# It is a sub-statistical effect -- the background is 134-392 events against
+# 1198-9726 of signal and both bins fit with 0 slices past 5 sigma -- but the
+# constraint costs nothing and removes a wrong shape. bins 35/36/37 in the same
+# ET row already come out falling (-0.028 / -0.095 / -0.035) and are untouched.
+tnpParAltBkgFitByBin = dict(globals().get('tnpParAltBkgFitByBin', {}))
+for _b in (34, 38, 39):
+    tnpParAltBkgFitByBin[_b] = params_with_updates(
+        tnpParAltBkgFitByBin.get(_b, tnpParAltBkgFit),
+        "alphaF[-0.01,-5.,0.]",
+    )
+
+
+# --- bins 32/34/38/39 failing background rises, altSigBkgFit (2026-09-06) ---
+# Same shape complaint as the altBkgFit row above, on the other background
+# parameter: tnpParAltSigBkgFit declares alphaF_2[-0.014, -1, 0.05], and the
+# 0.05 ceiling lets the exponential climb. b34 and b38 are sitting exactly on
+# it (+0.05000), i.e. they want to rise faster still; b39 is at +0.0300 +/-
+# 0.0082 and b32 at +0.0173 +/- 0.0127.
+# b33/35/36/37 in the same ET row come out falling and are left alone.
+# b39 also has edm 161 -- it does not converge -- so pinning the background
+# shape should help it settle.
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+for _b in (32, 34, 38, 39):
+    tnpParAltSigBkgFitByBin[_b] = params_with_updates(
+        tnpParAltSigBkgFitByBin.get(_b, tnpParAltSigBkgFit),
+        "alphaF_2[-0.01,-1,0.]",
+    )
+
+
+# --- bin14 passing shifted 2.5 GeV left of nominal (2026-09-06) ---
+# meanP = -3.758 where the converged nominalFit measures -1.248. The fit got
+# there because its background is unusable: nBkgP = 229 +/- 9993 (an error 44x
+# the value) sitting on the 0.5 floor, with acmsP on the 90 ceiling and betaP
+# on 0.08. With the background undetermined the signal absorbed the low-mass
+# end by walking left. 8 slices past 5 sigma, worst 95-100 GeV -14%.
+# Anchor mean/sigma at the nominal solution and open the two background
+# ceilings (nominal's own betaP range also stops at 0.08 and rails there).
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[14] = params_with_updates(
+    tnpParAltSigFitByBin.get(14, tnpParAltSigFit),
+    "meanP[-1.25,-4.0,2.0]",
+    "sigmaP[1.6,0.6,5.0]",
+    "sigmaP_2[1.2,0.4,5.0]",
+    "sosP[0.5,0.0,3.0]",
+    "acmsP[64.,45.,95.]",
+    "betaP[0.05,0.005,0.20]",
+    "gammaP[0.05,0.002,0.80]",
+)

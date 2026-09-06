@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # 初始化 _mod_path 並更新 sys.path，供 tnpEGM_fitter 與 etc.* 匯入使用
 import os, sys
+from etc.config.fit_param_utils import params_with_updates
 # 以 globals() 安全檢查，避免在 Py2 觸發 NameError
 if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
@@ -230,3 +231,24 @@ tnpParAltSigBkgFit = [
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.04, -1, -0.03]',
 # ]
+
+# ---------------------------------------------------------------------------
+# 2026-08-29  nominalFit bin04 / bin06 failing（ET 10-20，背景約 89%）
+#
+# 兩格都是 covQual=0（Hessian 奇異）且四個參數同時撞界:
+#   b04  acmsF=35 撞**下**界   betaF=0.01 撞下界  gammaF=0.02 撞下界  sigmaF=5 撞**上**界
+#   b06  acmsF=80 撞**上**界   betaF=0.01 撞下界  gammaF=0.02 撞下界  sigmaF=5 撞上界
+# 共通點是 sigmaF 撐到上界 5 —— 訊號被拉到最寬去描述低 pT endcap 光子的爛解析度,
+# 背景的三個形狀參數只好往界上跑去補償。acmsF 一個往下一個往上,代表它是被迫的、
+# 不是資料要的。四個方向都被關住時 Hessian 必然奇異。
+# 只放寬撞界那一側:sigmaF 上界 5->10、betaF 下界 0.01->0.002、gammaF 下界 0.02->-0.5、
+# acmsF 兩側都開(因為兩格撞的方向相反)。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+for _b in (4, 6):
+    tnpParNomFitByBin[_b] = params_with_updates(
+        tnpParNomFitByBin.get(_b, tnpParNomFit),
+        "sigmaF[3.0,0.5,10.0]",
+        "acmsF[60.,25.,95.]",
+        "betaF[0.03,0.002,0.30]",
+        "gammaF[0.05,-0.5,2.0]",
+    )
