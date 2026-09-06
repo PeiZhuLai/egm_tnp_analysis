@@ -151,8 +151,25 @@ mkdir -p "$FITSD" "$SUMMD"
 if [[ "${#SRC_FITS_PREFIXED[@]}" -gt 0 ]]; then
   DID_FITS_SYNC=1
   echo ">>> 同步 fits/ 來源（檔名前綴模式）"
-  # 前綴模式下先清理舊的 PNG/PDF，避免與舊版（未加前綴）檔名混用
-  find "${FITSD}" -type f \( -iname '*.png' -o -iname '*.pdf' \) -delete
+  # 前綴模式下先清理舊的 PNG/PDF，避免與舊版（未加前綴）檔名混用。
+  # 這個 wipe 原本無條件執行，在驗證任何來源之前。如果所有
+  # --src-fits-prefixed 的來源都不存在（打錯路徑、EOS 未掛載、上游目錄改名），
+  # 底下的迴圈只會逐一印 "fits 來源不存在" 然後什麼都不複製，
+  # 而已發布的圖已經被刪光了 —— 2026-09-06 量到 muon 六個 measurement × 三年
+  # 共 5292 張全靠這一行的時序保護。所以先確認至少有一個來源真的有檔案再清。
+  _prefixed_ok=0
+  for _spec in "${SRC_FITS_PREFIXED[@]:-}"; do
+    _s="${_spec#*:}"
+    [[ -z "${_s}" || "${_s}" == "${_spec}" ]] && continue
+    if [[ -d "${_s}" ]] && [[ -n "$(find "${_s}" -type f \( -iname '*.png' -o -iname '*.pdf' \) -print -quit 2>/dev/null)" ]]; then
+      _prefixed_ok=1; break
+    fi
+  done
+  if [[ "${_prefixed_ok}" == "1" ]]; then
+    find "${FITSD}" -type f \( -iname '*.png' -o -iname '*.pdf' \) -delete
+  else
+    echo "⚠️ 所有 --src-fits-prefixed 來源都不存在或沒有圖檔，略過清理（保留已發布內容）"
+  fi
   for spec in "${SRC_FITS_PREFIXED[@]:-}"; do
     prefix="${spec%%:*}"
     src="${spec#*:}"
@@ -195,6 +212,23 @@ elif [[ -n "${SRC_FITS}" && -d "${SRC_FITS}" ]]; then
   )
   if [[ "$COPY_PDF" == "1" ]]; then
     fits_rsync_args+=("--include=*.pdf")
+  fi
+  # Without --delete this rsync only ever adds. A bin that is renamed, merged
+  # away or re-binned leaves its old plot on the site forever, still linked
+  # from the index and indistinguishable from a current one.
+  # 2026-09-06: after the phcsev re-binning of 08-29 merged the nPV splits,
+  # 136 plots from the old binning were still published across 28 phcsev
+  # measurements -- the oldest dated 08-24 -- and were being read and reported
+  # on as if they were the current fits. They have been archived to
+  # condor_fit/stale_web_archive_20260906/ and removed.
+  # Guard: only delete when the source really has PNGs, so an empty or
+  # mistyped source cannot wipe an already published directory. Files the
+  # filter excludes (index.html, the 1p44To1p57 gap plots) are protected by
+  # rsync's own rule that excluded files are not deleted on the receiver.
+  if [[ -n "$(find "${SRC_FITS%/}/" -name '*.png' -print -quit 2>/dev/null)" ]]; then
+    fits_rsync_args+=("--delete")
+  else
+    echo "⚠️ 來源沒有任何 PNG，略過 --delete（避免清空已發布內容）"
   fi
   fits_rsync_args+=("--exclude=*")
   rsync "${fits_rsync_args[@]}" "${SRC_FITS%/}/" "${FITSD}/"
@@ -535,8 +569,8 @@ if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
 <title>HZa SF</title>
 <style>
   :root {
-    --page-max: 1580px;
-    --list-gap-x: 48px;
+    --page-max: 1720px;
+    --list-gap-x: 64px;
     --list-gap-y: 16px;
   }
   body {
@@ -546,7 +580,7 @@ if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
     color: #222;
   }
   ul.auto-list li a {
-    font-size: 1.5rem;     /* 可以改成 18px 或更大 */
+    font-size: 1.15rem;    /* 18.4px:最長的項目標題在三欄下剛好不折行 */
     font-weight: 500;      /* 稍微加粗，可選 */
   }
   .center {
@@ -556,7 +590,7 @@ if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
   }
   .center ul.auto-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    grid-template-columns: repeat(3, minmax(300px, 1fr));
     column-gap: var(--list-gap-x);
     row-gap: var(--list-gap-y);
     margin: 24px auto 0;
@@ -565,6 +599,19 @@ if [[ ! -f "$HOME_INDEX" || "$FORCE_REGEN_HOME" == "1" ]]; then
   }
   li {
     margin-bottom: 0;
+  }
+  /* 三欄 -> 兩欄 -> 一欄。
+     斷點是量出來的,不是猜的:最長的項目
+     "Custom Electron Double Upper Leg Trigger23 Nongap 2024"(54 字)
+     在 Arial 18.4px 下需要 494px。三欄要 3*494 + 2*64(間距) + 24(ul padding)
+     = 1634px,加上 body 左右各 24px 內距 -> 視窗至少要 1760px 才放得下。
+     再窄就換兩欄,否則標題會折行。
+     (同樣的算法:24px 字級需要 3*630 + 128 + 24 = 2042px,比 1920 螢幕還寬,
+      所以「三欄 + 更大間距 + 不折行」只能靠縮字級達成。) */
+  @media (max-width: 1760px) {
+    .center ul.auto-list {
+      grid-template-columns: repeat(2, minmax(300px, 1fr));
+    }
   }
   @media (max-width: 760px) {
     body {
@@ -629,8 +676,8 @@ if 'class="auto-list"' not in html:
     html = re.sub(r"<ul(\s*)>", r"<ul class=\"auto-list\">", html, count=1)
 
 HOME_STYLE = """  :root {
-    --page-max: 1580px;
-    --list-gap-x: 48px;
+    --page-max: 1720px;
+    --list-gap-x: 64px;
     --list-gap-y: 16px;
   }
   body {
@@ -640,7 +687,7 @@ HOME_STYLE = """  :root {
     color: #222;
   }
   ul.auto-list li a {
-    font-size: 1.5rem;
+    font-size: 1.15rem;
     font-weight: 500;
   }
   .center {
@@ -650,7 +697,7 @@ HOME_STYLE = """  :root {
   }
   .center ul.auto-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(320px, 1fr));
+    grid-template-columns: repeat(3, minmax(300px, 1fr));
     column-gap: var(--list-gap-x);
     row-gap: var(--list-gap-y);
     margin: 24px auto 0;
@@ -659,6 +706,19 @@ HOME_STYLE = """  :root {
   }
   li {
     margin-bottom: 0;
+  }
+  /* 三欄 -> 兩欄 -> 一欄。
+     斷點是量出來的,不是猜的:最長的項目
+     "Custom Electron Double Upper Leg Trigger23 Nongap 2024"(54 字)
+     在 Arial 18.4px 下需要 494px。三欄要 3*494 + 2*64(間距) + 24(ul padding)
+     = 1634px,加上 body 左右各 24px 內距 -> 視窗至少要 1760px 才放得下。
+     再窄就換兩欄,否則標題會折行。
+     (同樣的算法:24px 字級需要 3*630 + 128 + 24 = 2042px,比 1920 螢幕還寬,
+      所以「三欄 + 更大間距 + 不折行」只能靠縮字級達成。) */
+  @media (max-width: 1760px) {
+    .center ul.auto-list {
+      grid-template-columns: repeat(2, minmax(300px, 1fr));
+    }
   }
   @media (max-width: 760px) {
     body {
@@ -670,9 +730,9 @@ HOME_STYLE = """  :root {
     }
   }"""
 
-def ensure_two_column_home_style(page_html: str) -> str:
+def ensure_three_column_home_style(page_html: str) -> str:
     style_block = f"<style>\n{HOME_STYLE}\n</style>"
-    if "grid-template-columns: repeat(2, minmax(320px, 1fr))" in page_html:
+    if "grid-template-columns: repeat(3, minmax(300px, 1fr))" in page_html:
         return page_html
     if re.search(r"<style\b[^>]*>.*?</style>", page_html, flags=re.S | re.I):
         return re.sub(
@@ -684,7 +744,7 @@ def ensure_two_column_home_style(page_html: str) -> str:
         )
     return re.sub(r"(<title>.*?</title>)", rf"\1\n{style_block}", page_html, count=1, flags=re.S | re.I)
 
-html = ensure_two_column_home_style(html)
+html = ensure_three_column_home_style(html)
 
 def normalize_label(raw: str) -> str:
     text = re.sub(r"<[^>]+>", "", raw)
