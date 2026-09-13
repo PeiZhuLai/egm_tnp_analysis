@@ -390,3 +390,17 @@ tnpParAltSigFitByBin[19] = params_with_updates(
     "gammaP[0.05]",
     "peakP[89.0]",
 )
+
+
+# --- 開啟 addGaus 的逐 bin 開關 + altBkg 兩側 shoulder (2026-09-07) ---
+# bin16/bin23 的 altBkgFit 兩條腿都要 shoulder：低質量尾巴來自同一份模板，
+# passing 也會受影響。passing 側由設定宣告 meanGP/sigmaGP 才啟用。
+_gaus_p = ["meanGP[77.0,73.0,81.0]", "sigmaGP[4.0,2.0,8.0]"]
+for _b in (16, 23):
+    tnpParAltBkgFit_addGausByBin[_b] = list(
+        tnpParAltBkgFit_addGausByBin.get(_b, tnpParAltBkgFit_addGaus)) + _gaus_p
+
+addGausBins = {
+    'altBkgFit': (16, 23),
+    'altSigFit': (18, 19, 21),
+}

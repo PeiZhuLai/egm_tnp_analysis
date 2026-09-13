@@ -448,3 +448,56 @@ tnpParAltSigFitByBin[13] = params_with_updates(
     "betaP[0.04,0.005,0.25]",
 )
 
+
+
+# --- 開啟 addGaus 的逐 bin 開關 (2026-09-07) ---
+# 上面那些 _addGaus 變體本來只有全域 --addGaus 旗標會用到；改成逐 bin 指定，
+# 只讓真的是「窄峰 + 低質量 shoulder」的格子吃到。既有的 sigmaGF 上界（<= 8）
+# 已經是安全值，不動。
+# 2026-09-12 追加 bin18、bin19：和 20/21 是同一批「78 shoulder + 90 尖峰」的格子，
+# 只是上次沒被點名。現況：
+#   b18 failing DSCB 整個攤成一坨（sigmaF=8.916、sosF=4.082、meanF=-3.420），
+#       shoulder 與尖峰都沒對上，edmF = 8.95e+04、covQual 2。
+#   b19 更糟：CMSShape 背景膨脹成 80 GeV 的大鼓包去冒充 shoulder
+#       （nBkgF=24458，另三種擬合是 1100-2400；acmsF 撞上界 90、betaF 撞上界 0.08），
+#       結果 nSigF 被吃掉，**效率被墊高到 0.9787，而 nominal/altBkg/altSigBkg 是
+#       0.9691 / 0.9675 / 0.9676** —— 這格是真的有效率偏差，不只是外觀難看。
+#   b18 的效率目前還是對的（0.9720 對 0.9722/0.9720/0.9710），改完要維持。
+# _thintail_181920 對 18/19/20 早就備好，只差開關。
+addGausBins = {
+    'altSigFit': (18, 19, 20, 21),
+}
+
+
+# --- bins 21/26/39/41 nominalFit：背景歸一化積分下溢成 0 (2026-09-12) ---
+# 這四格在 2026-09-12 的重跑裡全部逾時（2700 秒沒收斂），log 裡刷的是
+#   function value is NAN @ numerator=bkg{Pass,Fail}_..._Int[x|fitMassRange]_Norm[x]=0,
+#                           denominator=..._Int[x|]_Norm[x]=0
+# 也就是 RooCMSShape 的歸一化積分算出 0，0/0 = NaN，MIGRAD 就在那裡空轉。
+# 它們原本（08-06、資料量只有一半時）是會收斂的；資料加倍之後擬合走到了別的區域。
+#
+# 病灶是 gamma 的範圍 [-2, 2] 允許負值。RooCMSShape =
+#     erfc((acms - x) * beta) * exp(-(x - peak) * gamma)
+# gamma < 0 時指數項往高質量發散、往低質量下溢，在 60-120 上積分會underflow 到 0。
+# 背景本來就該是隨質量下降的，gamma 取負值不合物理 —— 這不是收緊範圍去遷就擬合，
+# 是把一個本來就不該開放的區域關掉。（本檔的 altSig 早就用 gammaP[0.08,0.002,1.5]。）
+#
+# 證據很乾淨：NaN 一定出在「gamma 沒有約束的那一側」。
+#   b21 passing 側早就被釘死（acmsP[60.0]、betaP[0.05]、gammaP[0.05,0.0,0.5]）→ 不 NaN；
+#       NaN 的是 loose 的 failing 側。同一格內的對照。
+#   b39 也是 failing 側；b26/b41 是 passing 側，而且 acmsP 同時撞上界 90
+#       （turn-on 被推到 Z 峰上，背景在有資料的地方幾乎沒有支撐）。
+# 所以：gamma 一律限正，並把 acms 的天花板壓到 Z 峰以下。
+# b21 的 passing 覆寫保留不動（params_with_updates 只改指名的那幾個）。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+for _b in (21, 39):          # failing 側 NaN
+    tnpParNomFitByBin[_b] = params_with_updates(
+        tnpParNomFitByBin.get(_b, tnpParNomFit),
+        "acmsF[65.,45.,85.]", "betaF[0.05,0.005,0.10]", "gammaF[0.05,0.001,0.8]",
+    )
+for _b in (26, 41):          # passing 側 NaN
+    tnpParNomFitByBin[_b] = params_with_updates(
+        tnpParNomFitByBin.get(_b, tnpParNomFit),
+        "acmsP[65.,45.,85.]", "betaP[0.05,0.005,0.10]", "gammaP[0.05,0.001,0.8]",
+        "acmsF[65.,45.,85.]", "betaF[0.05,0.005,0.10]", "gammaF[0.05,0.001,0.8]",
+    )

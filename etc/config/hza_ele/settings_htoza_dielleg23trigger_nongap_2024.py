@@ -363,3 +363,18 @@ tnpParAltBkgFitByBin[38] = params_with_updates(
     tnpParAltBkgFitByBin[38],
     "sigmaF[1.0,0.3,2.5]",
 )
+
+
+# --- bin38 altSigBkgFit: failing 訊號略寬 (2026-09-07) ---
+# 90-95 GeV 曲線 3399 對資料 3639 (-7%，峰頂不夠高)，100-105 GeV 1415 對 1204
+# (+15%，右側太肥) —— 典型的「太寬」。該格背景只有 552 個事件，所以那 211 個
+# 多出來的事件是訊號形狀給的，不是背景。
+# 同時 alphaF = 1.412 +/- 1.363 貼著 1.4 下界、sosF = 0.024 +/- 0.753，兩個都
+# 完全不受約束，只是開出平坦方向讓 MIGRAD 停不下來（edm 0.44、covQual 2）。
+# 改法：把不受約束的 alphaF 釘死，再收 sigmaF 的上界。
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+tnpParAltSigBkgFitByBin[38] = params_with_updates(
+    tnpParAltSigBkgFitByBin.get(38, tnpParAltSigBkgFit),
+    'alphaF[2.0]',
+    'sigmaF[0.50, 0.10, 0.62]',
+)

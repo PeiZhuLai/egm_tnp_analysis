@@ -523,7 +523,12 @@ tnpParAltSigBkgFitByBin[29] = params_with_updates(
 # constraint costs nothing and removes a wrong shape. bins 35/36/37 in the same
 # ET row already come out falling (-0.028 / -0.095 / -0.035) and are untouched.
 tnpParAltBkgFitByBin = dict(globals().get('tnpParAltBkgFitByBin', {}))
-for _b in (34, 38, 39):
+# 2026-09-06 第二批：b24/b25 (eta -2.50..-1.57, ET 35-50) 與上面同型。
+# alphaF = +0.0259 +/- 0.0090 和 +0.0209 +/- 0.0053，一樣是往 Z 峰爬升的背景。
+# 這兩格擬合本身是乾淨的（0 個 slice 超標、covQual 3、效率與 nominal 分毫不差
+# 0.9847/0.9847 與 0.9859/0.9860），純粹是背景形狀不該上升；nBkgF 又貼在下界，
+# 所以約束它幾乎沒有代價。背景壓平之後訊號會略微變寬，正是使用者要的方向。
+for _b in (24, 25, 34, 38, 39):
     tnpParAltBkgFitByBin[_b] = params_with_updates(
         tnpParAltBkgFitByBin.get(_b, tnpParAltBkgFit),
         "alphaF[-0.01,-5.,0.]",

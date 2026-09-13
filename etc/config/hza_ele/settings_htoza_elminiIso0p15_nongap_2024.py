@@ -553,3 +553,91 @@ tnpParAltSigFitByBin[35] = params_with_updates(
     "betaF[0.05,0.005,0.25]",
     "sosF[1.0,0.0,5.0]",
 )
+
+
+# --- bins 34/35/37/39 altBkgFit failing (2026-09-07) ---
+# 34/37「右側 tail 曲率太大」：背景指數的 alphaF 在 34 是 +0.0196（往高質量爬），
+# 在 37 是 -0.0423，兩格號誌相反 —— 這個參數其實不受約束（nBkgF 只有 216 / 116
+# 個事件，誤差 31% / 53%）。把它限制成非正，右尾就不會再往上翹。
+#   ⚠️ 誠實說明：37 的 alphaF 本來就是負的，收界之後幾乎不會動；那格 100-120 GeV
+#      的偏差（105-110 +14%、115-120 -11%）落在每格 250-390 個事件的統計區間，
+#      pull 只有 2.5 / 1.9，以殘差判準看本來就已經是 0 slice。
+# 35 另外有實質偏差：75-80 +42%（資料高於曲線）對 100-105 -16%、105-110 -25%，
+#   整條曲線偏右。meanF = +0.231 是正的，往左拉。
+# 39 的病完全不同：edmF = 8.18e-20、covQual 0，而且 meanF / sigmaF / alphaF /
+#   nBkgF 的誤差全部是 0.0000、值全部停在初始值 —— MIGRAD 根本沒有動過。
+#   只把 sigmaF 放寬沒有用，必須把初始值挪離那個駐點，讓最小化真的跑起來。
+tnpParAltBkgFitByBin.update(params_for_bins(
+    tnpParAltBkgFit,
+    (34, 37),
+    "alphaF[-0.02,-0.30,0.0]",
+))
+tnpParAltBkgFitByBin[35] = params_with_updates(
+    tnpParAltBkgFitByBin.get(35, tnpParAltBkgFit),
+    "meanF[-0.3,-3.0,0.1]",
+    "alphaF[-0.03,-0.30,0.0]",
+)
+tnpParAltBkgFitByBin[39] = params_with_updates(
+    tnpParAltBkgFitByBin.get(39, tnpParAltBkgFit),
+    "meanF[-0.2,-4.0,4.0]",
+    "sigmaF[1.3,0.5,4.0]",
+    "alphaF[-0.05,-2.0,2.0]",
+)
+
+
+# --- bins 34/35/37 altSigBkgFit：failing 右側 tail 曲率太大 (2026-09-07) ---
+# 和同一批 altBkgFit 的 34/35/37 是同一個症狀。altSigBkg 的背景是
+# alphaF_2 那條（Bernstein/指數係數），把它限制成非正，右尾就不會往上翹。
+tnpParAltSigBkgFitByBin = dict(globals().get('tnpParAltSigBkgFitByBin', {}))
+for _b in (34, 35, 37):
+    tnpParAltSigBkgFitByBin[_b] = params_with_updates(
+        tnpParAltSigBkgFitByBin.get(_b, tnpParAltSigBkgFit),
+        "alphaF_2[-0.02,-0.30,0.0]",
+    )
+
+
+# --- bins 18/19/20/21 altSigFit：failing 換函數 (2026-09-12) ---
+# 這四格的 failing 是雙峰：78 GeV 的 shoulder（Z->ee 電子失隔離 / FSR）加上 90 GeV
+# 的 Z 核心。單一解析 DSCB 兩邊都要顧，結果是兩邊都不對，而且把背景擠死了 ——
+# nBkgF 只剩 40.7 / 63.3 / 65.2 / 43.6 個事件（誤差 47% / 27% / 5% / 103%），
+# 另外三種擬合在同樣的格子是 1100-1500。參數也全面撞界：
+#   b18 acmsF 撞上界 72、betaF 撞上界 0.05、sigmaF 撞下界 1.2
+#   b19 acmsF 撞上界 75、betaF 撞上界 0.06
+#   b20 sigmaF 撞下界 1.0 且 sosF = 0.000 +- 0.002（第二成分整個死掉）
+#   b21 acmsF 撞上界 75、betaF 撞上界 0.06
+# 收放界線沒有用，問題在函數本身少一個成分。改成
+#   pdfFail = sigFracF * DSCB + (1 - sigFracF) * Gaussian(meanGF ~ 77)
+# 也就是把本檔 2026-07-18 就寫好、但一直沒有開關去啟用的 _thintail_1820 recipe
+# 打開（薄 DSCB 尾 + 寬 shoulder Gaussian）。同一個 recipe 在 0p15_nongap_2025
+# 的 bin20/21 已經實際用著，failing 的 shoulder 與尖峰都描述得上
+# （meanGF=77.8、sigmaGF=5.29、sigFracF=0.632、nBkgF 回到 2225）。
+#
+# ⚠️ 驗收判準不只看殘差：addGaus 會把 shoulder 事件算進 nSigF，效率一定會往下走一點。
+# 目前四格的效率四種擬合本來就一致（b18 0.9704/0.9713/0.9705/0.9713、
+# b19 0.9674/0.9664/0.9661/0.9664、b20 0.9656/0.9660/0.9657/0.9660、
+# b21 0.9699/0.9698/0.9693/0.9697），所以改完必須仍然落在這個 ±0.001 的帶子裡；
+# 若 altSig 被拉離其他三種，就是 Gaussian 吃過頭（sigmaGF 太大 / sigFracF -> 0），
+# 要退回。
+addGausBins = {
+    'altSigFit': (18, 19, 20, 21),
+}
+
+
+# --- bin39 nominalFit：failing「非常崎嶇」 (2026-09-12) ---
+# 崎嶇只是表徵，真正的問題是 MIGRAD 從頭到尾沒有動過：failing 的每一個參數都
+# 停在初始值（acmsF=65、betaF=0.05、gammaF=0.1、meanF=0、sigmaF=0.9、
+# nSigF=729=0.9*nTotF、nBkgF=81=0.1*nTotF），誤差全部是 0.0000，
+# edmF = 8.28e-20、covQual = 0。紅線因此是「未經最小化的模板卷積」，
+# sigmaF=0.9 幾乎不抹平，低統計（nTotF 只有 810）的模板顛簸就原封不動印出來。
+# 與本檔 2026-09-07 修好的 altBkgFit bin39 是同一格、同一個病；那次把初始值挪離
+# 駐點之後就收斂了（edmF 0.000554、covQual 3、sigmaF 跑到 2.417 自己把模板抹平）。
+# 這裡照抄同一帖：挪初始值 + 給 sigmaF 一個夠高的起點讓卷積真的抹平。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[39] = params_with_updates(
+    tnpParNomFitByBin.get(39, tnpParNomFit),
+    "meanF[-0.2,-4.0,4.0]",
+    "sigmaF[1.6,0.5,4.0]",
+    "acmsF[70.,45.,95.]",
+    "betaF[0.04,0.001,0.10]",
+    "gammaF[0.06,-0.5,0.8]",
+)

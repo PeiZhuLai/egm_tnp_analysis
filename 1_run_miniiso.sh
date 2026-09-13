@@ -1,10 +1,10 @@
 #!/bin/bash
 # =============================================================================
-# miniIso 專用 driver — 帶 --addGaus,重現 generic-function fit + 所有 per-bin 微調
+# miniIso 專用 driver — 重現 per-bin 微調（addGaus 由 settings 的 addGausBins 決定）
 # =============================================================================
-# 為何要專用 driver:shared run.sh 的 doFit 都「沒有 --addGaus」→ 會走 fitUtils 的
-# ELSE 分支(template-pass+template-fail、用 base 參數、無微調)→ 覆蓋掉調好的 fit。
-# 本 driver 所有 doFit 都帶 --addGaus,才吃得到 generic function + config 裡的微調。
+# 為何要專用 driver:shared run.sh 走的是另一套序列。至於 addGaus —— 2026-09-12 起
+# 本 driver **不再下全域 --addGaus**,改由各 settings 的 addGausBins 逐 bin 決定。
+# 理由見下方 run_one() 內的註解。
 #
 # ---- lineshape(addGaus 模式,fitUtils.py 的 if isaddGaus==1) ----
 #   nominal / altBkg / altSigBkg : PASSING=MC template Pass, FAILING=generic ZeeGenLevel
@@ -72,13 +72,19 @@ run_one() {
     FIT "$mod" "$wp" --createHists --sample data   || { echo "FAIL hist data $c"; return 1; }
   fi
   if [[ "$STAGE" == "full" || "$STAGE" == "fits" ]]; then
-    # 全部帶 --addGaus(關鍵:吃 generic function + 微調)。
-    # 序列比照實測過的參考 driver:nominal 分 mcNom/data;alt 三種不帶 --fitSample。
-    FIT "$mod" "$wp" --doFit --fitSample mcNom --addGaus  || echo "WARN nominal mcNom $c"
-    FIT "$mod" "$wp" --doFit --fitSample data  --addGaus  || echo "WARN nominal data $c"
-    FIT "$mod" "$wp" --doFit --altSig          --addGaus  || echo "WARN altSig $c"
-    FIT "$mod" "$wp" --doFit --altBkg          --addGaus  || echo "WARN altBkg $c"
-    FIT "$mod" "$wp" --doFit --altSigBkg       --addGaus  || echo "WARN altSigBkg $c"
+    # 2026-09-12：這裡原本每一行都帶全域 --addGaus。**已經移除，不要加回來。**
+    # 當時的理由是「不帶就走 template 分支、吃不到微調」，那在 07 月是對的；但 09-07
+    # 之後 addGaus 改成逐 bin 開關(settings 的 addGausBins)，全域旗標會覆蓋掉它，
+    # 把 shoulder Gaussian 強加到每一格。完整比對量過:全開會改善 699 個擬合、
+    # 弄壞 1766 個 —— 那個成分只在 failing 真的是「窄峰+shoulder」時有東西可描述,
+    # 其他格子只是白花一個自由度。不帶旗標時 _addgaus_for_bin() 會照 settings 決定,
+    # 該開的格子照樣開,微調照樣吃得到。
+    # 要做探索性的全開比較,請在命令列自己加 --addGaus,不要改回這裡。
+    FIT "$mod" "$wp" --doFit --fitSample mcNom  || echo "WARN nominal mcNom $c"
+    FIT "$mod" "$wp" --doFit --fitSample data   || echo "WARN nominal data $c"
+    FIT "$mod" "$wp" --doFit --altSig           || echo "WARN altSig $c"
+    FIT "$mod" "$wp" --doFit --altBkg           || echo "WARN altBkg $c"
+    FIT "$mod" "$wp" --doFit --altSigBkg        || echo "WARN altSigBkg $c"
   fi
   FIT "$mod" "$wp" --sumUp --exportJson            || { echo "FAIL sumUp $c"; return 1; }
   echo "----------- DONE $c $(date +%H:%M:%S) -----------"

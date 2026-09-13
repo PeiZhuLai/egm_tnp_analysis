@@ -314,12 +314,38 @@ tnpParAltSigBkgFitByBin = {
     # bin00: failing-leg signal core railed right (meanF~+4.9) and over-narrow, with
     # the bkg exponential turning up at high mass. Pin meanF near the Z, widen the
     # core, and forbid the exponential upturn (alphaF_2 max 0).
+    #
+    # 2026-09-12：上面那次「放寬核心」現在變成病因。sigmaF 被壓滿在 2.0 上界
+    # （1.9927 +/- 0.0009），訊號因此吃掉約 113,000 個其他擬合視為背景的事件：
+    #   nSigF 160426 對 nominal 47466 / altBkg 47352（altSig 31586）
+    #   效率  0.3434 對 0.6320 / 0.6352 / 0.7139  —— 差快一倍，明顯離群
+    #   edmF  6.95e+05，covQual 2：根本沒收斂
+    # 同時 nF = 0.0007 撞 0 下界、alphaF = 1.444 +/- 1.071 貼著 1.4 下界且誤差
+    # 比可動範圍還大 —— 那兩個參數只是開出平坦方向讓 MIGRAD 停不下來。
+    # 這格背景占九成以上（nBkgF ~ 567k 對 nSigF ~ 47k），訊號一旦能變寬就會
+    # 往背景裡長，所以收上界之外還要把不受約束的尾巴參數釘死。
     0: params_with_updates(
         tnpParAltSigBkgFit,
+        # 第三輪試過把 meanF 放寬成 [-5, 1]（理由是 nominal/altBkg 的 meanF 都是
+        # -3.2，而 [-2,2] 把它排除在外），結果**大幅變壞**，已撤銷：
+        #   nSigF 74001 -> 362521、效率 0.5314 -> 0.1880、edm 0.055 -> 8.93e+08、
+        #   殘差 6 -> 11 個 slice；meanF 沒有去 -3.2，而是停在 +0.573，參數誤差
+        #   全是 1e-4 量級（MIGRAD 沒動）。
+        # 教訓：nominal/altBkg 是模板擬合，meanF 是「模板的位移」；altSigBkg 是
+        # 解析 DSCB，meanF 是「峰位本身」。兩者不同義，不能拿前者的數值當後者的
+        # 目標值。要跨擬合比對只能比 nSigF / 效率這種物理量。
         'meanF[0.0, -2.0, 2.0]',
-        'sigmaF[0.7, 0.2, 2.0]',
-        'sigmaF_2[1.5, 0.3, 3.0]',
-        'sosF[0.3, 0.0, 1.0]',
+        # 第二輪（2026-09-12）：只收 sigmaF 的上界沒有用。RooCBExGaussShapeTNP 收到的
+        # 寬度是 sqrt(sigmaF^2 + sosF^2)，所以 sigmaF 被壓到 1.4 上界之後，sosF 立刻
+        # 從 0.616 跑到 1.0 上界把寬度補回來：
+        #   有效寬度 sqrt(1.9927^2+0.616^2)=2.086 -> sqrt(1.4^2+1.0^2)=1.72
+        # 方向對了（nSigF 160426 -> 78996、edm 6.95e+05 -> 0.052、covQual 2 -> 3），
+        # 但兩個參數同時撞上界表示擬合還想更寬，所以 sosF 的上界要一起收。
+        'sigmaF[0.9, 0.2, 1.3]',
+        'sigmaF_2[0.8, 0.3, 1.6]',
+        'sosF[0.2, 0.0, 0.5]',
+        'alphaF[2.0]',
+        'nF[0.4, 0.05, 1.5]',
         'alphaF_2[-0.02, -1, 0.]',
     ),
     5: params_with_updates(
@@ -352,3 +378,14 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- bin02 passing：2026-09-06 嘗試後還原 ---
+# 診斷成立：altSig 的 sigmaP = 5.531 對照 nominalFit 的 1.442 寬了 3.8 倍，
+# acmsP 撞 90 上界、nP 撞 5，5 個 slice 超過 5 sigma。
+# 但把核心釘回 nominal 的解析度之後，殘差確實變好（5 -> 0 個 slice，covQual 2 -> 3），
+# 效率卻走反方向：0.7811 -> 0.8047，而 nominal 是 0.7357。同一格的 altBkg 是
+# +0.1%、altSigBkg 是 +0.5%，只有 altSig 離群，我的修改讓它從 +6.2% 變成 +9.4%。
+# 而且 sigmaP 停在新設的 3.0 上界，也就是那個效率是被界擋出來的，不是自由極小值。
+# 殘差不是這裡的判準——這格 passing 有 16 萬個事件，殘差對形狀很敏感，但
+# alternate-signal 的用途是產生系統誤差，離群才是問題。維持原設定。

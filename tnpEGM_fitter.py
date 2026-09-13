@@ -376,6 +376,17 @@ def _addgaus_for_bin(bin_index):
     return bin_index in set(spec)
 
 
+def _fit_mass_range():
+    """settings 的 fitMassRange = (lo, hi)；沒設回 None（沿用 60-120）。"""
+    fr = getattr(tnpConf, 'fitMassRange', None)
+    return (float(fr[0]), float(fr[1])) if fr and len(fr) == 2 else None
+
+
+def _bkg_model():
+    """settings 的 tnpBkgModel（None/'cmsshape' 預設，或 'exp'）；給 nominal 與 altSig。"""
+    return getattr(tnpConf, 'tnpBkgModel', None)
+
+
 def _altbkg_model_for_bin(bin_index, tnp_bin):
     """Per-bin background model for the alternate-background fit.
 
@@ -442,6 +453,8 @@ if  args.doFit:
                     fit_params,
                     bin_index=ib,
                     preserve_params_from_mc=changed_names,
+                    fitRange=_fit_mass_range(),
+                    bkgModel=_bkg_model(),
                 )
             elif args.altSig and use_gaus:
                 fit_params, changed_names = _resolve_fit_params('tnpParAltSigFit_addGaus', ib, tnp_bin, return_changed_names=True)
@@ -452,27 +465,29 @@ if  args.doFit:
                     1,
                     bin_index=ib,
                     preserve_params_from_mc=changed_names,
+                    fitRange=_fit_mass_range(),
+                    bkgModel=_bkg_model(),
                 )
             elif args.altBkg and use_gaus:
                 fit_params = _resolve_fit_params('tnpParAltBkgFit_addGaus', ib, tnp_bin)
                 tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib,
-                                           bkgModel=_altbkg_model_for_bin(ib, tnp_bin) )
+                                           bkgModel=_altbkg_model_for_bin(ib, tnp_bin), fitRange=_fit_mass_range() )
             elif args.altBkg:
                 fit_params = _resolve_fit_params('tnpParAltBkgFit', ib, tnp_bin)
                 tnpRoot.histFitterAltBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib,
-                                           bkgModel=_altbkg_model_for_bin(ib, tnp_bin) )
+                                           bkgModel=_altbkg_model_for_bin(ib, tnp_bin), fitRange=_fit_mass_range() )
             elif args.altSigBkg and use_gaus:
                 fit_params = _resolve_fit_params('tnpParAltSigBkgFit_addGaus', ib, tnp_bin)
-                tnpRoot.histFitterAltSigBkg(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib )
+                tnpRoot.histFitterAltSigBkg(  sampleToFit, tnp_bin, fit_params, 1, bin_index=ib, fitRange=_fit_mass_range() )
             elif args.altSigBkg:
                 fit_params = _resolve_fit_params('tnpParAltSigBkgFit', ib, tnp_bin)
-                tnpRoot.histFitterAltSigBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib )
+                tnpRoot.histFitterAltSigBkg(  sampleToFit, tnp_bin, fit_params, bin_index=ib, fitRange=_fit_mass_range() )
             elif use_gaus:
                 fit_params = _resolve_fit_params('tnpParNomFit_addGaus', ib, tnp_bin)
-                tnpRoot.histFitterNominal( sampleToFit, tnp_bin, fit_params, 1, bin_index=ib )
+                tnpRoot.histFitterNominal( sampleToFit, tnp_bin, fit_params, 1, bin_index=ib, fitRange=_fit_mass_range(), bkgModel=_bkg_model() )
             else:
                 fit_params = _resolve_fit_params('tnpParNomFit', ib, tnp_bin)
-                tnpRoot.histFitterNominal( sampleToFit, tnp_bin, fit_params, bin_index=ib )
+                tnpRoot.histFitterNominal( sampleToFit, tnp_bin, fit_params, bin_index=ib, fitRange=_fit_mass_range(), bkgModel=_bkg_model() )
     # Pool() with no argument uses every core the machine has, which is not what
     # was asked for: on a batch worker the job holds one requested CPU but forks
     # ~13 ROOT processes (a 2.6 h job reported 33.5 h of CPU), and on a shared

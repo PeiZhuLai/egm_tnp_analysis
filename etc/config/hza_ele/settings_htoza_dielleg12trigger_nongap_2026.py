@@ -378,3 +378,56 @@ tnpParAltBkgFitByBin[7] = params_with_updates(
     "meanP[-1.0,-3.0,2.0]",
     "sigmaP[2.0,0.5,6.0]",
 )
+
+
+# ============================================================================
+# addGaus：訊號加一個第二成分  (2026-09-07)
+# ----------------------------------------------------------------------------
+# 兩種症狀都適用，差別在第二個高斯落在哪裡：
+#   (a) 「窄峰 + 低質量 shoulder」——模板 conv Gaussian 做不出這個形狀，於是把
+#       sigma 撐寬去湊 shoulder，兩邊都對不上。高斯落在 75-83 GeV。
+#   (b) 「shoulder 太肥、峰太瘦」——曲線在 70-80 GeV 高出資料 ~20%、85-95 GeV
+#       又低 ~15%。模板本身的低質量尾巴比資料多，收 sigma 沒用（那段不是平滑
+#       出來的）。加了第二成分後模板權重被 sigFrac 壓下去，缺的峰由高斯補回。
+#       高斯落在 85-92 GeV，所以 meanG 的上界要開到 95。
+#
+# ⚠️ sigmaG 上界必須 <= 9 GeV。放到 20 時第二成分會退化成寬平台把背景吃進訊號：
+#    elid_nongap_2026 bin11/12 實測 sigmaGF 12.4 GeV、nSigF 27879+/-484 ->
+#    46534+/-1728、nBkgF 41912 -> 23257，效率 0.9073 -> 0.8830。那個狀態下殘差
+#    反而是乾淨的（0 slice），所以驗收要一併看 sigmaG 與 nSig/nBkg 的誤差。
+# ⚠️ meanG 的上界一度開到 95，讓第二個成分可以坐到 Z 峰上當「第二個峰」。
+#    兩份證據說那樣不行（2026-09-07）：
+#    (a) elminiIso0p15_gap_2024 bin02 altSigFit 的 meanGF 跑到 92.57（貼著 95），
+#        60-65 GeV 殘差惡化到 -49%，比不加 gaus 還糟。
+#    (b) elminiIso0p15_gap_2024/2026 的 nominalFit bin02 直接 sigGaussFail = -nan
+#        整個擬合掛掉（和 elid_nongap_2026 nominal bin15 同一種死法）。
+#    收回 shoulder 區間，並把 sigmaG 的下限抬到 2.5 避免退化成尖刺。
+_gaus_f = ("meanGF[77.0,70.0,86.0]", "sigmaGF[5.0,2.5,9.0]")
+_gaus_p = ("meanGP[77.0,70.0,86.0]", "sigmaGP[5.0,2.5,9.0]")
+
+addGausBins = {
+    'altBkgFit':    (23, 24, 31),
+    'altSigBkgFit': (24, 31),
+    'altSigFit':    (24,),
+}
+
+tnpParAltBkgFit_addGaus = params_with_updates(tnpParAltBkgFit, *_gaus_f)
+_bb0 = globals().get('tnpParAltBkgFitByBin', {})
+tnpParAltBkgFit_addGausByBin = {}
+for _b, _sides in {23: 'fp', 24: 'fp', 31: 'fp'}.items():
+    _extra = _gaus_f + (_gaus_p if _sides == "fp" else ())
+    tnpParAltBkgFit_addGausByBin[_b] = params_with_updates(_bb0.get(_b, tnpParAltBkgFit), *_extra)
+
+tnpParAltSigBkgFit_addGaus = params_with_updates(tnpParAltSigBkgFit, *_gaus_f)
+_bb1 = globals().get('tnpParAltSigBkgFitByBin', {})
+tnpParAltSigBkgFit_addGausByBin = {}
+for _b, _sides in {24: 'fp', 31: 'fp'}.items():
+    _extra = _gaus_f + (_gaus_p if _sides == "fp" else ())
+    tnpParAltSigBkgFit_addGausByBin[_b] = params_with_updates(_bb1.get(_b, tnpParAltSigBkgFit), *_extra)
+
+tnpParAltSigFit_addGaus = params_with_updates(tnpParAltSigFit, *_gaus_f)
+_bb2 = globals().get('tnpParAltSigFitByBin', {})
+tnpParAltSigFit_addGausByBin = {}
+for _b, _sides in {24: 'fp'}.items():
+    _extra = _gaus_f + (_gaus_p if _sides == "fp" else ())
+    tnpParAltSigFit_addGausByBin[_b] = params_with_updates(_bb2.get(_b, tnpParAltSigFit), *_extra)

@@ -277,9 +277,49 @@ void tnpFitter::setWorkspace(std::vector<std::string> workspace, bool isaddGaus)
   _work->factory(TString::Format("nSigP[%f,0.5,%f]",_nTotP*0.9,_nTotP*1.5));
   _work->factory(TString::Format("nBkgP[%f,0.5,%f]",_nTotP*0.1,_nTotP*1.5));
   _work->factory(TString::Format("nSigF[%f,0.5,%f]",_nTotF*0.9,_nTotF*1.5));
-  _work->factory(TString::Format("nBkgF[%f,0.5,%f]",_nTotF*0.1,_nTotF*1.5));
-  _work->factory("SUM::pdfPass(nSigP*sigPass,nBkgP*bkgPass)");
-  
+  // nBkgF's floor used to be a hard 0.5, i.e. "no background at all" was a
+  // reachable corner. For the alternate-signal fit it is a reachable *and
+  // attractive* one: the analytic DSCB power-law tail and RooCMSShape are nearly
+  // degenerate below ~80 GeV, so MIGRAD is free to hand the whole low-mass region
+  // to the signal tail and zero the background. Measured 2026-09-07 over the
+  // stored data fits: 94/1007 failing fits in the sielleg30 measurements (9.3%)
+  // and 24/864 in the dielleg23 ones (2.8%) had nBkgF pinned at 0.5 -- and 112 of
+  // those 118 were altSigFit.
+  //
+  // Once the background is gone the tail has to cover 60-80 GeV on its own, so
+  // alphaF gets driven to its heaviest allowed value and the curve overshoots the
+  // data there by factors of several. That region holds ~1% of the events, so the
+  // NLL barely notices and MIGRAD has no reason to come back -- which is why
+  // tightening the tail parameters per bin never worked (they just rail on the new
+  // bound). The signature is nBkgF at the floor with an error orders of magnitude
+  // larger than the value (e.g. 1 +/- 6822): unconstrained, not measured.
+  //
+  // A floor of 0.1% of the failing yield only removes the exactly-zero corner; it
+  // is far below any real background level, so healthy fits are unaffected.
+  // TNP_LEGACY_NBKG_FLOOR=1 puts the old hard 0.5 floor back. It exists only so the
+  // effect of this change can be measured after the fact: the per-bin fit files are
+  // overwritten in place, so once a bin is refit its previous efficiency is gone
+  // unless it is deliberately reproduced. Default (unset) is the new floor.
+  const char *legacyFloor = gSystem->Getenv("TNP_LEGACY_NBKG_FLOOR");
+  const double bkgFloorF = ( legacyFloor && legacyFloor[0] == '1' ) ? 0.5 : _nTotF*0.001;
+  _work->factory(TString::Format("nBkgF[%f,%f,%f]",_nTotF*0.1,bkgFloorF,_nTotF*1.5));
+  // The shoulder Gaussian used to exist only on the failing leg. The passing leg
+  // needs it too: measured on elid_nongap_2026 bin08 (eta -2.50..-2.00, ET 20-35),
+  // the passing residuals carry the same structure as the failing ones -- 60-65 GeV
+  // -50%, 70-75 GeV +65%, 7 slices past 5 sigma -- because it is the same MC
+  // template whose low-mass tail is too small, and the same template feeds both legs.
+  // Whether the passing Gaussian is built is decided by the settings file: it is
+  // added only if sigGaussPass was declared in the workspace parameter list (i.e.
+  // the settings named meanGP/sigmaGP), so every existing configuration keeps the
+  // pass leg exactly as it was. Bit-for-bit unchanged unless asked for.
+  if( _work->pdf("sigGaussPass") != 0 ) {
+    if( _work->var("sigFracP") == 0 ) _work->factory("sigFracP[0.5,0.0,1.0]");
+    _work->factory("SUM::pdfPass(expr('sigFracP*nSigP',{sigFracP,nSigP})*sigPass,nBkgP*bkgPass, expr('(1.-sigFracP)*nSigP',{sigFracP,nSigP})*sigGaussPass)");
+  }
+  else {
+    _work->factory("SUM::pdfPass(nSigP*sigPass,nBkgP*bkgPass)");
+  }
+
   if (isaddGaus) {
     _work->factory("SUM::pdfFail(expr('sigFracF*nSigF',{sigFracF,nSigF})*sigFail,nBkgF*bkgFail, expr('(1.-sigFracF)*nSigF',{sigFracF,nSigF})*sigGaussFail)");
   } 

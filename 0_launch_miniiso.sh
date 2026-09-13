@@ -2,7 +2,7 @@
 # =============================================================================
 # miniIso 一鍵啟動器(在 cmssw-el7 container "外" 執行)
 # =============================================================================
-# 自動:進 cmssw-el7 → cmsenv → 跑 1_run_miniiso.sh(帶 --addGaus,重現微調)。
+# 自動:進 cmssw-el7 → cmsenv → 跑 1_run_miniiso.sh(addGaus 由 settings 的 addGausBins 逐 bin 決定)。
 # 免手動進 container。1_run_miniiso.sh 的 header 記錄所有微調/lineshape。
 #
 # 用法(直接在 lxplus,不用先進 container、不用記 STAGE):

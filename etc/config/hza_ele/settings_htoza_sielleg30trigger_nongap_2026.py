@@ -276,3 +276,52 @@ tnpParAltSigBkgFitByBin[44] = params_with_updates(
     "sigmaP_2[1.5,0.2,5.0]",
     "sosP[0.3,0.0,2.0]",
 )
+
+
+# --- bin06 passing：2026-09-06 嘗試後還原 ---
+# 診斷是對的（nBkgP=0.5 貼在下界、acmsP 撞 90、gammaP 撞 0.002，三個背景形狀
+# 參數都失去約束，訊號因此把低質量端自己吃下來），但把 mean/sigma 錨到 nominal
+# 並拉回 turn-on 的做法反而更糟：meanP 撞死在新設的 -3.0 下界，效率從 0.1158
+# 掉到 0.1072，離 nominal 的 0.1167 更遠（-0.8% 變成 -8.1%）。
+# 這一格 passing 只有一萬三千個訊號、背景近乎為零，殘差檢定看不出差別
+# （前後都是 0 個 slice 超標），效率是唯一的判準，而它變差了。維持原設定。
+
+
+# ============================================================================
+# addGaus：failing（必要時 passing）訊號加一個 shoulder Gaussian  (2026-09-07)
+# ----------------------------------------------------------------------------
+# 適用症狀：模板 conv Gaussian 做不出「窄峰 + 低質量 shoulder」的形狀，於是把
+# sigmaF 撐寬去湊 shoulder，結果峰頂與 shoulder 兩邊都對不上，而且參數會撞界。
+# 加一個第二成分後 sigmaF 可以回到窄值，兩個區域同時對上。
+#
+# ⚠️ sigmaG 的上界必須收窄（<= 9 GeV）。上界放到 20 時第二成分會退化成寬平台，
+#    把背景整段吃進訊號：elid_nongap_2026 bin11/bin12 實測 sigmaGF 12.4 GeV、
+#    nSigF 27879+/-484 -> 46534+/-1728、nBkgF 41912 -> 23257，效率 0.9073 ->
+#    0.8830，離其他三種擬合更遠。殘差在那種狀態下反而是乾淨的（0 slice），
+#    所以驗收不能只看殘差，要一併看 sigmaG 大小與 nSig/nBkg 的誤差有沒有脹起來。
+#    健康的 shoulder 是 sigmaG 約 5-6.5 GeV、效率只動 0.5% 以內。
+_gaus_f = ("meanGF[74.0,60.0,88.0]", "sigmaGF[5.0,2.0,9.0]")
+_gaus_p = ("meanGP[74.0,60.0,88.0]", "sigmaGP[5.0,2.0,9.0]")
+
+addGausBins = {
+    'altBkgFit':    (0, 7),
+}
+
+tnpParAltBkgFit_addGaus = params_with_updates(tnpParAltBkgFit, *_gaus_f)
+_bybin = globals().get('tnpParAltBkgFitByBin', {})
+tnpParAltBkgFit_addGausByBin = {}
+for _b, _sides in {0: 'f', 7: 'fp'}.items():
+    _extra = _gaus_f + (_gaus_p if _sides == "fp" else ())
+    tnpParAltBkgFit_addGausByBin[_b] = params_with_updates(
+        _bybin.get(_b, tnpParAltBkgFit), *_extra)
+
+
+# --- bin00 altBkgFit：單一指數做不出低質量的轉折 (2026-09-07) ---
+# altBkg 的背景是 RooExponential，只有一個斜率參數，形狀必然是單調的 ——
+# 往低質量只會一路往上爬，做不出資料在 60-70 GeV 的轉折。實測 alphaF =
+# -0.0458 +/- 0.0009（自由、沒撞界），也就是說它已經盡力了，是函數族的限制。
+# 殘差：60-65 GeV -56%、70-75 GeV +86%（曲線在最低端過高、緊接著又不夠）。
+# 這正是 tnpAltBkgModelByBin 那個逃生口存在的理由，改用 bernstein2。
+# 注意 bin07 同一個檔案用指數 + addGaus 就修好了（兩側 0 slice），所以只換這格。
+tnpAltBkgModelByBin = dict(globals().get('tnpAltBkgModelByBin', {}))
+tnpAltBkgModelByBin[0] = 'bernstein2'

@@ -227,3 +227,26 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# --- bin19 altSigFit: failing 訊號峰偏右 (2026-09-07) ---
+# alphaF 壓在下界 1.2、nF 壓在上界 5.0 -> DSCB 左側冪次尾巴過重，60-65 GeV
+# 曲線 2565 對資料 263 (-90%)、65-70 -85%、70-75 -73%。nBkgF 又壓在 0.5 下界，
+# 低質量端整段由訊號尾巴撐著。MIGRAD 為了讓總積分對得上，只能把 meanF 推到
+# +0.874，峰值因此偏右；三個模板擬合同格的 meanF 是 -0.13 / -0.13 / -0.73。
+# 效率四種擬合已經一致 (0.6852-0.6862)，這是形狀問題不是量的問題。
+# 解法：把尾巴拉回去（alphaF 下界提高、nF 上界壓低），meanF 上界收到 0.3。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+# 第一次嘗試（收 alphaF 下界到 1.8、nF 上界到 4.0、meanF 上界到 0.3）失敗：
+# 三個參數全部改撞新界，90-95 GeV 從 +3.8% 惡化到 +11.9%，edm 0.0065 -> 5.31。
+# 只壓訊號尾巴沒用，因為病根在背景：acmsF 撞在 90.0 上界，等於把 RooCMSShape
+# 的 turn-on 推到 90 GeV 之外，nBkgF 隨之壓到 0.5 下界 —— failing 完全沒有背景，
+# 60-80 GeV 只能由 DSCB 的左尾去撐，尾巴才被逼到極重。三個模板擬合同格的
+# nBkgF 是 2584 / 1852 / 1867，不是 0。
+# 改法：把 acmsF 的上界拉回物理區間讓背景活過來，訊號尾巴參數放回原值。
+tnpParAltSigFitByBin[19] = params_with_updates(
+    tnpParAltSigFitByBin.get(19, tnpParAltSigFit),
+    "acmsF[70.,55.,80.]",
+    "betaF[0.04,0.005,0.15]",
+    "meanF[-0.1,-3.0,1.0]",
+)

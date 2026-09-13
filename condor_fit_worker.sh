@@ -26,11 +26,13 @@ case "$FT" in
   altSigBkg)  FTARG="--altSigBkg" ;;
   *) echo "unknown fit type $FT"; exit 12 ;;
 esac
-# The per-bin tunes written into tnpParNomFit_addGausByBin & friends (Joseph,
-# 2026-07-14..16) only take effect under --addGaus, and no production run has ever
-# passed it -- so those tunes have been inert. Only the eight miniIso settings
-# define the *_addGaus variables; anywhere else getattr() raises, which is why this
-# is opt-in per submission rather than always on.
+# TNP_ADDGAUS=1 forces the shoulder Gaussian on for EVERY bin. Since 2026-09-07 that
+# is almost never what you want: the normal route is the settings file's own
+# `addGausBins` (per fit type, per bin), which tnpEGM_fitter._addgaus_for_bin() reads
+# with no flag at all. Turning it on globally was measured across a full comparison to
+# improve 699 fits and make 1766 worse -- the extra component only has something to
+# describe where the failing leg really is "narrow peak + shoulder". Keep this for
+# exploratory A/B runs only.
 if [ "${TNP_ADDGAUS:-0}" = "1" ]; then
   FTARG="$FTARG --addGaus"
 fi

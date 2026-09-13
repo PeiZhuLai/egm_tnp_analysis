@@ -500,7 +500,7 @@ def createWorkspaceForAltSig( sample, tnpBin, tnpWorkspaceParam, preserve_params
         filemc.Close()
         return localParams
 
-    listOfParam = ['nF','alphaF','nP','alphaP','sigmaP','sigmaF','sigmaP_2','sigmaF_2','meanGF','sigmaGF','sigFracF']
+    listOfParam = ['nF','alphaF','nP','alphaP','sigmaP','sigmaF','sigmaP_2','sigmaF_2','meanGF','sigmaGF','sigFracF','meanGP','sigmaGP','sigFracP']
 
     # 失敗樣本參數
     fitParF = fitresF.floatParsFinal()
@@ -530,7 +530,34 @@ def createWorkspaceForAltSig( sample, tnpBin, tnpWorkspaceParam, preserve_params
 #############################################################
 ########## nominal fitter
 #############################################################
-def histFitterNominal( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None ):
+def _applyBkgModel(lines, bkgModel=None):
+    """把 nominal / altSig 的 RooCMSShape 背景換成別的模型。
+
+    預設（None / 'cmsshape'）原封不動回傳，所以既有 measurement 一律不受影響。
+
+    'exp' 換成單參數 RooExponential，settings 要改為提供 alphaBkgP / alphaBkgF。
+    刻意不叫 alphaP/alphaF：altSig 的 alphaP 是 DSCB 的尾巴參數、altBkg 的 alphaP
+    是它自己的背景斜率，兩個都會撞名（altSigBkg 用 alphaP_2 正是為了避開）。
+    這是給 phcsev 用的：那批是 Z->mumugamma，m(mumugamma) 被選擇釘在 80-100 GeV，
+    在一個幾乎全是峰的 20 GeV 窗裡，RooCMSShape 的 4 個參數(acms/beta/gamma/peak)
+    不可能被決定，而且它的 erfc turn-on 本身就長得像一個峰，會直接冒充訊號。
+    """
+    if bkgModel in (None, '', 'cmsshape', 'RooCMSShape'):
+        return lines
+    if bkgModel in ('exp', 'exponential', 'RooExponential'):
+        out = []
+        for l in lines:
+            if l.startswith('RooCMSShape::bkgPass'):
+                out.append("Exponential::bkgPass(x, alphaBkgP)")
+            elif l.startswith('RooCMSShape::bkgFail'):
+                out.append("Exponential::bkgFail(x, alphaBkgF)")
+            else:
+                out.append(l)
+        return out
+    raise ValueError("unknown tnpBkgModel %r (use 'cmsshape' or 'exp')" % (bkgModel,))
+
+
+def histFitterNominal( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None, fitRange=None, bkgModel=None ):
 
     tnpWorkspaceFunc = [
         "Gaussian::sigResPass(x,meanP,sigmaP)",
@@ -538,6 +565,7 @@ def histFitterNominal( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index
         "RooCMSShape::bkgPass(x, acmsP, betaP, gammaP, peakP)",
         "RooCMSShape::bkgFail(x, acmsF, betaF, gammaF, peakF)",
         ]
+    tnpWorkspaceFunc = _applyBkgModel(tnpWorkspaceFunc, bkgModel)
     ## optional 2nd Gaussian on the FAILING signal to absorb the low-mass (FSR/DY)
     ## shoulder: pdfFail = sigFracF*(template⊗Gauss) + (1-sigFracF)*sigGaussFail, both
     ## counted as signal (nSigF). Needs meanGF/sigmaGF in the param list (config).
@@ -545,6 +573,7 @@ def histFitterNominal( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index
         tnpWorkspaceFunc += [ "Gaussian::sigGaussFail(x,meanGF,sigmaGF)", ]
         if not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):
             tnpWorkspaceFunc += [ "sigFracF[0.5,0.0,1.0]", ]
+    tnpWorkspaceFunc += _passShoulderLines( tnpWorkspaceParam )
 
     tnpWorkspace = []
     tnpWorkspace.extend(tnpWorkspaceParam)
@@ -568,6 +597,9 @@ def histFitterNominal( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index
     rootpath = sample.nominalFit.replace('.root', '-%s.root' % tnpBin['name'])
     rootfile = rt.TFile(rootpath,'update')
     fitter.setOutputFile( rootfile )
+    # 擬合範圍：預設沿用 histFitter.C 寫死的 60-120；settings 設了 fitMassRange 才收窄。
+    if fitRange:
+        fitter.setFitRange( float(fitRange[0]), float(fitRange[1]) )
     
     ## generated Z LineShape
     if isaddGaus==1:
@@ -632,6 +664,8 @@ def histFitterAltSig(
     isaddGaus=0,
     bin_index=None,
     preserve_params_from_mc=None,
+    fitRange=None,
+    bkgModel=None,
 ):
 
     tnpWorkspacePar = createWorkspaceForAltSig(
@@ -648,10 +682,23 @@ def histFitterAltSig(
         "RooCMSShape::bkgPass(x, acmsP, betaP, gammaP, peakP)",
         "RooCMSShape::bkgFail(x, acmsF, betaF, gammaF, peakF)",
         ]
+    tnpWorkspaceFunc = _applyBkgModel(tnpWorkspaceFunc, bkgModel)
     if isaddGaus==1:
         tnpWorkspaceFunc += [ "Gaussian::sigGaussFail(x,meanGF,sigmaGF)", ]
-        if sample.isMC and not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):
+        # 原本這裡有 `sample.isMC and` 的守衛：設計上 data 的 sigFracF 應該由
+        # createWorkspaceForAltSig 從 MC 參考檔搬過來（它會 append 成 sigFracF[值]）。
+        # 但只要 MC 參考檔是在還沒開 addGaus 的時候擬合的，裡面就沒有 sigFracF，
+        # data 端於是誰都沒建立它，histFitter.C 的
+        #   SUM::pdfFail(expr('sigFracF*nSigF',...)...)
+        # 建不起來 —— RooFit 只印兩行 ERROR，然後**安靜地退回沒有 shoulder 的
+        # pdf**：擬合照跑、return 0、結果和沒加 gaus 時逐位元相同。
+        # (2026-09-07 實測 elminiIso0p15_gap_2024 bin02：MC 參考檔是 8/6 產的，
+        #  加了 addGaus 之後 nSigP/nSigF/meanF/sigmaF 四個數字完全沒變。)
+        # 拿掉守衛之後：MC 有提供就照用（下面的 not any(...) 會擋掉重複建立，
+        # 既有行為逐位元不變），沒提供才讓 data 自己浮動 —— 總比 pdf 靜默壞掉好。
+        if not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):
             tnpWorkspaceFunc += [ "sigFracF[0.5,0.0,1.0]", ]
+    tnpWorkspaceFunc += _passShoulderLines( tnpWorkspaceParam )
 
     tnpWorkspace = []
     tnpWorkspace.extend(tnpWorkspacePar)
@@ -679,6 +726,9 @@ def histFitterAltSig(
     rootpath = sample.altSigFit.replace('.root', '-%s.root' % tnpBin['name'])
     rootfile = rt.TFile(rootpath,'update')
     fitter.setOutputFile( rootfile )
+    # 擬合範圍：預設沿用 histFitter.C 寫死的 60-120；settings 設了 fitMassRange 才收窄。
+    if fitRange:
+        fitter.setFitRange( float(fitRange[0]), float(fitRange[1]) )
     
     ## generated Z LineShape
     fileTruth = rt.TFile('etc/inputs/ZeeGenLevel.root','read')
@@ -724,6 +774,29 @@ def histFitterAltSig(
 #############################################################
 ########## alternate background fitter
 #############################################################
+def _passShoulderLines( tnpWorkspaceParam ):
+    """Passing-leg shoulder Gaussian, opt-in from the settings file.
+
+    The shoulder component existed only on the failing leg. But the low-mass tail
+    it describes comes from the MC template, and the same template feeds both legs,
+    so a bin whose failing leg needs it can need it on the passing leg too.
+    Measured on elid_nongap_2026 bin08 (eta -2.50..-2.00, ET 20-35): the passing
+    residuals carry the same structure as the failing ones -- 60-65 GeV -50%,
+    70-75 GeV +65%, 7 slices past 5 sigma.
+
+    Opt-in by design: the lines are emitted only when the settings declared meanGP,
+    so every existing configuration is untouched (verified bit-for-bit on b12,
+    nSigP 364838.3434 -> 364838.3433). histFitter.C likewise builds the three-way
+    pdfPass only when sigGaussPass exists.
+    """
+    if not any(str(_p).startswith("meanGP") for _p in tnpWorkspaceParam):
+        return []
+    lines = [ "Gaussian::sigGaussPass(x,meanGP,sigmaGP)" ]
+    if not any(str(_p).startswith("sigFracP") for _p in tnpWorkspaceParam):
+        lines += [ "sigFracP[0.5,0.0,1.0]" ]
+    return lines
+
+
 def _altBkgShapeLines( bkgModel, tnpWorkspaceParam ):
     """Background pdf lines for the alternate-background fit.
 
@@ -789,7 +862,7 @@ def _altBkgShapeLines( bkgModel, tnpWorkspaceParam ):
     return [coeffs[k] for k in sorted(coeffs)] + lines
 
 
-def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None, bkgModel=None ):
+def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None, bkgModel=None, fitRange=None ):
 
     tnpWorkspaceFunc = [
         "Gaussian::sigResPass(x,meanP,sigmaP)",
@@ -799,6 +872,7 @@ def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=
         tnpWorkspaceFunc += [ "Gaussian::sigGaussFail(x,meanGF,sigmaGF)", ]
         if not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):
             tnpWorkspaceFunc += [ "sigFracF[0.5,0.0,1.0]", ]
+    tnpWorkspaceFunc += _passShoulderLines( tnpWorkspaceParam )
 
     tnpWorkspace = []
     tnpWorkspace.extend(tnpWorkspaceParam)
@@ -821,6 +895,9 @@ def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=
     rootpath = sample.altBkgFit.replace('.root', '-%s.root' % tnpBin['name'])
     rootfile = rt.TFile(rootpath,'update')
     fitter.setOutputFile( rootfile )
+    # 擬合範圍：預設沿用 histFitter.C 寫死的 60-120；settings 設了 fitMassRange 才收窄。
+    if fitRange:
+        fitter.setFitRange( float(fitRange[0]), float(fitRange[1]) )
 #    fitter.setFitRange(65,115)
 
     ## generated Z LineShape
@@ -877,7 +954,7 @@ def histFitterAltBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=
 #############################################################
 ########## alternate signal+background fitter
 #############################################################
-def histFitterAltSigBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None):
+def histFitterAltSigBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_index=None, fitRange=None):
 
 
     tnpWorkspaceFunc = [
@@ -893,6 +970,7 @@ def histFitterAltSigBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_ind
         tnpWorkspaceFunc += [ "Gaussian::sigGaussFail(x,meanGF,sigmaGF)", ]
         if not any(str(_p).startswith("sigFracF") for _p in tnpWorkspaceParam):
             tnpWorkspaceFunc += [ "sigFracF[0.5,0.0,1.0]", ]
+    tnpWorkspaceFunc += _passShoulderLines( tnpWorkspaceParam )
 
     tnpWorkspace = []
     tnpWorkspace.extend(tnpWorkspaceParam)
@@ -915,6 +993,9 @@ def histFitterAltSigBkg( sample, tnpBin, tnpWorkspaceParam, isaddGaus=0, bin_ind
     rootpath = sample.altSigBkgFit.replace('.root', '-%s.root' % tnpBin['name'])
     rootfile = rt.TFile(rootpath,'update')
     fitter.setOutputFile( rootfile )
+    # 擬合範圍：預設沿用 histFitter.C 寫死的 60-120；settings 設了 fitMassRange 才收窄。
+    if fitRange:
+        fitter.setFitRange( float(fitRange[0]), float(fitRange[1]) )
 #    fitter.setFitRange(65,115)
 
 

@@ -347,3 +347,110 @@ tnpParAltSigBkgFitByBin[41] = params_with_updates(
     "sosF[0.3,0.0,2.0]",
     "nF[0.8,0.0,3.0]",
 )
+
+
+# --- bin41 failing nominalFit：covQual 1，峰頂低 12% (2026-09-06) ---
+# edm 3.13、covQual 1 —— 沒有收斂。acmsF = 45.46 +/- 6.28 貼在 45 的下界，
+# 也就是 CMSShape 的 turn-on 被推到質量窗之外，背景於是在整個範圍近乎平坦，
+# 而 gammaF 走到 -0.0286（負值＝往高質量端爬）。
+# 結果是 90-95 GeV 資料 3875 對曲線 3470（+12%，唯一超過 5 sigma 的 slice）：
+# 峰頂不夠高。訊號 sigmaF = 1.720 對這個 eta/ET 偏寬，收窄可以把峰拉起來。
+# 同一格的 altSigBkgFit 在 2026-09-06 早先也是 90-95 +10%，同一個病。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[41] = params_with_updates(
+    tnpParNomFitByBin.get(41, tnpParNomFit),
+    # 第二輪 (2026-09-06)：第一輪把 edm 從 3.13 壓到 0.69，但 covQual 仍是 1，
+    # sigmaF 也幾乎沒動（1.7203 -> 1.7202）。原因是 acmsF 停在 48 的下界而誤差
+    # 高達 26.7 —— CMSShape 的 turn-on 被推到質量窗（60 GeV）之外，erfc 在整個
+    # 窗內幾乎恆為 1，acmsF 與 betaF 因此完全簡併。那個平坦方向讓共變異數矩陣
+    # 無法正定，也讓 sigmaF 找不到乾淨的極小值。
+    # 兩個都釘成常數（值取第一輪停下來的位置），把自由度還給 mean/sigma 與產率。
+    # gammaF 維持可負：這格的背景是真的往高質量端上升（60-65 GeV 只有 50 個事件，
+    # 115-120 有 519 個），不要強迫它遞減。
+    "meanF[-1.8,-4.0,1.0]",
+    "sigmaF[1.5,0.5,2.6]",
+    "acmsF[50.]",
+    "betaF[0.073]",
+    "gammaF[-0.029,-0.3,0.2]",
+)
+
+
+# ============================================================================
+# addGaus：訊號加一個第二成分  (2026-09-07)
+# ----------------------------------------------------------------------------
+# 兩種症狀都適用，差別在第二個高斯落在哪裡：
+#   (a) 「窄峰 + 低質量 shoulder」——模板 conv Gaussian 做不出這個形狀，於是把
+#       sigma 撐寬去湊 shoulder，兩邊都對不上。高斯落在 75-83 GeV。
+#   (b) 「shoulder 太肥、峰太瘦」——曲線在 70-80 GeV 高出資料 ~20%、85-95 GeV
+#       又低 ~15%。模板本身的低質量尾巴比資料多，收 sigma 沒用（那段不是平滑
+#       出來的）。加了第二成分後模板權重被 sigFrac 壓下去，缺的峰由高斯補回。
+#       高斯落在 85-92 GeV，所以 meanG 的上界要開到 95。
+#
+# ⚠️ sigmaG 上界必須 <= 9 GeV。放到 20 時第二成分會退化成寬平台把背景吃進訊號：
+#    elid_nongap_2026 bin11/12 實測 sigmaGF 12.4 GeV、nSigF 27879+/-484 ->
+#    46534+/-1728、nBkgF 41912 -> 23257，效率 0.9073 -> 0.8830。那個狀態下殘差
+#    反而是乾淨的（0 slice），所以驗收要一併看 sigmaG 與 nSig/nBkg 的誤差。
+# ⚠️ meanG 的上界一度開到 95，讓第二個成分可以坐到 Z 峰上當「第二個峰」。
+#    兩份證據說那樣不行（2026-09-07）：
+#    (a) elminiIso0p15_gap_2024 bin02 altSigFit 的 meanGF 跑到 92.57（貼著 95），
+#        60-65 GeV 殘差惡化到 -49%，比不加 gaus 還糟。
+#    (b) elminiIso0p15_gap_2024/2026 的 nominalFit bin02 直接 sigGaussFail = -nan
+#        整個擬合掛掉（和 elid_nongap_2026 nominal bin15 同一種死法）。
+#    收回 shoulder 區間，並把 sigmaG 的下限抬到 2.5 避免退化成尖刺。
+_gaus_f = ("meanGF[77.0,70.0,86.0]", "sigmaGF[5.0,2.5,9.0]")
+_gaus_p = ("meanGP[77.0,70.0,86.0]", "sigmaGP[5.0,2.5,9.0]")
+
+addGausBins = {
+    'altBkgFit':    (21,),
+    'altSigBkgFit': (21,),
+}
+
+tnpParAltBkgFit_addGaus = params_with_updates(tnpParAltBkgFit, *_gaus_f)
+_bb0 = globals().get('tnpParAltBkgFitByBin', {})
+tnpParAltBkgFit_addGausByBin = {}
+for _b, _sides in {21: 'f'}.items():
+    _extra = _gaus_f + (_gaus_p if _sides == "fp" else ())
+    tnpParAltBkgFit_addGausByBin[_b] = params_with_updates(_bb0.get(_b, tnpParAltBkgFit), *_extra)
+
+tnpParAltSigBkgFit_addGaus = params_with_updates(tnpParAltSigBkgFit, *_gaus_f)
+_bb1 = globals().get('tnpParAltSigBkgFitByBin', {})
+tnpParAltSigBkgFit_addGausByBin = {}
+for _b, _sides in {21: 'f'}.items():
+    _extra = _gaus_f + (_gaus_p if _sides == "fp" else ())
+    tnpParAltSigBkgFit_addGausByBin[_b] = params_with_updates(_bb1.get(_b, tnpParAltSigBkgFit), *_extra)
+
+
+# --- bin16 altSigFit passing：訊號偏左 (2026-09-07) ---
+# 和 2026-07-12 夥伴回饋修掉的 bins 10-14,18-21,23,30 是同一個病：group 參數
+# meanP[-25,-40,-5] 的「上界」就是 -5，fit 想往右卻只能停在那裡。實測 meanP =
+# -5.0000 +/- 0.0008 撞界，連帶 acmsP 撞 65、betaP 撞 0.035、alphaP 撞 4.5、
+# nP 撞 8.0、sigmaP 撞 1.5 下界、sosF 撞 0.2 下界 —— 六個參數同時撞界，是整組
+# 範圍設錯而不是單一參數的問題。當時只改了被點名的 bin，16 留在原 group。
+# 殘差：70-75 +24%、80-85 -12%、90-95 +14%、95-100 -15%（峰位整體偏左）。
+tnpParAltSigFitByBin[16] = params_with_updates(
+    tnpParAltSigFit,
+    "meanP[-2.0,-12.0,5.0]",
+    "sigmaP[2.5,0.7,7.0]",
+    "sigmaP_2[2.0,0.5,7.0]",
+    "sosP[1.0,0.0,5.0]",
+    "meanF[-2.0,-12.0,5.0]",
+    "sigmaF[3.0,0.7,8.0]",
+    "sigmaF_2[2.0,0.5,7.0]",
+    "sosF[1.0,0.0,5.0]",
+    "peakP[86.0,70.0,90.0]",
+    "peakF[86.0,70.0,90.0]",
+)
+
+# --- bin26 altSigFit passing：訊號太寬、低質量尾巴太彎 (2026-09-07) ---
+# sigmaP = 5.336 貼著 6.0 天花板，其他三個擬合同格的 passing 寬度是 1.20 /
+# 1.81 / 0.25，altSig 明顯離群；效率也是 0.8643 對其他三個的 0.828/0.821/0.820。
+# 殘差：60-65 -62%（曲線比資料高 16700 個事件）、65-70 -28%、85-90 +15%、
+# 95-100 -20%、100-105 -24% —— 峰被攤平、兩側尾巴撐太開。
+# nBkgP = 36737 +/- 4685（誤差 13%）也偏大，是被寬訊號逼出來的。
+tnpParAltSigFitByBin[26] = params_with_updates(
+    tnpParAltSigFit,
+    "sigmaP[1.8,0.7,3.0]",
+    "sigmaP_2[1.2,0.4,3.0]",
+    "sosP[1.0,0.3,3.0]",
+    "acmsP[65.,45.,80.]",
+)

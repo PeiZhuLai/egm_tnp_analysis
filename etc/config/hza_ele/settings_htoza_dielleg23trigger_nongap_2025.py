@@ -360,3 +360,62 @@ tnpParAltSigFitByBin[18] = params_with_updates(
     "acmsF[75.,45.,95.]",
     "betaF[0.10,0.005,0.60]",
 )
+
+
+# ============================================================================
+# addGaus：failing（必要時 passing）訊號加一個 shoulder Gaussian  (2026-09-07)
+# ----------------------------------------------------------------------------
+# 適用症狀：模板 conv Gaussian 做不出「窄峰 + 低質量 shoulder」的形狀，於是把
+# sigmaF 撐寬去湊 shoulder，結果峰頂與 shoulder 兩邊都對不上，而且參數會撞界。
+# 加一個第二成分後 sigmaF 可以回到窄值，兩個區域同時對上。
+#
+# ⚠️ sigmaG 的上界必須收窄（<= 9 GeV）。上界放到 20 時第二成分會退化成寬平台，
+#    把背景整段吃進訊號：elid_nongap_2026 bin11/bin12 實測 sigmaGF 12.4 GeV、
+#    nSigF 27879+/-484 -> 46534+/-1728、nBkgF 41912 -> 23257，效率 0.9073 ->
+#    0.8830，離其他三種擬合更遠。殘差在那種狀態下反而是乾淨的（0 slice），
+#    所以驗收不能只看殘差，要一併看 sigmaG 大小與 nSig/nBkg 的誤差有沒有脹起來。
+#    健康的 shoulder 是 sigmaG 約 5-6.5 GeV、效率只動 0.5% 以內。
+_gaus_f = ("meanGF[74.0,60.0,88.0]", "sigmaGF[5.0,2.0,9.0]")
+_gaus_p = ("meanGP[74.0,60.0,88.0]", "sigmaGP[5.0,2.0,9.0]")
+
+addGausBins = {
+    'altSigFit':    (12, 13, 15, 21, 22),
+}
+
+tnpParAltSigFit_addGaus = params_with_updates(tnpParAltSigFit, *_gaus_f)
+_bybin = globals().get('tnpParAltSigFitByBin', {})
+tnpParAltSigFit_addGausByBin = {}
+for _b, _sides in {12: 'f', 13: 'f', 15: 'f', 21: 'f', 22: 'f'}.items():
+    _extra = _gaus_f + (_gaus_p if _sides == "fp" else ())
+    tnpParAltSigFit_addGausByBin[_b] = params_with_updates(
+        _bybin.get(_b, tnpParAltSigFit), *_extra)
+
+
+# --- bins 13/21/22 altSigFit：failing 背景在低質量端爬太快 (2026-09-07) ---
+# 直接證據是 acmsF 和 betaF 同時撞到各自的「上界」：
+#   b13 acmsF 89.98/[45,90]、betaF 0.0800/[0.005,0.08]
+#   b21 acmsF 71.9999/[45,72]、betaF 0.1500/[0.005,0.15]
+#   b22 acmsF 72.0000/[45,72]、betaF 0.1500/[0.005,0.15]
+# RooCMSShape 是 erfc((acms-x)*beta) * exp(-(x-peak)*gamma)：acms 是 turn-on 的
+# 位置、beta 是它的陡度。兩個都撞上界＝擬合想要「更高、更陡的低質量截止」，
+# 但範圍不讓它去。把天花板打開就是使用者看到的那個問題的直接解。
+# 這幾個參數不在 listOfParam 裡，所以在 data fit 是自由浮動（不會被 MC 值蓋掉），
+# 改範圍才會真的生效。
+for _b in (21, 22):
+    tnpParAltSigFitByBin[_b] = params_with_updates(
+        tnpParAltSigFitByBin.get(_b, tnpParAltSigFit),
+        "acmsF[72.,45.,88.]",
+        "betaF[0.15,0.005,0.60]",
+    )
+tnpParAltSigFitByBin[13] = params_with_updates(
+    tnpParAltSigFitByBin.get(13, tnpParAltSigFit),
+    "acmsF[85.,45.,96.]",
+    "betaF[0.08,0.005,0.60]",
+)
+
+# ⚠️ 13/21/22 同時在 addGausBins['altSigFit'] 裡，實際取用的是
+#    tnpParAltSigFit_addGausByBin（它在上面就已經從當時的 tnpParAltSigFitByBin
+#    拷貝好了）。上面那段只改 tnpParAltSigFitByBin 不會傳過去，必須重建。
+for _b in (13, 21, 22):
+    tnpParAltSigFit_addGausByBin[_b] = params_with_updates(
+        tnpParAltSigFitByBin[_b], *_gaus_f)

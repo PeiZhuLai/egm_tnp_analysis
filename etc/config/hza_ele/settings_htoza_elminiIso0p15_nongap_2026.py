@@ -448,3 +448,12 @@ tnpParAltSigBkgFitByBin[35] = params_with_updates(
     tnpParAltSigBkgFitByBin.get(35, tnpParAltSigBkgFit),
     "alphaP_2[-0.02]",
 )
+
+
+# --- 開啟 addGaus 的逐 bin 開關 (2026-09-07) ---
+addGausBins = {
+    'altSigFit':    (18, 19, 20, 21),
+    'altBkgFit':    (19, 20),
+    'altSigBkgFit': (19, 20),
+    'nominalFit':   (19, 20),
+}

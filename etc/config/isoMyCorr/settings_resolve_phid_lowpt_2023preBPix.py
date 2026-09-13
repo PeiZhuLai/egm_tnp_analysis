@@ -6,6 +6,7 @@ if '_mod_path' not in globals() or not _mod_path:
     _mod_path = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
     if _mod_path not in sys.path:
         sys.path.insert(0, _mod_path)
+from etc.config.fit_param_utils import params_with_updates
 
 #############################################################
 ########## General settings
@@ -279,3 +280,24 @@ tnpParAltSigBkgFit = [
   'alphaP_2[-0.020, -1, 0]',
   'alphaF_2[-0.014, -1, 0.05]',
 ]
+
+
+# --- bin07 nominalFit：failing 訊號要窄一點 → **已撤銷** (2026-09-12) ---
+# 試過把 sigmaF 的地板從 0.5 降到 0.15（它本來就撞在 0.5 的下界，看起來是地板擋住）。
+# 結果變壞，已還原：
+#     sigmaF   0.5003 -> 0.150（撞新地板，換了個界線撞而已）
+#     殘差      0 slice -> **3 slice**（75-80 GeV -6%、115-120 +10%、60-65 +5%）
+#     效率      0.8651 -> 0.8807（+1.6 點）
+# 關鍵證據是效率的方向：改前的 0.8651 幾乎正好等於 altBkg 的 0.8653（同一個訊號模型、
+# 只換背景），改完反而被推離到 0.8807。也就是說原本那個「撞下界」是對的答案被邊界
+# **恰好**框住，不是被邊界擋住。
+#
+# 教訓：參數撞界有兩種，要分清楚。
+#   (a) 擬合想去界線外面 —— 放寬會改善（如 2023postBPix bin06 的 sigmaF 撞上界 5.0）。
+#   (b) 最佳值本來就落在界線附近 —— 放寬只會讓它滑進一個更差的區域。
+# 分辨方法不是看「撞不撞界」，而是看殘差與「同訊號模型的 altBkg 給什麼效率」。
+# 這格改前殘差就已經是 0 slice，(b) 的訊號其實一開始就寫在那裡了。
+#
+# 使用者觀察到的「視覺上偏寬」是真的，但那個寬度來自 MC 模板本身而不是 sigmaF 的卷積，
+# 所以調 sigmaF 動不到它。要真的改，得換 failing 的函數（像 elminiIso 那批改用
+# DSCB+shoulder Gaussian），不是收界線。

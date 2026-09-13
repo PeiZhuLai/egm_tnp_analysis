@@ -214,3 +214,48 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.]',
 # ]
+
+
+# ============================================================================
+# addGaus：failing（必要時 passing）訊號加一個 shoulder Gaussian  (2026-09-07)
+# ----------------------------------------------------------------------------
+# 適用症狀：模板 conv Gaussian 做不出「窄峰 + 低質量 shoulder」的形狀，於是把
+# sigmaF 撐寬去湊 shoulder，結果峰頂與 shoulder 兩邊都對不上，而且參數會撞界。
+# 加一個第二成分後 sigmaF 可以回到窄值，兩個區域同時對上。
+#
+# ⚠️ sigmaG 的上界必須收窄（<= 9 GeV）。上界放到 20 時第二成分會退化成寬平台，
+#    把背景整段吃進訊號：elid_nongap_2026 bin11/bin12 實測 sigmaGF 12.4 GeV、
+#    nSigF 27879+/-484 -> 46534+/-1728、nBkgF 41912 -> 23257，效率 0.9073 ->
+#    0.8830，離其他三種擬合更遠。殘差在那種狀態下反而是乾淨的（0 slice），
+#    所以驗收不能只看殘差，要一併看 sigmaG 大小與 nSig/nBkg 的誤差有沒有脹起來。
+#    健康的 shoulder 是 sigmaG 約 5-6.5 GeV、效率只動 0.5% 以內。
+_gaus_f = ("meanGF[74.0,60.0,88.0]", "sigmaGF[5.0,2.0,9.0]")
+_gaus_p = ("meanGP[74.0,60.0,88.0]", "sigmaGP[5.0,2.0,9.0]")
+
+addGausBins = {
+    'altSigFit':    (6,),
+}
+
+tnpParAltSigFit_addGaus = params_with_updates(tnpParAltSigFit, *_gaus_f)
+_bybin = globals().get('tnpParAltSigFitByBin', {})
+tnpParAltSigFit_addGausByBin = {}
+for _b, _sides in {6: 'f'}.items():
+    _extra = _gaus_f + (_gaus_p if _sides == "fp" else ())
+    tnpParAltSigFit_addGausByBin[_b] = params_with_updates(
+        _bybin.get(_b, tnpParAltSigFit), *_extra)
+
+
+# --- bin06 altSigFit：failing 背景 turn-on 不夠陡 (2026-09-07) ---
+# betaF 撞在 0.0800 上界，acmsF 74.13 +/- 15.71、gammaF 0.045 +/- 1.48、
+# nBkgF 0.64 +/- 18460 —— 背景整組不受約束，而 60-65 GeV 曲線比資料高 68%。
+# 先把 betaF 的天花板打開讓 turn-on 能變陡。
+tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
+tnpParAltSigFitByBin[6] = params_with_updates(
+    tnpParAltSigFitByBin.get(6, tnpParAltSigFit),
+    "betaF[0.08,0.005,0.60]",
+    "acmsF[74.,55.,88.]",
+)
+
+# ⚠️ 同上：bin06 在 addGausBins 裡，要重建 _addGausByBin 才吃得到新的背景範圍。
+tnpParAltSigFit_addGausByBin[6] = params_with_updates(
+    tnpParAltSigFitByBin[6], *_gaus_f)

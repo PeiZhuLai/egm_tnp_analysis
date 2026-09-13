@@ -648,3 +648,80 @@ tnpParAltSigBkgFitByBin = {
 tnpAltBkgModelByBin = {
     4: {'fail': 'bernstein2'},
 }
+
+# --- 70-75 GeV shoulder：模板的低質量尾巴太小 (2026-09-07) ---
+# 症狀：三個用「MC 模板 ⊗ Gaussian」的擬合在**同一質量區同號**失敗，而同格用解析
+# DSCB 的 altSigFit 明顯較好。以 bin08 failing 為例：
+#   nominalFit   60-65 -31%  70-75 +27%   3 個 slice 超過 5 sigma
+#   altBkgFit    60-65 -25%  70-75 +34%   6 個
+#   altSigBkgFit 60-65 -26%  70-75 +20%   3 個
+#   altSigFit    60-65 -0.0% 70-75 +3.5%  0 個   <-- 不吃模板
+# 三個模板型擬合各自扭曲別的東西去補（altBkg 的 sigmaF 撞死上界 5.0、meanF 拉到
+# -3.75；nominal 的 acmsF 撞 70、betaF 撞 0.06；altSigBkg 的 alphaF 撞 1.4 下界），
+# 三個不同參數撞界指向同一件事：函數族做不出那個形狀，放寬邊界只會撞下一個。
+#
+# 驗證（bin08 altBkgFit failing，2026-09-07）：
+#   60-65 -24.8% -> -1.9% ; 70-75 +34.2% -> -1.6% ; 80-85 -18.1% -> -0.6%
+#   6 個 slice -> 0 ; sigmaF 5.000(撞界) -> 4.300(自由) ; 效率 0.7852 -> 0.7897
+#   meanGF 74.40+/-0.25、sigmaGF 5.42+/-0.23、sigFracF 0.678+/-0.015
+#   全部落在內部極小值，sigFracF 誤差只有 2% —— 第二個成分是被資料決定的，不是硬湊。
+#
+# ⚠️ addGaus 不能全開：全開會讓 699 個 fit 變好、1766 個變壞（見 tnpEGM_fitter.py
+#    的 _addgaus_for_bin 註解）。只在 failing 真的是「窄峰 + shoulder」時才有用。
+#
+# passing 側（bin08/bin15 的 altBkgFit）用同一機制的對稱版本：低質量尾來自同一份
+# 模板，兩條腿都會受影響。bin08 passing 實測 60-65 -50%、70-75 +65%、7 個 slice。
+# 由設定宣告 meanGP/sigmaGP 才啟用，未宣告的組態逐位元不變（已驗證 b12）。
+_gaus_f = ("meanGF[70.0,55.0,88.0]", "sigmaGF[8.0,2.0,20.0]")
+_gaus_p = ("meanGP[70.0,55.0,88.0]", "sigmaGP[8.0,2.0,20.0]")
+
+# ⚠️ sigmaGF 的上界 20 太鬆，會讓第二個成分從「shoulder」退化成「寬平台」，
+#    把背景整段吃進訊號。bin11/bin12 的 altBkgFit 中招（2026-09-07）：
+#      sigmaGF 12.36 / 12.68 GeV、sigFracF 0.33、meanGF 81.8
+#      nSigF 27879+/-484 -> 46534+/-1728，nBkgF 41912+/-499 -> 23257+/-1722
+#      （誤差脹 3.5 倍且兩者完全反相關 = 訊號/背景已經分不開）
+#      效率 0.9073 -> 0.8830，離其他三種擬合更遠，altBkg 系統誤差反而翻倍
+#    殘差是乾淨的（0 slice），所以殘差本身抓不到這個病 —— 判準是 sigmaGF 的大小
+#    與 nSigF/nBkgF 的誤差有沒有脹起來。健康的 shoulder：bin08 sigmaGF 5.42、
+#    bin15 6.47，效率只動 0.5%。因此 b11/b12 改用收窄版本。
+_gaus_f_narrow = ("meanGF[74.0,60.0,88.0]", "sigmaGF[5.0,2.0,9.0]")
+
+addGausBins = {
+    'nominalFit':   (8, 15),
+    # bin12 已撤回（原本是 (8, 11, 12, 15)）：加了 shoulder 之後 sigFracF 撞到
+    # 1.0 上界 —— 第二個高斯把模板訊號整個取代掉，sigmaGF 3.88+/-4.31 完全不受
+    # 約束、sigmaF 5.25 貼著 5.5 天花板，failing 殘差反而從乾淨變成 6 個 slice。
+    # bin11 收窄後 OK（效率 0.9065 對未加時的 0.9073），bin12 就是不適用。
+    'altBkgFit':    (8, 11, 15),
+    'altSigBkgFit': (8, 15),
+    'altSigFit':    (15,),
+}
+
+tnpParNomFit_addGaus = params_with_updates(tnpParNomFit, *_gaus_f)
+# bin15 改用收窄版：寬版（sigmaGF 上界 20）會讓 sigGaussFail 跑到 nan，
+# 連帶 bkgFail 的歸一化積分變成 0，整個 fit 直接掛掉（2026-09-07 實測）。
+tnpParNomFit_addGausByBin = {
+    b: params_with_updates(tnpParNomFitByBin.get(b, tnpParNomFit),
+                           *(_gaus_f_narrow if b == 15 else _gaus_f))
+    for b in (8, 15)
+}
+
+# altBkg：bin08 與 bin15 兩側都加 shoulder
+tnpParAltBkgFit_addGaus = params_with_updates(tnpParAltBkgFit, *_gaus_f)
+tnpParAltBkgFit_addGausByBin = {}
+for _b in (8, 11, 15):
+    _base = _gaus_f_narrow if _b == 11 else _gaus_f
+    _extra = _base + (_gaus_p if _b in (8, 15) else ())
+    tnpParAltBkgFit_addGausByBin[_b] = params_with_updates(
+        tnpParAltBkgFitByBin.get(_b, tnpParAltBkgFit), *_extra)
+
+tnpParAltSigBkgFit_addGaus = params_with_updates(tnpParAltSigBkgFit, *_gaus_f)
+tnpParAltSigBkgFit_addGausByBin = {
+    b: params_with_updates(tnpParAltSigBkgFitByBin.get(b, tnpParAltSigBkgFit), *_gaus_f)
+    for b in (8, 15)
+}
+
+tnpParAltSigFit_addGaus = params_with_updates(tnpParAltSigFit, *_gaus_f)
+tnpParAltSigFit_addGausByBin = {
+    15: params_with_updates(tnpParAltSigFitByBin.get(15, tnpParAltSigFit), *_gaus_f),
+}

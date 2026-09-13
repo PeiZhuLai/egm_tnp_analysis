@@ -345,3 +345,22 @@ tnpParAltSigBkgFitByBin = {
 #   'alphaF[2.0, 1.4, 3.5]', 'nF[0.4, 0.0, 1.5]',
 #   'alphaF_2[-0.023, -1, -0.023]',
 # ]
+
+
+# --- bin06 nominalFit：failing 訊號要窄一點 (2026-09-12) ---
+# sigmaF = 4.9999 壓在上界 5.0 —— 擬合被卡在它能做到的最寬，不是自己選了寬，
+# 所以只改初值沒有用，要把天花板降下來。殘差也指向同一個方向：
+#   85-90 GeV +7%（資料高於曲線）對 95-100 GeV -8%（曲線高於資料），
+#   70-80 GeV 也是曲線偏高 -5%。整條訊號被抹得太寬，往高質量端溢出去。
+# 另外 betaF 撞在下界 0.01（背景 turn-on 已經是最緩），60-65 +6% 與
+# 115-120 +12% 兩端都還差一點；那是「界線擋住」不是「形狀選擇」，
+# 所以下界一起放鬆讓它自己找，不強迫它去哪裡。
+# （acmsF 也撞上界 80，但那會讓背景 turn-on 爬到 Z 峰上跟訊號搶事件，
+#   這格又是背景主導 nBkgF=65192 對 nSigF=8404，先不動；若收窄後 85-90
+#   仍然對不上再說。）
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[6] = params_with_updates(
+    tnpParNomFitByBin.get(6, tnpParNomFit),
+    "sigmaF[2.0,0.4,3.0]",
+    "betaF[0.03,0.002,0.08]",
+)

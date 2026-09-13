@@ -354,3 +354,44 @@ tnpParAltSigBkgFit = [
 #   'alphaP_2[-0.012, -1, 0]',
 #   'alphaF_2[-0.014, -1, 0.05]',
 # ]
+
+
+# --- bins 04/07 nominalFit：failing 訊號要窄一點 (2026-09-07) ---
+# 兩格的 sigmaF 都壓在各自的「上界」：b04 是 5.0000/[0.5,5.0]（用 base 參數），
+# b07 是 2.9999/[0.4,3.0]。也就是說擬合被卡在它能做到的最寬，不是自己選了寬。
+# 要收窄只能把天花板降下來，改初值沒有用。
+# b04 另外還有 acmsF 撞 35 下界、betaF 撞 0.01 下界（背景 turn-on 被推到最低最緩），
+# 背景 216992 對訊號 19785，這格本來就是背景主導；收窄訊號後把 betaF 的下界一起
+# 放鬆，讓背景能自己調整而不是跟著撞界。
+# b07 目前殘差已經是 0 slice（純粹是視覺上的寬度），所以只小幅收 5%，避免把
+# 已經對上的地方弄壞；驗收時要確認 slice 數沒有變多。
+tnpParNomFitByBin[4] = params_with_updates(
+    tnpParNomFit,
+    "sigmaF[3.0,0.5,4.0]",
+    "meanF[-1.0,-4.0,4.0]",
+    "acmsF[50.,30.,80.]",
+    "betaF[0.03,0.002,0.10]",
+)
+tnpParNomFitByBin[7] = params_with_updates(
+    tnpParNomFitByBin[7],
+    "sigmaF[2.2,0.4,2.85]",
+)
+
+
+# --- bin03 nominalFit：passing 左尾要彎一點、整體對不好 (2026-09-12) ---
+# 殘差證實這格真的有問題（4 個 slice |pull|>5 且 >=200 事件）：
+#   60-65 GeV +14%(pull 12.8)、65-70 +7%(6.1)  → 曲線在低質量端**不夠高**
+#   80-85 GeV -12%(-14.3)、85-90 -8%(-10.3)   → 曲線在峰區**太高**
+# 這兩件事是同一件：背景被界線綁住，補不到 60-70 的量，訊號只好在峰區放大去
+# 湊總數。證據是 betaP 死壓在下界 0.01、acmsP = 50.98 貼著下界 50。
+# RooCMSShape = erfc((acms-x)*beta) * exp(-(x-peak)*gamma)：beta 越小、acms 越低，
+# 低質量端相對於峰區就越高（60/90 的 erfc 比值 beta=0.01 時是 0.776，beta->0 時
+# 趨近 1）。兩個參數同時往同一邊撞界，就是在說「我還要更彎的左尾」。
+# 所以這裡不是去強迫訊號變寬，而是**把擋住背景的界線拿開**讓它自己找；
+# 背景接手 60-70 之後 nSigP 會下來，峰區的過衝跟著消。
+tnpParNomFitByBin = dict(globals().get('tnpParNomFitByBin', {}))
+tnpParNomFitByBin[3] = params_with_updates(
+    tnpParNomFitByBin.get(3, tnpParNomFit),
+    "acmsP[50.,35.,80.]",
+    "betaP[0.02,0.001,0.08]",
+)

@@ -345,3 +345,15 @@ tnpParNomFitByBin[52] = params_with_updates(
     "gammaP[0.05,0.0,0.5]",
     "peakP[87.0]",
 )
+
+
+# --- bin42 altBkgFit: failing 訊號略寬 (2026-09-07) ---
+# sigmaF = 2.599 是自由參數、沒壓界、edm 1.45e-05、covQual 3，也就是真的極小值，
+# 只改初值不會動；要收窄必須收上界。峰太胖的證據：85-90 GeV 曲線 2748 對資料
+# 2474 (-10%)、90-95 GeV 3542 對 3754 (+6%)，低質量 75-80 GeV 還缺 48%
+# （訊號吃掉了本來該給背景的份）。nominalFit 同格 sigmaF = 1.818。
+tnpParAltBkgFitByBin = dict(globals().get('tnpParAltBkgFitByBin', {}))
+tnpParAltBkgFitByBin[42] = params_with_updates(
+    tnpParAltBkgFitByBin.get(42, tnpParAltBkgFit),
+    "sigmaF[2.0,0.5,2.3]",
+)
