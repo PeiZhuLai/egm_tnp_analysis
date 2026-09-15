@@ -220,6 +220,31 @@ tnpParAltSigBkgFitByBin = {
 # bin1: acmsF 貼在上界(89.5~90)，CMSShape 的 turn-on 被推到 Z 峰上，
 # 低質量端沒有背景，訊號被迫去補。與 elid_gap_2024 bin02 同型
 # (那次 acmsF 90->45.5、sosF 脫離下界、背景佔比 22%->78%)。
+# --- 2026-09-15：補產了本 measurement 缺失的 MC altSigFit 參考檔 ---
+# 原本 /eos/.../hza_dielleg23trigger_gap_2025_sf/DY_MC_LO_2025_*.altSigFit.root 不存在，
+# fitUtils.createWorkspaceForAltSig() 印「參考檔不存在或未設定」後退回用設定檔初始值，
+# 所以這裡所有 bin 的 altSig 失敗側形狀（alphaF/nF/sigmaF/sigmaF_2）都是**自由浮動**的，
+# 而同批的 gap_2026 與 nongap_2024 都是被 MC 釘死的常數。三個設定檔的 tnpParAltSigFit
+# 逐字相同 —— 差異純粹來自生產缺口，不是設定。
+# 補產指令留在 run_mcaltsig_gap2025_20260915.sh（--doFit --mcSig --altSig，24 格）。
+#
+# 補產後 b06（et 25-27，使用者回報左尾）的變化，以及與 nongap_2024 b14 的對照：
+#
+#   bin            形狀來源      eff 對 altBkg    左尾殘差
+#   b06 (gap2025)  自由           +3.9%           較好
+#   b06 (gap2025)  MC 播種        +1.3%  <- 現況  較差（60.5 GeV d/model 0.363 -> 0.204）
+#   b14 (nongap24) MC 播種        +2.6%  <- 現況  較差
+#   b14 (nongap24) 自由           +7.1%（已撤回） 好很多（Σ|pull| 90.6 -> 34.9）
+#
+# 兩格同方向：**MC 播種 → 效率一致性好、左尾差；形狀自由 → 左尾好、效率偏離。**
+# 物理上說得通：左尾不足是「把訊號形狀約束到 MC」的代價；放開之後殘差變好，是因為
+# 擬合把低質量事件重新歸類成背景，而 nominal/altBkg/altSigBkg 三者都不同意那個歸類。
+#
+# 🔴 使用者 2026-09-15 定案：**保留 MC 播種**。理由是效率才是進到分析裡的量。
+#    b06 的左尾在 60-64 GeV 描述不足（d/model 約 0.20-0.33）是**已知且接受**的後果，
+#    不要當成 bug 去修 —— 要修就會把 altSig 的系統誤差推回 +3.9%。
+#    b06 的 edm 也從 0.0102 改善到 8.59e-05、covQual 2 -> 3。
+
 tnpParAltSigFitByBin = dict(globals().get('tnpParAltSigFitByBin', {}))
 tnpParAltSigFitByBin[1] = params_with_updates(
     tnpParAltSigFitByBin.get(1, tnpParAltSigFit),

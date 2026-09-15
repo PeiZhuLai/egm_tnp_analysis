@@ -124,14 +124,32 @@ one(){  # one <tag> <cfg> <flag> <ftArg> <ibin>
   echo RUNNING > "$ST/$tag"
   {
     if [ "$MODE" != plot ]; then
-      timeout 2700 python3 tnpEGM_fitter.py "$cfg" --flag "$flag" --doFit $fta --iBin "$ib"; rcf=$?
+      # 2026-09-15：fit 階段也要重試，但只在「EOS 讀到損壞資料」這個明確簽章上重試。
+      # 實測今天 8 個批次 23 個 log：[3001] 出現在 13 個（ROOT 內部重試後都成功，良性），
+      # 升級成 R__unzip_header 損壞並讓 ROOT 崩潰的只有 1 個（約 4%）。
+      # 4% 對 24 格批次代表幾乎每批中一格，值得重試；但不能用 [3001] 當條件
+      # （會對幾乎每格重試），也不能無條件重試（會掩蓋真正的擬合失敗 ——
+      # 真失敗是 Python 例外，不會印 R__unzip_header）。
+      for t in 1 2 3; do
+        _ftmp=$(mktemp); timeout 2700 python3 tnpEGM_fitter.py "$cfg" --flag "$flag" --doFit $fta --iBin "$ib" > "$_ftmp" 2>&1; rcf=$?
+        cat "$_ftmp"; rm -f "$_ftmp"
+        [ $rcf -eq 0 ] && break
+        if grep -q "R__unzip_header" "$L/$tag.log" 2>/dev/null || [ $rcf -ge 128 ]; then
+          echo "[tnp_refit] fit 第 $t 次 rc=$rcf，偵測到 EOS 損壞讀取，重試"; sleep $((t*45))
+        else
+          break        # 真正的擬合失敗，不重試
+        fi
+      done
       echo "[tnp_refit] fit rc=$rcf"
     fi
     if [ "$MODE" != fit ] && [ $rcf -eq 0 ]; then
-      for t in 1 2 3; do
+      # 2026-09-14：重試從 3 次 x 20s 退避改成 6 次 x 60s。當 EOS 同時被別的批次
+      # （那天是 spark_tnp 的 ctrl 重擬，6 個 worker 持續寫入）佔用時，三次固定
+      # 重試全部撞 rc=124，三格都被標成 FAILED —— 但它們的 fit rc 都是 0。
+      for t in 1 2 3 4 5 6; do
         timeout 1200 python3 tnpEGM_fitter.py "$cfg" --flag "$flag" --doPlot $fta --iBin "$ib"; rcp=$?
         [ $rcp -eq 0 ] && break
-        echo "[tnp_refit] plot 第 $t 次 rc=$rcp，重試（EOS 暫時性錯誤）"; sleep $((t*20))
+        echo "[tnp_refit] plot 第 $t 次 rc=$rcp，重試（EOS 暫時性錯誤）"; sleep $((t*60))
       done
       echo "[tnp_refit] plot rc=$rcp"
     fi
@@ -139,10 +157,36 @@ one(){  # one <tag> <cfg> <flag> <ftArg> <ibin>
     # `&& echo DONE || echo FAILED` 永遠不會執行，跑完的格子就永遠停在 RUNNING
     # （2026-09-12 的 48 格 nominal 重跑全中，真實狀態只能從 log 的 rc= 反推）。
     # 用「最後一個指令的結束碼」把狀態交出去，不要用 exit。
+    # 2026-09-14：擬合失敗與「只有重畫失敗」必須分開。以前兩者都寫 FAILED，
+    # 結果 EOS 忙碌那晚三格全標 FAILED，實際上 fit rc 都是 0、PNG 也在 fit 階段
+    # 就產生了，真正沒完成的只是從合併檔重畫一次。照字面讀會誤判成三格全毀。
     rc=$(( rcf > rcp ? rcf : rcp ))
-    echo "[tnp_refit] rc=$rc"
-    [ $rc -eq 0 ]
-  } > "$L/$tag.log" 2>&1 && echo DONE > "$ST/$tag" || echo FAILED > "$ST/$tag"
+    echo "[tnp_refit] rc=$rc  (fit=$rcf plot=$rcp)"
+    # ⚠ 這裡**不能用 exit**。one() 在下面是以 `one ... &` 背景呼叫，本身就是 subshell，
+    #   而 `{ }` 不另開 subshell —— exit 會終結整個 one()，後面的 case 永遠不執行，
+    #   狀態檔就永遠停在 RUNNING（正是上面那段註解記的 2026-09-12 舊病）。
+    #   用 `(exit N)` 在子 shell 裡設定 $? 而不終結流程。
+    if   [ $rcf -ne 0 ]; then (exit 2)      # 擬合真的壞了
+    elif [ $rcp -ne 0 ]; then (exit 3)      # 只有重畫沒完成，擬合結果可用
+    else (exit 0); fi
+  } > "$L/$tag.log" 2>&1
+  local st=$?
+  # 產物驗證。ROOT 在寫不進 EOS 時會印 SysError in <TFile::Flush> ... Protocol error
+  # 然後**照常 rc=0 結束** —— 擬合白跑，磁碟上還是舊檔，狀態卻標 DONE。
+  # 2026-09-14 的 b19 就是這樣：改後參數與改前逐位元相同，檔案 mtime 停在一週前，
+  # 我是靠「數字一字不差」才發現的，那是運氣不是流程。
+  # 這裡直接抓失敗簽章，不去重建輸出路徑（一開始那版用了不存在的變數，
+  # 會讓每一格都誤報 STALE —— 會誤報的守門比沒有守門更糟）。
+  if [ $st -ne 2 ] && grep -q "SysError in <TFile::Flush>" "$L/$tag.log" 2>/dev/null; then
+    echo "[tnp_refit] 🔴 偵測到 TFile::Flush 寫入失敗 —— 輸出沒有更新，要重跑" >> "$L/$tag.log"
+    st=4
+  fi
+  case $st in
+    0) echo DONE       > "$ST/$tag" ;;
+    3) echo PLOTFAILED > "$ST/$tag" ;;
+    4) echo STALE      > "$ST/$tag" ;;
+    *) echo FAILED     > "$ST/$tag" ;;
+  esac
   printf "  %-40s %s\n" "$tag" "$(cat "$ST/$tag")"
 }
 

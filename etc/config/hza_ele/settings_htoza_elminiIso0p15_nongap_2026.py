@@ -432,6 +432,30 @@ for _b in (18, 19, 20):
 for _b in (18, 19, 20, 21):
     tnpParAltSigBkgFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin.get(_b, tnpParAltSigBkgFit_addGaus)), *_thintail_181920)
 
+# --- bin19 altSigBkg：_thintail_181920 的盒子把它關住了 (2026-09-13) ---
+# edm = 2.1e+05 —— 這個擬合沒有收斂，所以下面的參數值本身不能當證據，
+# 但「往哪個方向頂」可以：alphaF 停在盒子的**下界** 2.0（誤差 0.0226），
+# nF 停在**上界** 2.2（誤差 0.0272），sigmaF 2.594 也貼著上界 2.8 ——
+# 兩個參數往相反方向頂住同一個盒子，這是範圍過緊的典型徵狀。
+#
+# 後果是形狀整個錯位（資料/模型）：
+#     72.5  0.52   75.5  0.59   77.5  0.74      左側肩膀被灌了一倍
+#     89.5  1.62   90.5  1.51   91.5  1.52      Z 峰矮了 38%
+# 也就是使用者說的「右邊的 peak 要更高，左邊的 peak 要更低」。肩膀高斯
+# （meanGF=77.5, sigmaGF=5.6, sigFracF=0.478）吃掉了 48% 的訊號。
+#
+# ⚠️ 這裡**不直接壓 sigFracF**。擬合沒收斂時去調形狀參數是在對雜訊調參；
+#    先把界放開讓它收斂，再量一次殘差決定要不要動肩膀佔比。
+#    只改 bin19，18/20/21 維持原樣（沒有證據說它們也有問題）。
+tnpParAltSigBkgFit_addGausByBin[19] = params_with_updates(
+    list(tnpParAltSigBkgFit_addGausByBin[19]),
+    "alphaF[2.4,1.2,3.5]",
+    "nF[1.8,0.7,4.0]",
+    "sigmaF[1.8,0.8,4.0]",
+    "sigmaF_2[1.4,0.6,3.5]",
+    "sosF[0.5,0.0,2.0]",
+)
+
 # bin35,37 altSigBkg (high-ET central) failing 峰右移+高質量continuum(Joseph 2026-07-18): 收 meanF + alphaF_2 描述 continuum
 for _b in (35, 37):
     tnpParAltSigBkgFit_addGausByBin[_b] = params_with_updates(list(tnpParAltSigBkgFit_addGausByBin.get(_b, tnpParAltSigBkgFit_addGaus)), "meanF[0.0,-1.5,1.0]", "alphaF_2[0.0,-0.08,0.03]")
@@ -451,9 +475,43 @@ tnpParAltSigBkgFitByBin[35] = params_with_updates(
 
 
 # --- 開啟 addGaus 的逐 bin 開關 (2026-09-07) ---
+# bin21 的 altBkgFit 加進 addGaus (2026-09-14)
+# 症狀：failing 的 Z 峰太矮。量出來是整條曲線**左移約 1 GeV** ——
+#     模型峰在 89.5，資料峰在 90.5
+#     85.5-91.5 的 data/model 是 1.09-1.19（模型低估 9-19%）
+#     92.5-93.5 掉到 0.91-0.84（模型高估）
+# 關鍵判準：sigmaF = 1.830 +- 0.145 在 [0.5, 5] **內部、沒有撞界**。
+# 卷積寬度不是限制因素 —— 而且卷積只能讓峰變寬，修不了峰位。
+# 峰位差 1 GeV 是 MC 模板本身的形狀問題，只有換掉模板才處理得了。
+# addGaus 正是把 failing 訊號從「模板 ⊗ 高斯」換成「平滑 gen-level 線形 + 肩膀高斯」。
+#
+# 配方 tnpParAltBkgFit_addGausByBin[21] = _ab_bimodal 早就寫好了（上面那個
+# for _b in (18,19,20,21) 迴圈），只是這個開關沒打開；altSigFit 有 21、altBkgFit 沒有。
+#
+# ⚠️ 只對低統計格有效：nSigF = 7607。高統計格換柔性模型 chi2 反而暴增
+#    （全開過的比較是改善 699 / 變差 1766），所以不要順手把別的 bin 一起加進來。
+# ⚠️ 這和 b19 不是同一種病：b19 是 _thintail_181920 的盒子太緊（alphaF 頂下界、
+#    nF 頂上界、EDM 2.1e+05），修法是放開範圍讓它收斂，不是換模型。
 addGausBins = {
     'altSigFit':    (18, 19, 20, 21),
-    'altBkgFit':    (19, 20),
+    'altBkgFit':    (19, 20, 21),
     'altSigBkgFit': (19, 20),
     'nominalFit':   (19, 20),
 }
+
+# bin21 altBkg addGaus 第二輪：放開兩個撞死的寬度上界 (2026-09-14)
+# 第一輪（只打開 addGaus 開關）峰高確實上來了 —— 模型峰 393 -> 488，
+# 90.5 GeV 的低估從 19% 收到 3%，最大 |pull| 3.38 -> 2.72，Σ|pull| 21.1 -> 17.9。
+# 但形狀換了一種錯法：89.5 變成高估 13%，而 84-86 仍低估 10-16%，峰太集中。
+# 而這正對應兩個撞界：
+#     sigmaF  2.2000 +- 0.0055  [0.5, 2.2]   來自共用的 _ab_bimodal
+#     sigmaGF 6.0000 +- 0.0137  [2, 6]       來自共用的 _gs
+# 兩個寬度都頂在上界、誤差只有 0.006/0.014，擬合還要更寬 —— 而更寬正好把 89.5
+# 多出來的產率往 84-86 的缺口送。撞界方向與殘差要求的方向一致（A 類同向）。
+#
+# 只改 bin21：_ab_bimodal 由 18/19/20/21 共用、_gs 更廣，動它們會波及沒問題的格子。
+tnpParAltBkgFit_addGausByBin[21] = params_with_updates(
+    list(tnpParAltBkgFit_addGausByBin[21]),
+    "sigmaF[1.8,0.5,4.5]",
+    "sigmaGF[6.0,2.0,12.0]",
+)

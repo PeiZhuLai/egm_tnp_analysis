@@ -400,6 +400,28 @@ for _b in (16, 23):
     tnpParAltBkgFit_addGausByBin[_b] = list(
         tnpParAltBkgFit_addGausByBin.get(_b, tnpParAltBkgFit_addGaus)) + _gaus_p
 
+
+# --- bin23 altBkg failing 右峰太尖 (2026-09-13) ---
+# 兩個參數同時撞**天花板**，而且方向和使用者要求的一致（要更寬）：
+#     sigmaF  2.5000 +- 0.0050   [0.5, 2.5]   <- 來自共用的 _ab_highet
+#     meanGF 81.0000 +- 0.0291   [73, 81]     <- 來自共用的 _gaus_pars
+# 誤差分別只有 0.005 / 0.029，代表資料把它們定得很準、就是要比天花板大。
+#
+# 這是「撞界方向與需求同向」的情形，放開界線是對的。對照今天失敗的兩格：
+#   b01(elid_nongap_2026) 是**反向** —— 參數撞地板（要更窄）而使用者要更寬，
+#     抬地板之後撞界從 3 個變 6 個、nSigF 對 nominal 的偏差從 19% 惡化到 314%。
+#   b12(elid_nongap_2024) 是**耦合** —— 放開 alphaP 之後背景塌到 5.3，
+#     但低質量側曲線不降反升，DSCB 左尾只是接管了背景的角色。
+#
+# 只改 bin23。_ab_highet 由 28 個 bin 共用，_gaus_pars 更廣，都不要動 ——
+# 今天已經被 _failbkg_altsig 與 _thintail_181920 這兩個共用 recipe 咬過兩次。
+# 目前 EDM 9.69e-06、covQual 3，改後必須維持，否則撤回。
+tnpParAltBkgFit_addGausByBin[23] = params_with_updates(
+    list(tnpParAltBkgFit_addGausByBin[23]),
+    "sigmaF[2.0,0.5,4.5]",
+    "meanGF[78.0,73.0,86.0]",
+)
+
 addGausBins = {
     'altBkgFit': (16, 23),
     'altSigFit': (18, 19, 21),

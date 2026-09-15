@@ -203,6 +203,34 @@ tnpParAltSigFitByBin = {
     # which pushed the altSig systematic to +7.5% / +9.8% against nominal,
     # where altBkg and altSigBkg both sit within 2.6%.
     13: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
+    # --- bin14 左尾：2026-09-15 試過解放 alphaF/nF，殘差大好但效率變壞，已撤回 ---
+    # 機制查清楚了（這部分是對的，值得留著）：
+    # fitUtils.createWorkspaceForAltSig() 會拿 **MC 的 altSigFit 結果**覆寫訊號形狀
+    # 參數並**固定成常數**。這一格被釘死的是
+    #     alphaF -> 1.424   nF -> 0.183   sigmaF -> 3.203   sigmaF_2 -> 3.221
+    # 而 DSCB 左尾 exp(n*(t+|alpha|)) 正由 alphaF/nF 控制，nF=0.183 是極平坦的尾巴。
+    # 所以先前兩輪只調背景（_failbkg_altsig、round-2 的 _failbkg_sharp）都不可能成功：
+    # 等於拿背景去補訊號形狀的缺口，只能在「60-64 灌太多」和「67-70 補不上」之間二選一。
+    # 解放方法是框架自備的 preserve_params_from_mc = changed_names
+    #（tnpEGM_fitter.py:455 -> fitUtils.py:510）：參數只要出現在逐 bin 覆寫裡就不被 MC 覆寫。
+    #
+    # 實測結果：寫進 "alphaF[1.4,0.8,4.0]" 與 "nF[0.5,0.0,5.0]" 之後
+    #     log 確認「保留手動設定 alphaF / nF，不使用 MC 覆寫」
+    #     殘差 60.5 GeV 的 d/model 0.192 -> 0.619（曲線 119.9 -> 37.2，資料 23）
+    #     最大 |pull| 16.5 -> 4.20，Σ|pull|(60-76) 90.6 -> 34.9
+    #     sosF 也從撞下界 0.5 脫離到 1.925
+    # 看起來是大勝，但效率往錯方向跑：
+    #     nominalFit 0.8028 / altBkgFit 0.8181 / altSigBkgFit 0.8182
+    #     altSigFit  改前 0.8391（比 altBkg 高 2.6%）→ 改後 0.8763（高 **7.1%**）
+    # 產率說明了原因：nSigF 12961 -> 9536、nBkgF 2055 -> 5479，總量守恆，
+    # 也就是把 3425 個事件從訊號重新歸類成背景。但另外三種 fit type 都說
+    # nSigF ~ 14950（failing 幾乎全是訊號），這個歸類與它們的共識相反。
+    #
+    # 🔴 判準：**殘差好不算數，效率與 altBkg 的一致性才是決定性的。**
+    #    這一格的 round-1 當初就是為了把 altSig 的系統誤差從 +7.5%/+9.8% 壓到 2.6%，
+    #    解放左尾等於把它推回原來的壞區間。
+    #    要再動這一格，得先解釋「為什麼 altSig 認為 36% 的 failing 是背景，
+    #    而另外三種模型認為幾乎沒有」—— 那是模型層級的分歧，不是調參能解決的。
     14: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
     16: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
     18: params_with_updates(tnpParAltSigFit, *_failbkg_altsig),
